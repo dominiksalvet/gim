@@ -77,19 +77,19 @@ sudo make install # install the program again
 To **automatically install the latest stable release** of a gim compliant project, use the following command:
 
 ```sh
-gim install <url>
+gim install <git_url>
 ```
 
 To **automatically uninstall your current release** of a gim compliant project, use the following command:
 
 ```sh
-gim uninstall <url>
+gim uninstall <git_url>
 ```
 
 To **automatically update a gim compliant project to it's latest stable release**, use the following command:
 
 ```sh
-gim update <url>
+gim update <git_url>
 ```
 
 ## Badge
