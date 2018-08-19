@@ -1,2 +1,1 @@
-# gim
-
+# Git Installation Manager *(gim)*
