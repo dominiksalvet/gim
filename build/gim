@@ -122,6 +122,7 @@ Try '$0 -help' for more information." >&2
             echo "$0: Provided Git URL is invalid.
 POSSIBLE SOLUTIONS:
   * use the 'https://<provider>.<domain>/<author>/<project>.git' template" >&2
+            exit 1
         fi
     fi
 fi
