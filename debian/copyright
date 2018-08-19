@@ -3,6 +3,6 @@ Upstream-Name: gim
 Upstream-Contact: Dominik Salvet
 Source: https://gitlab.com/dominiksalvet/gim
 
-Files: README.md CHANGELOG.md CONTRIBUTING.md
+Files: README.md CHANGELOG.md CONTRIBUTING.md RULES.md
 Copyright: Copyright 2018 Dominik Salvet
 License: MIT
