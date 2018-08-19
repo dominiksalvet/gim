@@ -152,13 +152,13 @@ case "$action" in
         ;;
     uninstall)
         # use the program version as a tag
-        git checkout "$(gim -version)"
+        git checkout "$("$git_url_project" -version)"
         # uninstall the program
         make uninstall
         ;;
     update)
         # use the program version as a tag
-        git checkout "$(gim -version)"
+        git checkout "$("$git_url_project" -version)"
         # uninstall the program
         make uninstall
         # use the latest repository tag
