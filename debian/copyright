@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: gim
+Upstream-Contact: Dominik Salvet
+Source: https://gitlab.com/dominiksalvet/gim
+
+Files: README.md CHANGELOG.md CONTRIBUTING.md
+Copyright: Copyright 2018 Dominik Salvet
+License: MIT
