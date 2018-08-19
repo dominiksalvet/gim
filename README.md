@@ -6,6 +6,14 @@ Nearly every hosted Git project needs to take different steps to being successfu
 
 Therefore, the goal of this project is to make managing of Git projects easier for end users. Development of those projects must be gim compliant as stated in the [RULES.md](RULES.md) file. The rules are as non-restrictive as possible to affect the development as little as possible.
 
+## Table of Contents
+
+* [Install](#install)
+* [Usage](#usage)
+* [Badge](#badge)
+* [Contribute](#contribute)
+* [License](#license)
+
 ## Install
 
 To **automatically install the latest stable release** of this program, open a terminal emulator and use the following commands:
