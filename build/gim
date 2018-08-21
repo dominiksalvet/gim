@@ -109,7 +109,6 @@ elif [ -z "$git_url" ]; then # check if GIT_URL argument provided
 Try '$0 -help' for more information." >&2
     exit 1
 else # both arguments provided
-
     # check the format of given Git URL
     if ! echo "$git_url" | grep -q -E -e 'https://[^\.]+\.[^/]+/[^/]+/[^\.]+\.git'; then
         echo "$0: Supplied Git URL is invalid.
