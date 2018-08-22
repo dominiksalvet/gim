@@ -1,6 +1,6 @@
 # Git Installation Manager *(gim)*
 
-> Install, uninstall or update Git projects in an easy and unified way with a single command.
+> Install, uninstall or update Git projects in an easy way with a single command.
 
 Nearly every hosted Git project needs to take different steps to being successfully installed, uninstalled or updated. That makes sense as requirements per project differ. However, very often an end user must deal with those differences during reading an exhaustive README file to get out from it how to install the project. And that does not make sense.
 
