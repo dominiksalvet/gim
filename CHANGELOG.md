@@ -5,3 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 ## Unreleased
 
 The changes not yet present in any release are listed in this section.
+
+### Added
+
+* When updating a project, gim checks whether installed version is the same as the latest version of the Git repository to prevent uninstall-and-install routine.

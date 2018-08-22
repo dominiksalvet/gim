@@ -137,7 +137,7 @@ if [ -d ".git" ]; then # if the repository is in the cache
 else # if the repository is not in the cache
     git clone "$project_git_url" . # clone it to the created cache directory
 fi || {
-    echo "$0: The Git repository can't be get to the most recent state.
+    echo "$0: The Git repository can't be obtained in the most recent state.
 POSSIBLE CAUSES:
   * your device is not connected to the Internet" >&2
     exit 1
@@ -145,16 +145,17 @@ POSSIBLE CAUSES:
 
 case "$action" in
     install)
-        git checkout -q "$(git describe --abbrev=0)" && # use the latest repository tag
+        git checkout "$(git describe --abbrev=0)" && # use the latest repository tag
         make install # install the program
         ;;
     uninstall)
         # check if the project is installed
         if ! command -v "$project_name" > /dev/null; then # if not
+            echo 'SUCCESS'
             exit 0 # uninstallation returns success eventually
         fi
 
-        git checkout -q "$("$project_name" -version)" && # use the program version as a tag
+        git checkout "$("$project_name" -version)" && # use the program version as a tag
         make uninstall # uninstall the program
         ;;
     update)
@@ -166,16 +167,25 @@ POSSIBLE SOLUTIONS:
             exit 1
         fi
 
-        git checkout -q "$("$project_name" -version)" && # use the program version as a tag
+        # if the versions are the same, it is not required any updates
+        if [ "$("$project_name" -version)" = "$(git describe --abbrev=0)" ]; then
+            echo 'The latest stable release of this Git project is already installed, update canceled.
+SUCCESS'
+            exit 0
+        fi
+
+        git checkout "$("$project_name" -version)" && # use the program version as a tag
         make uninstall && # uninstall the program
 
-        git checkout -q "$(git describe --abbrev=0)" && # use the latest repository tag
+        git checkout "$(git describe --abbrev=0)" && # use the latest repository tag
         make install # install the program again
         ;;
 esac || {
     echo "$0: An error has occurred during the '$action' process.
 POSSIBLE SOLUTIONS:
-  * read lines above as they can provide required information
+  * read the lines above as they can provide required information
   * refer to a developer of the project of the given Git URL" >&2
     exit 1
 }
+
+echo 'SUCCESS'
