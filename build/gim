@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ git make cd mkdir sed grep'
+SW_REQUIRED='command echo [ git make cd mkdir sed grep rm'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
@@ -43,12 +43,13 @@ ACTION:
   update     update a program originating from the given Git URL
 
 OPTION:
-  -help     show this help and exit
-  -about    show information and exit
-  -version  show version and exit"
+  -clear-cache  clear cache of downloaded Git project repositories and exit
+  -help         show this help and exit
+  -about        show information and exit
+  -version      show version and exit"
 
 ABOUT_MESSAGE="gim $VERSION
-Install, uninstall or update Git projects in an easy and unified way with a single command.
+Install, uninstall or update Git projects in an easy way with a single command.
 
 Copy"'right 2018 Dominik Salvet
 SPDX License Identifier: MIT
@@ -77,6 +78,10 @@ for i in "$@"; do
                 ;;
             update)
                 action=update
+                ;;
+            -clear-cache)
+                rm -rf "${CACHE_DIR:?}/"
+                exit 0
                 ;;
             -help)
                 echo "$HELP_MESSAGE"
