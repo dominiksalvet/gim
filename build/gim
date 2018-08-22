@@ -35,7 +35,7 @@ done
 # the current version of the program
 VERSION=1.0.0
 
-HELP_MESSAGE="Usage: $0 [OPTION]... ACTION GIT_URL
+HELP_MESSAGE="Usage: $0 [OPTION]... ACTION HTTPS_GIT_URL
 
 ACTION:
   install    install a program originating from the given Git URL
@@ -65,7 +65,7 @@ CACHE_DIR=~/.cache/gim
 for i in "$@"; do
     if [ ! -z "$action" ]; then # if the action has been selected in the previous variable
         # get Git URL and discard all following parameters
-        project_git_url="$i"
+        project_url="$i"
         break
     else
         case "$i" in
@@ -100,17 +100,17 @@ Try '$0 -help' for more information." >&2
 done
 
 # check arguments if valid and parse required information
-if [ -z "$action" ]; then # check if ACTION argument provided
+if [ -z "$action" ]; then # check if argument with an action provided
     echo "$0: No argument with action provided.
 Try '$0 -help' for more information." >&2
     exit 1
-elif [ -z "$project_git_url" ]; then # check if GIT_URL argument provided
+elif [ -z "$project_url" ]; then # check if argument with Git URL provided
     echo "$0: No argument with Git URL provided.
 Try '$0 -help' for more information." >&2
     exit 1
 else # both arguments provided
     # check the format of given Git URL
-    if ! echo "$project_git_url" | grep -q -E -e 'https://[^\.]+\.[^/]+/[^/]+/[^\.]+\.git'; then
+    if ! echo "$project_url" | grep -q -E -e 'https://[^\.]+\.[^/]+/[^/]+/[^\.]+\.git'; then
         echo "$0: Supplied Git URL is invalid.
 POSSIBLE SOLUTIONS:
   * use the 'https://<provider>.<domain>/<author>/<project>.git' template" >&2
@@ -118,8 +118,8 @@ POSSIBLE SOLUTIONS:
     fi
 
     # get project name and author name from the given Git URL
-    project_name="$(echo "$project_git_url" | sed -E -e 's/.git$//; s|.*/||')"
-    project_author="$(echo "$project_git_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
+    project_name="$(echo "$project_url" | sed -E -e 's/.git$//; s|.*/||')"
+    project_author="$(echo "$project_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
 fi
 
 #-------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ if [ -d ".git" ]; then # if the repository is in the cache
     git pull && # get the most recent state of the repository
     git fetch --tags # get the most recent state of the repository tags
 else # if the repository is not in the cache
-    git clone "$project_git_url" . # clone it to the created cache directory
+    git clone "$project_url" . # clone it to the created cache directory
 fi || {
     echo "$0: The Git repository can't be obtained in the most recent state.
 POSSIBLE CAUSES:
