@@ -9,4 +9,4 @@ The changes not yet present in any release are listed in this section.
 ### Added
 
 * When updating a project, gim checks whether installed version is the same as the latest version of the Git repository to prevent uninstall-and-install routine.
-* The option '-clear-cache' has been added to clear cached Git repositories locally stored.
+* The option `-clear-cache` has been added to clear cached Git repositories locally stored.
