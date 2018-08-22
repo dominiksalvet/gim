@@ -161,52 +161,73 @@ POSSIBLE CAUSES:
     exit 1
 }
 
+# get the latest stable release of the obtained Git project
+project_last_release="$(git describe --abbrev=0)"
+
+# verify that the repository has at least one tag
+if [ -z "$project_last_release" ]; then
+    echo "$0: The given Git repository has no commit tagged.
+POSSIBLE SOLUTIONS:
+  * refer to a developer of the given Git URL's project" >&2
+    exit 1
+fi
+
 #-------------------------------------------------------------------------------
 # EXECUTE SELECTED ACTION
 #-------------------------------------------------------------------------------
 
 case "$action" in
     install)
-        git checkout "$(git describe --abbrev=0)" && # use the latest repository tag
+        if command -v "$project_name" > /dev/null; then # check if the project already installed
+            if [ "$("$project_name" -version)" = "$project_last_release" ]; then # if the versions are the same
+                echo 'The latest stable release of this Git project is already installed.
+SUCCESS'
+                exit 0
+            else
+                echo "$0: This Git project is already install, but it is not updated.
+POSSIBLE SOLUTIONS:
+  * use the 'update' action instead of the used 'install' action" >&2
+                exit 1
+            fi
+        fi
+
+        git checkout "$project_last_release" && # use the latest repository tag
         make install # install the program
         ;;
     uninstall)
-        # check if the project is installed
-        if ! command -v "$project_name" > /dev/null; then # if not
-            echo 'SUCCESS'
-            exit 0 # uninstallation returns success eventually
+        if ! command -v "$project_name" > /dev/null; then # if the project is not installed
+            echo 'SUCCESS' # then it is uninstalled
+            exit 0 # uninstallation exits with a success eventually
         fi
 
         git checkout "$("$project_name" -version)" && # use the program version as a tag
         make uninstall # uninstall the program
         ;;
     update)
-        # check if the project is installed
-        if ! command -v "$project_name" > /dev/null; then # if not
+        if command -v "$project_name" > /dev/null; then # check if the project installed
+            if [ "$("$project_name" -version)" = "$project_last_release" ]; then # if the versions are the same
+                echo 'The latest stable release of this Git project is already installed.
+SUCCESS'
+                exit 0
+            fi
+        else # the project is not installed
             echo "$0: The project originating from given Git URL is not installed.
 POSSIBLE SOLUTIONS:
-  * use the 'install' action instead of used 'update' action" >&2
+  * use the 'install' action instead of the used 'update' action" >&2
             exit 1
-        fi
-
-        # if the versions are the same, it is not required any updates
-        if [ "$("$project_name" -version)" = "$(git describe --abbrev=0)" ]; then
-            echo 'The latest stable release of this Git project is already installed, update canceled.
-SUCCESS'
-            exit 0
         fi
 
         git checkout "$("$project_name" -version)" && # use the program version as a tag
         make uninstall && # uninstall the program
 
-        git checkout "$(git describe --abbrev=0)" && # use the latest repository tag
+        git checkout "$project_last_release" && # use the latest repository tag
         make install # install the program again
         ;;
 esac || {
     echo "$0: An error has occurred during the '$action' process.
 POSSIBLE SOLUTIONS:
-  * read the lines above as they can provide required information
-  * refer to a developer of the project of the given Git URL" >&2
+  * read the report above as it can provide required information
+  * refer to a developer of the given Git URL's project" >&2
     exit 1
 }
 
