@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ git make cd mkdir sed grep rm'
+SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
@@ -133,25 +133,37 @@ POSSIBLE SOLUTIONS:
 fi
 
 #-------------------------------------------------------------------------------
-# EXECUTE SELECTED ACTION
+# OBTAINING THE REPOSITORY
 #-------------------------------------------------------------------------------
 
 # create a cache directory for the program
 mkdir -p "$CACHE_DIR/$project_author/$project_name/"
 cd "$CACHE_DIR/$project_author/$project_name/" || exit 1
 
-if [ -d ".git" ]; then # if the repository is in the cache
-    git checkout master && # checkout the master branch for the pull command
-    git pull && # get the most recent state of the repository
-    git fetch --tags # get the most recent state of the repository tags
-else # if the repository is not in the cache
-    git clone "$project_url" . # clone it to the created cache directory
+if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
+    git clone "$project_url" . # clone the Git repository to the this directory
+else # if not empty
+    # check if the directory is a valid Git repository
+    if [ -d '.git' ] && git diff --quiet; then # expecting that the '.git' contents is not corrupted
+        git checkout master && # checkout the master branch for the pull command
+        git pull && # get the most recent state of the repository
+        git fetch --tags # get the most recent state of the repository tags
+    else
+        echo "$0: The Git repository in cache is corrupted.
+POSSIBLE SOLUTIONS:
+  * clear the program's cache using the '-clear-cache' option" >&2
+        exit 1
+    fi
 fi || {
     echo "$0: The Git repository can't be obtained in the most recent state.
 POSSIBLE CAUSES:
   * your device is not connected to the Internet" >&2
     exit 1
 }
+
+#-------------------------------------------------------------------------------
+# EXECUTE SELECTED ACTION
+#-------------------------------------------------------------------------------
 
 case "$action" in
     install)
