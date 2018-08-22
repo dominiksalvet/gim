@@ -231,4 +231,27 @@ POSSIBLE SOLUTIONS:
     exit 1
 }
 
+#-------------------------------------------------------------------------------
+# STATE VERIFICATION
+#-------------------------------------------------------------------------------
+
+case "$action" in
+    install | update)
+        if ! command -v "$project_name" > /dev/null; then # if the project is not installed (as it should be now)
+            echo "$0: The '$project_name' should have been installed, but it is not.
+POSSIBLE SOLUTIONS:
+  * refer to a developer of the given Git URL's project" >&2
+            exit 1
+        fi
+        ;;
+    uninstall)
+        if command -v "$project_name" > /dev/null; then # if the project is installed (as it shouldn't be now)
+            echo "$0: The '$project_name' should have been uninstalled, but it is not.
+POSSIBLE SOLUTIONS:
+  * refer to a developer of the given Git URL's project" >&2
+            exit 1
+        fi
+        ;;
+esac
+
 echo 'SUCCESS'
