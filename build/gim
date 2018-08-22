@@ -65,7 +65,7 @@ CACHE_DIR=~/.cache/gim
 for i in "$@"; do
     if [ ! -z "$action" ]; then # if the action has been selected in the previous variable
         # get Git URL and discard all following parameters
-        git_url="$i"
+        project_git_url="$i"
         break
     else
         case "$i" in
@@ -99,18 +99,18 @@ Try '$0 -help' for more information." >&2
     fi
 done
 
-# check arguments if valid
+# check arguments if valid and parse required information
 if [ -z "$action" ]; then # check if ACTION argument provided
     echo "$0: No argument with action provided.
 Try '$0 -help' for more information." >&2
     exit 1
-elif [ -z "$git_url" ]; then # check if GIT_URL argument provided
+elif [ -z "$project_git_url" ]; then # check if GIT_URL argument provided
     echo "$0: No argument with Git URL provided.
 Try '$0 -help' for more information." >&2
     exit 1
 else # both arguments provided
     # check the format of given Git URL
-    if ! echo "$git_url" | grep -q -E -e 'https://[^\.]+\.[^/]+/[^/]+/[^\.]+\.git'; then
+    if ! echo "$project_git_url" | grep -q -E -e 'https://[^\.]+\.[^/]+/[^/]+/[^\.]+\.git'; then
         echo "$0: Supplied Git URL is invalid.
 POSSIBLE SOLUTIONS:
   * use the 'https://<provider>.<domain>/<author>/<project>.git' template" >&2
@@ -118,8 +118,8 @@ POSSIBLE SOLUTIONS:
     fi
 
     # get project name and author name from the given Git URL
-    git_url_project="$(echo "$git_url" | sed -E -e 's/.git$//; s|.*/||')"
-    git_url_author="$(echo "$git_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
+    project_name="$(echo "$project_git_url" | sed -E -e 's/.git$//; s|.*/||')"
+    project_author="$(echo "$project_git_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
 fi
 
 #-------------------------------------------------------------------------------
@@ -127,39 +127,55 @@ fi
 #-------------------------------------------------------------------------------
 
 # create a cache directory for the program
-mkdir -p "$CACHE_DIR/$git_url_author/$git_url_project/"
-cd "$CACHE_DIR/$git_url_author/$git_url_project/" || exit 1
+mkdir -p "$CACHE_DIR/$project_author/$project_name/"
+cd "$CACHE_DIR/$project_author/$project_name/" || exit 1
 
-# check if already existing a downloaded repository
-if [ -d ".git" ]; then
-    git checkout master
-    git pull
-    git getch --tags
-else
-    git clone "$git_url" .
-fi
+if [ -d ".git" ]; then # if the repository is in the cache
+    git checkout master && # checkout the master branch for the pull command
+    git pull && # get the most recent state of the repository
+    git fetch --tags # get the most recent state of the repository tags
+else # if the repository is not in the cache
+    git clone "$project_git_url" . # clone it to the created cache directory
+fi || {
+    echo "$0: The Git repository can't be get to the most recent state.
+POSSIBLE CAUSES:
+  * your device is not connected to the Internet" >&2
+    exit 1
+}
 
 case "$action" in
     install)
-        # use the latest repository tag
-        git checkout "$(git describe --abbrev=0)"
-        # install the program
-        make install
+        git checkout -q "$(git describe --abbrev=0)" && # use the latest repository tag
+        make install # install the program
         ;;
     uninstall)
-        # use the program version as a tag
-        git checkout "$("$git_url_project" -version)"
-        # uninstall the program
-        make uninstall
+        # check if the project is installed
+        if ! command -v "$project_name" > /dev/null; then # if not
+            exit 0 # uninstallation returns success eventually
+        fi
+
+        git checkout -q "$("$project_name" -version)" && # use the program version as a tag
+        make uninstall # uninstall the program
         ;;
     update)
-        # use the program version as a tag
-        git checkout "$("$git_url_project" -version)"
-        # uninstall the program
-        make uninstall
-        # use the latest repository tag
-        git checkout "$(git describe --abbrev=0)"
-        # install the program again
-        make install
+        # check if the project is installed
+        if ! command -v "$project_name" > /dev/null; then # if not
+            echo "$0: The project originating from given Git URL is not installed.
+POSSIBLE SOLUTIONS:
+  * use the 'install' action instead of used 'update' action" >&2
+            exit 1
+        fi
+
+        git checkout -q "$("$project_name" -version)" && # use the program version as a tag
+        make uninstall && # uninstall the program
+
+        git checkout -q "$(git describe --abbrev=0)" && # use the latest repository tag
+        make install # install the program again
         ;;
-esac
+esac || {
+    echo "$0: An error has occurred during the '$action' process.
+POSSIBLE SOLUTIONS:
+  * read lines above as they can provide required information
+  * refer to a developer of the project of the given Git URL" >&2
+    exit 1
+}
