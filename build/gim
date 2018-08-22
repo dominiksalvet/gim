@@ -137,7 +137,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # create a cache directory for the program
-mkdir -p "$CACHE_DIR/$project_author/$project_name/"
+mkdir -p "$CACHE_DIR/$project_author/$project_name/" &&
 cd "$CACHE_DIR/$project_author/$project_name/" || exit 1
 
 if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
@@ -196,7 +196,8 @@ POSSIBLE SOLUTIONS:
         ;;
     uninstall)
         if ! command -v "$project_name" > /dev/null; then # if the project is not installed
-            echo 'SUCCESS' # then it is uninstalled
+            echo 'This Git project is not installed.
+SUCCESS'
             exit 0 # uninstallation exits with a success eventually
         fi
 
