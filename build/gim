@@ -178,7 +178,7 @@ fi
 
 case "$action" in
     install)
-        if command -v "$project_name" > /dev/null; then # check if the project already installed
+        if [ -f "$(command -v "$project_name")" ]; then # check if the project already installed
             if [ "$("$project_name" -version)" = "$project_last_release" ]; then # if the versions are the same
                 echo 'The latest stable release of this Git project is already installed.
 SUCCESS'
@@ -195,7 +195,7 @@ POSSIBLE SOLUTIONS:
         make install # install the program
         ;;
     uninstall)
-        if ! command -v "$project_name" > /dev/null; then # if the project is not installed
+        if [ ! -f "$(command -v "$project_name")" ] > /dev/null; then # if the project is not installed
             echo 'This Git project is not installed.
 SUCCESS'
             exit 0 # uninstallation exits with a success eventually
@@ -205,7 +205,7 @@ SUCCESS'
         make uninstall # uninstall the program
         ;;
     update)
-        if command -v "$project_name" > /dev/null; then # check if the project installed
+        if [ -f "$(command -v "$project_name")" ] > /dev/null; then # check if the project installed
             if [ "$("$project_name" -version)" = "$project_last_release" ]; then # if the versions are the same
                 echo 'The latest stable release of this Git project is already installed.
 SUCCESS'
@@ -238,7 +238,7 @@ POSSIBLE SOLUTIONS:
 
 case "$action" in
     install | update)
-        if ! command -v "$project_name" > /dev/null; then # if the project is not installed (as it should be now)
+        if [ ! -f "$(command -v "$project_name")" ] > /dev/null; then # if the project is not installed (as it should be now)
             echo "$0: The '$project_name' should have been installed, but it is not.
 POSSIBLE SOLUTIONS:
   * refer to a developer of the given Git URL's project" >&2
@@ -246,7 +246,7 @@ POSSIBLE SOLUTIONS:
         fi
         ;;
     uninstall)
-        if command -v "$project_name" > /dev/null; then # if the project is installed (as it shouldn't be now)
+        if [ -f "$(command -v "$project_name")" ] > /dev/null; then # if the project is installed (as it shouldn't be now)
             echo "$0: The '$project_name' should have been uninstalled, but it is not.
 POSSIBLE SOLUTIONS:
   * refer to a developer of the given Git URL's project" >&2
