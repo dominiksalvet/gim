@@ -32,7 +32,7 @@ done
 # DEFINITIONS
 #-------------------------------------------------------------------------------
 
-# set up a mask for permissions of manipulated files
+# set up the mask for permissions of manipulated files
 umask 000
 
 # the current version of the program
@@ -236,7 +236,7 @@ POSSIBLE SOLUTIONS:
 }
 
 #-------------------------------------------------------------------------------
-# STATE VERIFICATION
+# VERIFY THE PROJECT'S STATUS
 #-------------------------------------------------------------------------------
 
 case "$action" in
