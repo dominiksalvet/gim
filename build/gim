@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls'
+SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls umask'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
@@ -31,6 +31,9 @@ done
 #-------------------------------------------------------------------------------
 # DEFINITIONS
 #-------------------------------------------------------------------------------
+
+# set up a mask for permissions of manipulated files
+umask 000
 
 # the current version of the program
 VERSION=1.0.0
