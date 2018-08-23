@@ -72,7 +72,7 @@ version_check() {
     if [ -z "$1" ]; then
         echo "$0: Neither the '-version' flag nor the '--version' flag has been recognized.
 POSSIBLE SOLUTIONS:
-  * refer to a developer of the given Git URL's project"
+  * refer to a developer of the given Git URL's project about gim compliance"
         return 1
     fi
 }
@@ -182,7 +182,7 @@ project_last_version="$(git describe --abbrev=0)"
 if [ -z "$project_last_version" ]; then
     echo "$0: The given Git repository has no commit tagged.
 POSSIBLE SOLUTIONS:
-  * refer to a developer of the given Git URL's project" >&2
+  * refer to a developer of the given Git URL's project about gim compliance" >&2
     exit 1
 fi
 
