@@ -20,61 +20,20 @@ This project is not a package manager, it is an installation manager. **It's mea
 
 ## Install
 
-To **automatically install the latest stable release** of this program, open a terminal emulator and use the following commands:
+If you haven't installed this project yet, to **automatically install it's latest stable release**, open a terminal emulator and use the following commands:
 
 ```sh
 cd ~/Downloads/ && # change directory to the 'Downloads' directory
-if cd gim/ 2>/dev/null; then # if local repository exists
-    git checkout master && # checkout the master branch for the pull command
-    git pull && # get the most recent state of the repository
-    git fetch --tags # in case of any tag change
-else # if local repository doesn't exist
-    git clone https://gitlab.com/dominiksalvet/gim.git && # clone it
-    cd gim/ # and change directory to the downloaded repository
-fi &&
+git clone https://gitlab.com/dominiksalvet/gim.git && # clone it
+cd gim/ && # change directory to the cloned repository
 git checkout "$(git describe --abbrev=0)" && # use the latest repository tag
-sudo make install # install the program
+sudo make install && # install the program
+cd ~/Downloads/ && # change directory to the 'Downloads' directory again
+rm -rf gim/ && # remove cloned repository (can be omitted if you want)
+echo 'SUCCESS' # print a message if everything succeeded
 ```
 
-After the installation, the *~/Downloads/gim* directory won't be required for the program to be working and so it can be removed.
-
----
-
-If it is required to **automatically uninstall your current release** of this program, open a terminal emulator and use the following commands:
-
-```sh
-cd ~/Downloads/ && # change directory to the 'Downloads' directory
-if cd gim/ 2>/dev/null; then # if local repository exists
-    git checkout master && # checkout the master branch for the pull command
-    git pull && # get the most recent state of the repository
-    git fetch --tags # in case of any tag change
-else # if local repository doesn't exist
-    git clone https://gitlab.com/dominiksalvet/gim.git && # clone it
-    cd gim/ # and change directory to the downloaded repository
-fi &&
-git checkout "$(gim -version)" && # use the program version as a tag
-sudo make uninstall # uninstall the program
-```
-
----
-
-To **automatically update the program to it's latest stable release**, open a terminal emulator and use the following commands:
-
-```sh
-cd ~/Downloads/ && # change directory to the 'Downloads' directory
-if cd gim/ 2>/dev/null; then # if local repository exists
-    git checkout master && # checkout the master branch for the pull command
-    git pull && # get the most recent state of the repository
-    git fetch --tags # in case of any tag change
-else # if local repository doesn't exist
-    git clone https://gitlab.com/dominiksalvet/gim.git && # clone it
-    cd gim/ # and change directory to the downloaded repository
-fi &&
-git checkout "$(gim -version)" && # use the program version as a tag
-sudo make uninstall # uninstall the program
-git checkout "$(git describe --abbrev=0)" && # use the latest repository tag
-sudo make install # install the program again
-```
+After the steps above, gim should be installed and if it required to **uninstall gim** or **update gim**, you can use the steps stated below in the [Usage](#usage) section, which shows how to use gim itself for installation management. Use `https://gitlab.com/dominiksalvet/gim` as `<git_url>` in those cases.
 
 ## Usage
 
