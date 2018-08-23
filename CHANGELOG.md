@@ -9,6 +9,7 @@ The changes not yet present in any release are listed in this section.
 ### Added
 
 * The option `-clear-cache` has been added to clear cached Git repositories locally stored.
+* Support for programs reporting it's version with the `--version` flag.
 
 ### Changed
 

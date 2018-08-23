@@ -66,6 +66,17 @@ https://gitlab.com/dominiksalvet/gim'
 # cache directory to store downloaded Git repositories
 CACHE_DIR=~/.cache/gim
 
+# DESCRIPTION:
+#   Check if program's version has been successfully obtained.
+version_check() {
+    if [ -z "$1" ]; then
+        echo "$0: Neither the '-version' flag nor the '--version' flag has been recognized.
+POSSIBLE SOLUTIONS:
+  * refer to a developer of the given Git URL's project"
+        return 1
+    fi
+}
+
 #-------------------------------------------------------------------------------
 # PROCESSING PARAMETERS
 #-------------------------------------------------------------------------------
@@ -165,15 +176,20 @@ POSSIBLE CAUSES:
 }
 
 # get the latest stable release of the obtained Git project
-project_last_release="$(git describe --abbrev=0)"
+project_last_version="$(git describe --abbrev=0)"
 
 # verify that the repository has at least one tag
-if [ -z "$project_last_release" ]; then
+if [ -z "$project_last_version" ]; then
     echo "$0: The given Git repository has no commit tagged.
 POSSIBLE SOLUTIONS:
   * refer to a developer of the given Git URL's project" >&2
     exit 1
 fi
+
+# get the current version of the program (if installed)
+if ! project_current_version="$("$project_name" -version)" 2>/dev/null; then
+    project_current_version="$("$project_name" --version)" 2>/dev/null
+fi || project_current_version=
 
 #-------------------------------------------------------------------------------
 # EXECUTE SELECTED ACTION
@@ -182,7 +198,8 @@ fi
 case "$action" in
     install)
         if [ -f "$(command -v "$project_name")" ]; then # check if the project already installed
-            if [ "$("$project_name" -version)" = "$project_last_release" ]; then # if the versions are the same
+            version_check "$project_current_version" || exit
+            if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
                 echo 'The latest stable release of this Git project is already installed.
 SUCCESS'
                 exit 0
@@ -194,7 +211,7 @@ POSSIBLE SOLUTIONS:
             fi
         fi
 
-        git checkout "$project_last_release" && # use the latest repository tag
+        git checkout "$project_last_version" && # use the latest repository tag
         make install # install the program
         ;;
     uninstall)
@@ -204,12 +221,14 @@ SUCCESS'
             exit 0 # uninstallation exits with a success eventually
         fi
 
-        git checkout "$("$project_name" -version)" && # use the program version as a tag
+        version_check "$project_current_version" || exit
+        git checkout "$project_current_version" && # use the program version as a tag
         make uninstall # uninstall the program
         ;;
     update)
         if [ -f "$(command -v "$project_name")" ] > /dev/null; then # check if the project installed
-            if [ "$("$project_name" -version)" = "$project_last_release" ]; then # if the versions are the same
+            version_check "$project_current_version" || exit
+            if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
                 echo 'The latest stable release of this Git project is already installed.
 SUCCESS'
                 exit 0
@@ -221,10 +240,11 @@ POSSIBLE SOLUTIONS:
             exit 1
         fi
 
-        git checkout "$("$project_name" -version)" && # use the program version as a tag
+        version_check "$project_current_version" || exit
+        git checkout "$project_current_version" && # use the program version as a tag
         make uninstall && # uninstall the program
 
-        git checkout "$project_last_release" && # use the latest repository tag
+        git checkout "$project_last_version" && # use the latest repository tag
         make install # install the program again
         ;;
 esac || {
