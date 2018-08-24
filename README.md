@@ -62,7 +62,7 @@ For example, **uninstalling the gim itself** is pretty easy:
 sudo gim uninstall https://gitlab.com/dominiksalvet/gim.git
 ```
 
-Maybe you will want to remove the program's cached repositories as well if you haven't planned to install gim again. **Programs installed from these repositories will not be uninstalled.** You can do it by executing the `gim -clear-cache` command before the gim uninstallation as stated above.
+Maybe you will want to remove the program's cached repositories as well if you haven't planned to install gim again. **Programs installed by gim will not be uninstalled.** You can do it by executing the `gim -clear-cache` command before the gim uninstallation as stated above.
 
 Once the gim is uninstalled and the cache is cleared, it is required to use the steps described in the [Install](#install) section in case to install it again.
 
