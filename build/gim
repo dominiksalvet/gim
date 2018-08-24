@@ -40,7 +40,7 @@ VERSION=1.0.0
 
 GIT_URL_FORMAT='https://<provider>.<domain>/<author>/<project>.git'
 
-HELP_MESSAGE="Usage: $0 [OPTION]... ACTION GIT_URL
+HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION GIT_URL
 
 ACTION:
   install    install a program originating from the given Git URL
@@ -67,7 +67,7 @@ https://gitlab.com/dominiksalvet/gim'
 CACHE_DIR=~/.cache/gim
 
 # DESCRIPTION:
-#   Check if program's version has been successfully obtained.
+#   Check if the program's version has been successfully obtained.
 version_check() {
     if [ -z "$1" ]; then
         echo "$0: Neither the '-version' flag nor the '--version' flag has been recognized.
@@ -187,8 +187,8 @@ POSSIBLE SOLUTIONS:
 fi
 
 # get the current version of the program (if installed)
-if ! project_current_version="$("$project_name" -version)" 2>/dev/null; then
-    project_current_version="$("$project_name" --version)" 2>/dev/null
+if ! project_current_version="$("$project_name" --version)" 2>/dev/null; then
+    project_current_version="$("$project_name" -version)" 2>/dev/null
 fi || project_current_version=
 
 #-------------------------------------------------------------------------------

@@ -9,6 +9,7 @@ The changes not yet present in any release are listed in this section.
 ### Fixed
 
 * Remove question about write-protected file while uninstalling the project.
+* Check first for existence of the `--version` flag and then the `-version` flag. Otherwise, the `-version` flag could be interpreted by many programs as `-v -e -r -s -i -o -n` parameters.
 
 ## 1.0.0 (2018-08-24)
 
