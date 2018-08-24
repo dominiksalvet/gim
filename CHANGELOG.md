@@ -10,7 +10,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Fixed
 
-* Prevent owning cache directories by root user as then would be impossible to use the `-clear-cache` flag by a standard user.
+* Prevent owning cache directories by the root user as then it would be impossible to use the `-clear-cache` flag by a standard user.
 * Remove question about write-protected file while uninstalling the project.
 * Check first for existence of the `--version` flag and then the `-version` flag. Otherwise, the `-version` flag could be interpreted by many programs as `-v -e -r -s -i -o -n` parameters.
 
