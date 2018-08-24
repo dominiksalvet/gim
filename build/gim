@@ -95,7 +95,7 @@ fill_project_current_version() {
     if [ -z "$project_current_version" ]; then
         echo "$0: Neither the '--version' flag nor the '-version' flag has been recognized.
 POSSIBLE SOLUTIONS:
-  * refer to a developer of the given Git URL's project about gim compliance"
+  * refer to a developer of the '$project_name' project about gim compliance"
         return 1
     fi
 }
@@ -230,7 +230,7 @@ project_last_version="$(git describe --abbrev=0)"
 if [ -z "$project_last_version" ]; then
     echo "$0: The given Git repository has no commit tagged.
 POSSIBLE SOLUTIONS:
-  * refer to a developer of the given Git URL's project about gim compliance" >&2
+  * refer to a developer of the '$project_name' project about gim compliance" >&2
     exit 1
 fi
 
@@ -304,7 +304,7 @@ esac || {
     echo "$0: An error has occurred during the '$action' process.
 POSSIBLE SOLUTIONS:
   * read the report above as it can provide required information
-  * refer to a developer of the given Git URL's project" >&2
+  * refer to a developer of the '$project_name' project" >&2
     exit 1
 }
 
@@ -317,7 +317,7 @@ case "$action" in
         if [ ! -f "$(command -v "$project_name")" ]; then # if the project is not installed (as it should be now)
             echo "$0: The '$project_name' should have been installed, but it is not.
 POSSIBLE SOLUTIONS:
-  * refer to a developer of the given Git URL's project" >&2
+  * refer to a developer of the '$project_name' project" >&2
             exit 1
         fi
         ;;
@@ -325,7 +325,7 @@ POSSIBLE SOLUTIONS:
         if [ -f "$(command -v "$project_name")" ]; then # if the project is installed (as it shouldn't be now)
             echo "$0: The '$project_name' should have been uninstalled, but it is not.
 POSSIBLE SOLUTIONS:
-  * refer to a developer of the given Git URL's project" >&2
+  * refer to a developer of the '$project_name' project" >&2
             exit 1
         fi
         ;;
