@@ -67,10 +67,18 @@ umask 000
 CACHE_DIR=~/.cache/gim
 
 # DESCRIPTION:
-#   Check if the program's version has been successfully obtained.
-version_check() {
-    if [ -z "$1" ]; then
-        echo "$0: Neither the '-version' flag nor the '--version' flag has been recognized.
+#   Fill the '$project_current_version' variable with the current version of a given project.
+# PARAMETERS:
+#   $1 - project name
+fill_project_current_version() {
+    # get the current version of the program
+    if ! project_current_version="$("$1" --version)" 2>/dev/null; then
+        project_current_version="$("$1" -version)" 2>/dev/null
+    fi || project_current_version=
+
+    # check if non-empty version was returned
+    if [ -z "$project_current_version" ]; then
+        echo "$0: Neither the '--version' flag nor the '-version' flag has been recognized.
 POSSIBLE SOLUTIONS:
   * refer to a developer of the given Git URL's project about gim compliance"
         return 1
@@ -186,11 +194,6 @@ POSSIBLE SOLUTIONS:
     exit 1
 fi
 
-# get the current version of the program (if installed)
-if ! project_current_version="$("$project_name" --version)" 2>/dev/null; then
-    project_current_version="$("$project_name" -version)" 2>/dev/null
-fi || project_current_version=
-
 #-------------------------------------------------------------------------------
 # EXECUTE SELECTED ACTION
 #-------------------------------------------------------------------------------
@@ -198,7 +201,7 @@ fi || project_current_version=
 case "$action" in
     install)
         if [ -f "$(command -v "$project_name")" ]; then # check if the project already installed
-            version_check "$project_current_version" || exit
+            fill_project_current_version "$project_name" || exit
             if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
                 echo 'The latest stable release of this Git project is already installed.
 SUCCESS'
@@ -221,13 +224,13 @@ SUCCESS'
             exit 0 # uninstallation exits with a success eventually
         fi
 
-        version_check "$project_current_version" || exit
+        fill_project_current_version "$project_name" || exit
         git checkout "$project_current_version" && # use the program version as a tag
         make uninstall # uninstall the program
         ;;
     update)
         if [ -f "$(command -v "$project_name")" ] > /dev/null; then # check if the project installed
-            version_check "$project_current_version" || exit
+            fill_project_current_version "$project_name" || exit
             if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
                 echo 'The latest stable release of this Git project is already installed.
 SUCCESS'
@@ -240,7 +243,7 @@ POSSIBLE SOLUTIONS:
             exit 1
         fi
 
-        version_check "$project_current_version" || exit
+        fill_project_current_version "$project_name" || exit
         git checkout "$project_current_version" && # use the program version as a tag
         make uninstall && # uninstall the program
 
