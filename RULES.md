@@ -12,4 +12,4 @@ A Git project is **gim compliant** only if it meets all of the following rules:
 
 A Git project is also **gim compliant** if it meets all of the rules stated above and the following rules since it's certain version:
 
-1. The information about gim compliance since a certain version must be accessible to the project users in every compliant tagged commit to prevent problems raised when using gim on non-compliant versions.
+1. The information about gim compliance since a certain version must be accessible to the project users in every compliant tagged commit in the appropriate place (E.g., an installation section of README file) to prevent problems raised when using gim on non-compliant versions.
