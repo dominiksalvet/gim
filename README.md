@@ -72,7 +72,7 @@ Note that root permissions are not required for every project, gim also **suppor
 
 ### Update
 
-To **automatically update a gim compliant project to the latest stable release**, use the following command:
+To **automatically update to the latest stable release** a gim compliant project, use the following command:
 
 ```sh
 gim update <git_url>
