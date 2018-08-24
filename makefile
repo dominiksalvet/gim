@@ -51,10 +51,10 @@ endef
 # there is no building required, so the default target references to the help target
 all: help
 
-install: # install the entire project automatically
+install: # install the entire project
 	$(CP) $(BUILD_DIR)/gim $(INSTALL_DIR)/
 
-uninstall: # uninstall the project automatically
+uninstall: # uninstall the project
 	$(RM_F) $(INSTALL_DIR)/gim
 
 help: # default, show this help
