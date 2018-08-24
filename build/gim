@@ -32,11 +32,8 @@ done
 # DEFINITIONS
 #-------------------------------------------------------------------------------
 
-# set up the mask for permissions of manipulated files
-umask 000
-
 # the current version of the program
-VERSION=1.0.0
+VERSION=1.0.1
 
 GIT_URL_FORMAT='https://<provider>.<domain>/<author>/<project>.git'
 
@@ -62,6 +59,9 @@ Install, uninstall or update Git projects in an easy way with a single command.
 Copy"'right 2018 Dominik Salvet
 SPDX License Identifier: MIT
 https://gitlab.com/dominiksalvet/gim'
+
+# set up the mask for permissions of manipulated files
+umask 000
 
 # cache directory to store downloaded Git repositories
 CACHE_DIR=~/.cache/gim
