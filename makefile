@@ -53,7 +53,7 @@ install: # install the program
 	cp $(BUILD_DIR)/gim $(INSTALL_DIR)/
 
 uninstall: # uninstall the program
-	rm $(INSTALL_DIR)/gim
+	rm -f $(INSTALL_DIR)/gim
 
 help: # default, show this help
 	$(call show_generated_help,makefile)
