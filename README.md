@@ -59,7 +59,7 @@ gim uninstall <git_url>
 For example, **uninstalling the gim itself** is pretty easy:
 
 ```sh
-sudo gim uninstall https://gitlab.com/dominiksalvet/gim
+sudo gim uninstall https://gitlab.com/dominiksalvet/gim.git
 ```
 
 Once the gim is uninstalled, in case of install it again, it is required to used the steps described in the [Install](#install) section.
