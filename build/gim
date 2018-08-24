@@ -165,7 +165,7 @@ else # if not empty
     else
         echo "$0: The Git repository in cache is corrupted.
 POSSIBLE SOLUTIONS:
-  * clear the program's cache using the '-clear-cache' option" >&2
+  * clear the program's cache using the '$0 -clear-cache' command" >&2
         exit 1
     fi
 fi || {
