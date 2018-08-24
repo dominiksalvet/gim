@@ -14,6 +14,8 @@ SHELL := /bin/sh
 ECHO := echo
 SED := sed
 COLUMN := column
+CP := cp
+RM_F := rm -f
 
 # directory definitions
 BUILD_DIR := build
@@ -34,7 +36,7 @@ export GET_TARGET_DESCRIPTIONS
 
 # shows generated help of a given makefile from it's comments
 define show_generated_help
-	@$(ECHO) 'Usage: make [TARGET]...'
+	@$(ECHO) 'USAGE: make [TARGET]...'
 	@$(ECHO)
 	@$(ECHO) 'TARGET:'
 	@$(SED) -E -e "$$GET_TARGET_DESCRIPTIONS" $(1) | $(COLUMN) -t -s '#'
@@ -44,23 +46,16 @@ endef
 # TARGETS
 #-------------------------------------------------------------------------------
 
-.PHONY: all install uninstall help about
+.PHONY: all install uninstall help
 
 # there is no building required, so the default target references to the help target
 all: help
 
 install: # install the program
-	cp $(BUILD_DIR)/gim $(INSTALL_DIR)/
+	$(CP) $(BUILD_DIR)/gim $(INSTALL_DIR)/
 
 uninstall: # uninstall the program
-	rm -f $(INSTALL_DIR)/gim
+	$(RM_F) $(INSTALL_DIR)/gim
 
 help: # default, show this help
 	$(call show_generated_help,makefile)
-
-about: # show information about this makefile
-	@$(ECHO) "Installation manager for 'gim' program."
-	@$(ECHO)
-	@$(ECHO) 'Copy''right 2018 Dominik Salvet'
-	@$(ECHO) 'SPDX License Identifier: MIT'
-	@$(ECHO) 'https://gitlab.com/dominiksalvet/gim'
