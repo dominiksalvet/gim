@@ -4,7 +4,7 @@
 
 Nearly every hosted Git project needs to take different steps to being successfully installed, uninstalled or updated. That makes sense as requirements per project differ. However, very often an end user must deal with those differences during reading an exhaustive README file to get out of it how to install the project. And that does not make sense.
 
-Therefore, the goal of this project is to make managing of Git projects as easy as possible for end users. Projects that support this way of installation management are marked as **gim compliant** and once they are marked so, they must meet the rules stated in the [RULES.md](RULES.md) file. Those rules are as least restrictive as possible to be also friendly to the projects developers.
+Therefore, the goal of this project is to make managing Git projects as easy as possible for end users. Projects that support this way of installation management are marked as **gim compliant** and once they are marked so, they must meet the rules stated in the [RULES.md](RULES.md) file. These rules are as least restrictive as possible to be also friendly to the projects developers.
 
 ---
 
@@ -14,13 +14,16 @@ This project is not a package manager, it is an installation manager. **It's mea
 
 * [Install](#install)
 * [Usage](#usage)
+  * [Installation](#installation)
+  * [Uninstallation](#uninstallation)
+  * [Update](#update)
 * [Badge](#badge)
 * [Contribute](#contribute)
 * [License](#license)
 
 ## Install
 
-If you haven't installed this project yet, to **automatically install it's latest stable release**, open a terminal emulator and use the following commands:
+If you haven't installed this project yet, to **automatically install the latest stable release** of it, open a terminal emulator and use the following commands:
 
 ```sh
 cd ~/Downloads/ && # change directory to the 'Downloads' directory
@@ -33,9 +36,11 @@ rm -rf gim/ && # remove cloned repository (can be omitted if you want)
 echo 'SUCCESS' # print a message if everything succeeded
 ```
 
-After the steps above, gim should be installed and if it required to **uninstall gim** or **update gim**, you can use the steps stated below in the [Usage](#usage) section, which shows how to use gim itself for installation management. Use `https://gitlab.com/dominiksalvet/gim` as `<git_url>` in those cases.
+After the steps above are successfully executed, gim will be installed on your system and in case of requiring to **uninstall gim** or **update gim**, you can **use the gim itself for these operations** as shown in the [Usage](#usage) section below.
 
 ## Usage
+
+### Installation
 
 To **automatically install the latest stable release** of a gim compliant project, use the following command:
 
@@ -43,13 +48,29 @@ To **automatically install the latest stable release** of a gim compliant projec
 gim install <git_url>
 ```
 
+### Uninstallation
+
 To **automatically uninstall your current release** of a gim compliant project, use the following command:
 
 ```sh
 gim uninstall <git_url>
 ```
 
-To **automatically update a gim compliant project to it's latest stable release**, use the following command:
+For example, **uninstalling the gim itself** is pretty easy:
+
+```sh
+sudo gim uninstall https://gitlab.com/dominiksalvet/gim
+```
+
+Once the gim is uninstalled, in case of install it again, it is required to used the steps described in the [Install](#install) section.
+
+---
+
+Note that root permissions are not required for every project, gim also **supports installation without root permissions**. This decision is exclusively up to the project developer.
+
+### Update
+
+To **automatically update a gim compliant project to the latest stable release**, use the following command:
 
 ```sh
 gim update <git_url>
@@ -57,11 +78,15 @@ gim update <git_url>
 
 ## Badge
 
-If your project is gim compliant and so it meets rules stated in the [RULES.md](RULES.md) file, you can use the following badge in Markdown format in connection with the project as a sign of a gim compliance:
+If **your project is gim compliant** and so it meets the rules stated in the [RULES.md](RULES.md) file, **you can use the following badge** in Markdown format in connection with the project as a sign of a gim compliance:
 
 ```
 [![gim compliant](https://img.shields.io/badge/gim-compliant-b74cff.svg)](https://gitlab.com/dominiksalvet/gim)
 ```
+
+Graphics form:
+
+[![gim compliant](https://img.shields.io/badge/gim-compliant-b74cff.svg)](https://gitlab.com/dominiksalvet/gim)
 
 ## Contribute
 
