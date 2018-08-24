@@ -10,6 +10,6 @@ A Git project is **gim compliant** only if it meets all of the following rules:
    * Target `uninstall` uninstalls the project automatically. However, the project's configuration files are not removed.
 5. If the software of your project requires root permissions, it is also responsible for dealing with that fact.
 
-A Git project is **gim compliant since \<version\>** only if it meets all of the stated rules above and the following rules as well:
+A Git project is also **gim compliant** if it meets all of the rules stated above and the following rules since it's certain version:
 
-1. The information about gim compliance since a certain version must be accessible to the project users to prevent problems raised when using gim on non-compliant version.
+1. The information about gim compliance since a certain version must be accessible to the project users in every compliant tagged commit to prevent problems raised when using gim on non-compliant versions.
