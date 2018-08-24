@@ -11,6 +11,6 @@ A Git project is **gim compliant** if it meets all of the following rules:
 5. If the software of your project requires root permissions, it is also responsible for dealing with that fact.
 6. If a tagged commit has a README file with an install section, it starts with a link to the gim project website, `https://gitlab.com/dominiksalvet/gim`. This could be as easy as: "This project is [gim](https://gitlab.com/dominiksalvet/gim) compliant."
 
-A Git project is also **gim compliant** if it meets all of the rules stated above and the following rules **since it's certain release version** to allow projects to adapt to gim:
+A Git project is also **gim compliant** if it meets all of the rules stated above and the following rules **since it's certain release version** to allow existing projects to adapt to gim:
 
 1. Every tagged commit has a README file with an install section and it starts with the information about gim compliance since a certain version. Together with the 6th point of the previous rules it could be look like that: "This project is [gim](https://gitlab.com/dominiksalvet/gim) compliant since version \<version\>."
