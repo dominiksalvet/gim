@@ -62,11 +62,13 @@ For example, **uninstalling the gim itself** is pretty easy:
 sudo gim uninstall https://gitlab.com/dominiksalvet/gim.git
 ```
 
-Once the gim is uninstalled, in case of install it again, it is required to used the steps described in the [Install](#install) section.
+Maybe you will want to remove the program's cached repositories as well if you haven't planned to install gim again. **Programs installed from these repositories will not be uninstalled.** You can do it by executing the `gim -clear-cache` command before the gim uninstallation as stated above.
+
+Once the gim is uninstalled and the cache is cleared, it is required to use the steps described in the [Install](#install) section in case to install it again.
 
 ---
 
-Note that root permissions are not required for every project, gim also **supports installation without root permissions**. This decision is exclusively up to the project developer.
+Note that root permissions are not required for every project, gim also **supports installation without root permissions** into user's directories. This decision is exclusively up to the project developer.
 
 ### Update
 
