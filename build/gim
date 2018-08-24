@@ -63,6 +63,9 @@ Copy"'right 2018 Dominik Salvet
 SPDX License Identifier: MIT
 https://gitlab.com/dominiksalvet/gim'
 
+HINT_MESSAGE="POSSIBLE SOLUTIONS:
+  * use the '$0 -help' command for more information"
+
 # cache directory to store downloaded Git repositories
 CACHE_DIR=~/.cache/gim
 
@@ -151,7 +154,7 @@ for i in "$@"; do
                 ;;
             *)
                 echo "$0: The option '$i' was not recognized.
-Try '$0 -help' for more information." >&2
+$HINT_MESSAGE" >&2
                 exit 1
                 ;;
         esac
@@ -161,11 +164,11 @@ done
 # check arguments if valid and parse required information
 if [ -z "$action" ]; then # check if argument with an action provided
     echo "$0: No argument with action provided.
-Try '$0 -help' for more information." >&2
+$HINT_MESSAGE" >&2
     exit 1
 elif [ -z "$project_url" ]; then # check if argument with Git URL provided
     echo "$0: No argument with Git URL provided.
-Try '$0 -help' for more information." >&2
+$HINT_MESSAGE" >&2
     exit 1
 else # both arguments provided
     # check the format of given Git URL
