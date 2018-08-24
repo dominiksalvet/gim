@@ -3,8 +3,8 @@
 A Git project is **gim compliant** only if it meets all of the following rules:
 
 1. Its Git repository has at least one commit tagged.
-2. The status of installed/uninstalled project is determined by existence of an executable file with the same name as the Git project name located in any of directories defined by `$PATH` variable.
-3. The executable file stated above also supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
+2. The status of installed/uninstalled project is determined by existence of a file with the same name as the Git project name located in any of directories defined by `$PATH` variable.
+3. The file stated above is executable and also supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
 4. Every tagged commit contains a *makefile* with `install` and `uninstall` targets, where:
    * Target `install` installs all dependencies and then the project itself automatically.
    * Target `uninstall` uninstalls the project automatically. However, the project's configuration files are not removed.
