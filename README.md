@@ -4,7 +4,7 @@
 
 Nearly every hosted **Git project needs to take different steps to being successfully installed, uninstalled or updated**. That makes sense as requirements per project differ. However, very often an **end user must deal with those differences** during reading an exhaustive README file to get out of it how to install the project. And that does not make sense.
 
-Therefore, the goal of this project is to **make managing Git projects as easy as possible for end users**. Projects that support this way of installation management are marked as **gim compliant** and once they are marked so, they must meet the rules stated in the [RULES.md](RULES.md) file. These rules are as least restrictive as possible to be also friendly to the projects developers.
+Therefore, the goal of this project is to **make managing Git projects as easy as possible for end users**. Projects that support this way of installation management are marked as **gim compliant** or **gim compliant since /<version/>** and once they are marked so, they must meet the rules stated in the [RULES.md](RULES.md) file. These rules are as least restrictive as possible to be also friendly to the projects developers.
 
 ---
 
