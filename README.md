@@ -81,12 +81,12 @@ gim update <git_url>
 If **your project is gim compliant** and so it meets the rules stated in the [RULES.md](RULES.md) file, **you can use the following badge** in Markdown format in connection with the project as a sign of a gim compliance:
 
 ```
-[![gim compliant](https://img.shields.io/badge/gim-compliant-b74cff.svg)](https://gitlab.com/dominiksalvet/gim)
+[![gim compliant](https://img.shields.io/badge/gim-compliant-b045ff.svg)](https://gitlab.com/dominiksalvet/gim)
 ```
 
 Graphics form:
 
-[![gim compliant](https://img.shields.io/badge/gim-compliant-b74cff.svg)](https://gitlab.com/dominiksalvet/gim)
+[![gim compliant](https://img.shields.io/badge/gim-compliant-b045ff.svg)](https://gitlab.com/dominiksalvet/gim)
 
 ## Contribute
 
