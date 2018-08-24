@@ -68,7 +68,7 @@ Once the gim is uninstalled and the cache is cleared, it is required to use the 
 
 ---
 
-Note that root permissions are not required for every project, gim also **supports installation without root permissions** into user's directories. This decision is exclusively up to the project developer.
+Note that root permissions are not required for every project, gim also **supports installation without root permissions** to user's directories. This decision is exclusively up to the project developer.
 
 ### Update
 
