@@ -194,7 +194,7 @@ umask 000
 # create a cache directory for the program
 mkdir -p "$CACHE_DIR/$project_author/$project_name/" &&
 cd "$CACHE_DIR/$project_author/$project_name/" || {
-    echo "$0: It wasn't possible to access the gim's cache directory.
+    echo "$0: It wasn't possible to access gim's cache directory.
 POSSIBLE SOLUTIONS:
   * free up some storage space
   * contact a gim developer" >&2

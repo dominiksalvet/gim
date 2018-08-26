@@ -36,7 +36,7 @@ rm -rf gim/ && # remove cloned repository (can be omitted if you want)
 echo 'SUCCESS' # print a message if everything succeeded
 ```
 
-After the steps above are successfully executed, gim will be installed on your system and in case of requiring to **uninstall gim** or **update gim**, you can **use the gim itself for these operations** as shown in the [Usage](#usage) section below.
+After the steps above are successfully executed, gim will be installed on your system and in case of requiring to **uninstall gim** or **update gim**, you can **use gim itself for these operations** as shown in the [Usage](#usage) section below.
 
 ## Usage
 
@@ -56,13 +56,13 @@ To **automatically uninstall your current release** of a gim compliant project, 
 gim uninstall <git_url>
 ```
 
-For example, if you want to **uninstall the gim itself**, you can use the following command:
+For example, if you want to **uninstall gim itself**, you can use the following command:
 
 ```sh
 sudo gim uninstall https://gitlab.com/dominiksalvet/gim.git
 ```
 
-You may want to remove gim's cached Git repositories as well if you haven't planned to install gim again. You can do it by executing the `gim -clear-cache` command before the gim is uninstalled. Note that **in no case any program installed by gim will be uninstalled** after following those steps. These programs must be uninstalled directly by gim's `uninstall` action if required.
+You may want to remove gim's cached Git repositories as well if you haven't planned to install gim again. You can do it by executing the `gim -clear-cache` command before gim is uninstalled. Note that **in no case any program installed by gim will be uninstalled** after following those steps. These programs must be uninstalled directly by gim's `uninstall` action if required.
 
 Once gim is uninstalled and its cache has been cleared, it is required to use the steps described in the [Install](#install) section in case to install it again.
 
