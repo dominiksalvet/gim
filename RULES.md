@@ -23,4 +23,4 @@ To **allow existing projects to adapt** to gim, a Git project is also **gim comp
 
 Suggestions in this section are optional to follow and they do not affect the gim compliance. These are the suggestions:
 
-1. In a *makefile* of every tagged commit checks whether a project is installed before allowing to install or uninstall it to prevent problems while using only `make` tool without gim, which does the check automatically.
+1. In a *makefile* of every tagged commit checks whether a project is installed before allowing to install or uninstall it using the *makefile* to prevent problems while using only `make` tool without gim, which does the check automatically.
