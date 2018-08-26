@@ -4,7 +4,7 @@
 
 Nearly every hosted **Git project needs to take different steps to being successfully installed, uninstalled or updated**. That makes sense as requirements per project differ. However, very often an **end user must deal with those differences** during reading an exhaustive README file to get out of it how to install the project. And that does not make sense.
 
-Therefore, the goal of this project is to **make managing Git projects as easy as possible for end users**. Projects that support this way of installation management are marked as **gim compliant** and once they are marked so, they must meet the rules stated in the [RULES.md](RULES.md) file. These rules are as least restrictive as possible to be also friendly to the projects developers.
+Therefore, the goal of this project is to **make managing Git projects as easy as possible for end users**. Projects that support this way of installation management are marked as **gim compliant** and once they are marked so, they **must meet the rules** stated in the [RULES.md](RULES.md) file. These rules are as least restrictive as possible to be also friendly to the projects developers.
 
 ---
 
@@ -56,19 +56,19 @@ To **automatically uninstall your current release** of a gim compliant project, 
 gim uninstall <git_url>
 ```
 
-For example, **uninstalling the gim itself** is pretty easy:
+For example, if you want to **uninstall the gim itself**, you can use the following command:
 
 ```sh
 sudo gim uninstall https://gitlab.com/dominiksalvet/gim.git
 ```
 
-Maybe you will want to remove the program's cached repositories as well if you haven't planned to install gim again. **Programs installed by gim will not be uninstalled.** You can do it by executing the `gim -clear-cache` command before the gim uninstallation as stated above.
+You may want to remove gim's cached Git repositories as well if you haven't planned to install gim again. You can do it by executing the `gim -clear-cache` command before the gim is uninstalled. Note that **in no case any program installed by gim will be uninstalled** after following those steps. These programs must be uninstalled directly by gim's `uninstall` action if required.
 
-Once the gim is uninstalled and the cache is cleared, it is required to use the steps described in the [Install](#install) section in case to install it again.
+Once gim is uninstalled and its cache has been cleared, it is required to use the steps described in the [Install](#install) section in case to install it again.
 
 ---
 
-Note that root permissions are not required for every project, gim also **supports installation without root permissions** to user's directories. This decision is exclusively up to the project developer.
+Note that root permissions are not required for every project, gim also **supports installation without root permissions** to a user directory. This decision is exclusively up to the project developer as long as the project is gim compliant.
 
 ### Update
 
