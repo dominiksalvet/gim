@@ -33,7 +33,7 @@ done
 #-------------------------------------------------------------------------------
 
 # the current version of the program
-VERSION=1.1.0
+VERSION=1.1.1
 
 GIT_URL_FORMAT='https://<provider>.<domain>/<author>/<project>.git'
 
@@ -250,7 +250,7 @@ fi
 
 case "$action" in
     install)
-        if [ -f "$(command -v "$project_name")" ]; then # check if the project already installed
+        if [ -x "$(command -v "$project_name")" ]; then # check if the project already installed
             fill_project_current_version "$project_name" || exit
             if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
                 echo 'The latest stable release of this Git project is already installed.
@@ -264,22 +264,22 @@ POSSIBLE SOLUTIONS:
             fi
         fi
 
-        git checkout "$project_last_version" && # use the latest repository tag
+        git -c advice.detachedHead=false checkout "$project_last_version" && # use the latest repository tag
         make_call install "$make_args" # install the program
         ;;
     uninstall)
-        if [ ! -f "$(command -v "$project_name")" ]; then # if the project is not installed
+        if [ ! -x "$(command -v "$project_name")" ]; then # if the project is not installed
             echo 'This Git project is not installed.
 SUCCESS'
             exit 0 # uninstallation exits with a success eventually
         fi
 
         fill_project_current_version "$project_name" || exit
-        git checkout "$project_current_version" && # use the program version as a tag
+        git -c advice.detachedHead=false checkout "$project_current_version" && # use the program version as a tag
         make_call uninstall "$make_args" # uninstall the program
         ;;
     update)
-        if [ -f "$(command -v "$project_name")" ]; then # check if the project installed
+        if [ -x "$(command -v "$project_name")" ]; then # check if the project installed
             fill_project_current_version "$project_name" || exit
             if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
                 echo 'The latest stable release of this Git project is already installed.
@@ -294,10 +294,10 @@ POSSIBLE SOLUTIONS:
         fi
 
         fill_project_current_version "$project_name" || exit
-        git checkout "$project_current_version" && # use the program version as a tag
+        git -c advice.detachedHead=false checkout "$project_current_version" && # use the program version as a tag
         make_call uninstall "$make_args" && # uninstall the program
 
-        git checkout "$project_last_version" && # use the latest repository tag
+        git -c advice.detachedHead=false checkout "$project_last_version" && # use the latest repository tag
         make_call install "$make_args" # install the program again
         ;;
 esac || {
@@ -314,7 +314,7 @@ POSSIBLE SOLUTIONS:
 
 case "$action" in
     install | update)
-        if [ ! -f "$(command -v "$project_name")" ]; then # if the project is not installed (as it should be now)
+        if [ ! -x "$(command -v "$project_name")" ]; then # if the project is not installed (as it should be now)
             echo "$0: The '$project_name' should have been installed, but it is not.
 POSSIBLE SOLUTIONS:
   * refer to a developer of the '$project_name' project" >&2
@@ -322,7 +322,7 @@ POSSIBLE SOLUTIONS:
         fi
         ;;
     uninstall)
-        if [ -f "$(command -v "$project_name")" ]; then # if the project is installed (as it shouldn't be now)
+        if [ -x "$(command -v "$project_name")" ]; then # if the project is installed (as it shouldn't be now)
             echo "$0: The '$project_name' should have been uninstalled, but it is not.
 POSSIBLE SOLUTIONS:
   * refer to a developer of the '$project_name' project" >&2
