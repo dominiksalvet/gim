@@ -6,12 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+## 1.1.2 (2018-09-04)
+
+### Changed
+
+* Gim now includes the given project name in reports as much as possible.
+
 ## 1.1.1 (2018-08-27)
 
 ### Fixed
 
 * When checking if a project is installed, it is also checked whether a project program file is executable.
-* Git messages about `detached HEAD` are suppressed.
+* Git messages about `detached HEAD` are suppressed as irrelevant. Nevertheless, information about `HEAD` change will be shown.
 
 ## 1.1.0 (2018-08-26)
 
