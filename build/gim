@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls umask logname sudo printenv id'
+SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls umask logname sudo printenv'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
@@ -90,7 +90,7 @@ fill_project_current_version() {
 
     # check if non-empty version was returned
     if [ -z "$project_current_version" ]; then
-        echo "$0: Neither the '--version' flag nor the '-version' flag has been recognized.
+        echo "$0: Neither the '--version' flag nor the '-version' flag is supported.
 POSSIBLE SOLUTIONS:
   * Contact a $project_name developer about gim compliance."
         return 1
@@ -237,15 +237,13 @@ fi
 # EXECUTE SELECTED ACTION
 #-------------------------------------------------------------------------------
 
-if [ "$(id -u)" -eq 0 ]; then # if running as root
-    # use user's '$PATH' variable instead of the root's one to detect all installations when running as root
-    PATH="$(sudo -iu "$(logname)" printenv PATH)" || {
-        echo "$0: Can't obtain user's "'$PATH'" variable to detect all gim installations.
+# use user's '$PATH' variable when running as root instead of the root's one to detect all installations
+PATH="$(sudo -iu "$(logname)" printenv PATH)" || {
+    echo "$0: Can't obtain user's "'$PATH'" variable to detect all gim installations.
 POSSIBLE SOLUTIONS:
   * Contact a gim developer." >&2
-        exit 1
-    }
-fi
+    exit 1
+}
 
 case "$action" in
     install)
