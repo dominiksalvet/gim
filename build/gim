@@ -54,7 +54,7 @@ OPTION:
   -version      show version and exit
 
 MAKE_ARG:
-  arguments for make commands in format <VAR>=<value>, do not use only <value>"
+  arguments for all make commands of a selected action in format <VAR>=<value>"
 
 ABOUT_MESSAGE="gim $VERSION
 Install, uninstall or update Git projects in an easy way with a single command.
