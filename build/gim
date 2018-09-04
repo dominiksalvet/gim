@@ -223,11 +223,11 @@ POSSIBLE SOLUTIONS:
 }
 
 # get the latest stable release of the obtained Git project
-project_last_version="$(git describe --tags --abbrev=0)"
+project_last_version="$(git describe --abbrev=0)"
 
 # verify that the repository has at least one tag
 if [ -z "$project_last_version" ]; then
-    echo "$0: Repository $project_name has no commit tagged.
+    echo "$0: Repository $project_name has no annotated tag.
 POSSIBLE SOLUTIONS:
   * Contact a $project_name developer about gim compliance." >&2
     exit 1
