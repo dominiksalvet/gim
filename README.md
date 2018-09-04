@@ -36,7 +36,7 @@ echo 'SUCCESS' # print a message if everything succeeded
 
 After the steps above are successfully executed:
 
-* Gim will be installed on your system and in case of requiring to **uninstall gim** or **update gim**, you can **use gim itself for these operations** as demonstrated in the [Usage](#usage) section below.
+* Gim will be installed on your system and in case of requiring to **uninstall gim** or **update gim**, you can **use gim itself for these operations** as demonstrated in the [Uninstallation](#uninstallation) section below.
 * The *~/Downloads/gim* directory won't be required for the program to be working and so it can be manually removed.
 
 ## Usage
