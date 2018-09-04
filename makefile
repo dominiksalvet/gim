@@ -14,12 +14,10 @@ SHELL := /bin/sh
 ECHO := echo
 SED := sed
 COLUMN := column
-CP := cp
-RM_F := rm -f
 
 # directory definitions
+MAKE_DIR := make
 BUILD_DIR := build
-INSTALL_DIR := /usr/local/bin
 
 #-------------------------------------------------------------------------------
 # HELP GENERATOR
@@ -51,11 +49,11 @@ endef
 # there is no building required, so the default target references to the help target
 all: help
 
-install: # install the entire project
-	$(CP) $(BUILD_DIR)/gim $(INSTALL_DIR)/
+install: # install the entire project automatically
+	./$(MAKE_DIR)/install '$(BUILD_DIR)'
 
 uninstall: # uninstall the project
-	$(RM_F) $(INSTALL_DIR)/gim
+	./$(MAKE_DIR)/uninstall
 
 help: # default, show this help
 	$(call show_generated_help,makefile)

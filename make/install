@@ -1,0 +1,71 @@
+#!/bin/sh
+
+#-------------------------------------------------------------------------------
+# Copyright 2018 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+# PARAMETERS:
+#   $1 - build directory path
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# SOFTWARE DEPENDENCIES
+#-------------------------------------------------------------------------------
+
+# list of required software
+SW_REQUIRED='command echo [ id cp'
+
+# check if some software is missing
+for i in $SW_REQUIRED; do
+    # software is missing if at least one piece of software is missing
+    if ! command -v "$i" > /dev/null; then
+        echo "$0: Required software '$i' is missing." >&2
+        exit 1
+    fi
+done
+
+#-------------------------------------------------------------------------------
+# DEFINITIONS
+#-------------------------------------------------------------------------------
+
+# installation directory of this program
+INSTALL_DIR=/usr/local/bin
+
+#-------------------------------------------------------------------------------
+# CHECK STATE
+#-------------------------------------------------------------------------------
+
+# check if already installed
+if [ -f "$INSTALL_DIR/gim" ]; then
+    echo 'The program is already installed.'
+    exit 0
+fi
+
+# check if the build directory argument passed
+if [ -z "$1" ]; then
+    echo "$0: Please supply non-empty build directory argument." >&2
+    exit 1
+fi
+
+# check if gim file exists
+if [ ! -f "$1/gim" ]; then
+    echo "$0: '$1/gim' does not exist.
+POSSIBLE SOLUTIONS:
+  * Download the project again and repeat the action." >&2
+    exit 1
+fi
+
+#-------------------------------------------------------------------------------
+# INSTALLATION
+#-------------------------------------------------------------------------------
+
+# check if running as root
+if [ "$(id -u)" -ne 0 ]; then
+    echo "$0: Please run as root." >&2
+    exit 1
+fi
+
+# copy the program itself
+cp "$1/gim" "$INSTALL_DIR/"
