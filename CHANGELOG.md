@@ -13,6 +13,7 @@ The changes not yet present in any release are listed in this section.
 ### Fixed
 
 * No more checking for `hda-verb` software as gim dependency.
+* Accept also unannotated tags as a version of a given Git repository.
 
 ## 1.1.2 (2018-09-04)
 
