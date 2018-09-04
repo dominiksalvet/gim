@@ -27,10 +27,10 @@ If you haven't installed this project yet, to **automatically install the latest
 
 ```sh
 cd ~/Downloads/ && # change directory to the 'Downloads' directory
-git clone https://gitlab.com/dominiksalvet/gim.git && # clone it
+git clone https://gitlab.com/dominiksalvet/gim.git && # clone gim repository
 cd gim/ && # change directory to the cloned repository
 git checkout "$(git describe --abbrev=0)" && # use the latest repository tag
-sudo make install && # install the program
+sudo make install && # install gim
 echo 'SUCCESS' # print a message if everything succeeded
 ```
 
