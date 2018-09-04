@@ -199,13 +199,13 @@ POSSIBLE SOLUTIONS:
 }
 
 if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
-    git clone "$project_url" . # clone the Git repository to the this directory
+    git clone -q --progress "$project_url" . # clone the Git repository to the this directory
 else # if not empty
     # check if the directory is a valid Git repository
     if [ -d '.git' ] && git diff --quiet; then # expecting that the '.git' contents is not corrupted
-        git checkout master && # checkout the master branch for the following commands
-        git pull && # get the most recent state of the repository
-        git fetch --tags # get the most recent state of the repository tags
+        git checkout -q master && # checkout the master branch for the following commands
+        git pull -q --progress && # get the most recent state of the repository
+        git fetch -q --progress --tags # get the most recent state of the repository tags
     else
         echo "$0: Cached $project_name repository is corrupted.
 POSSIBLE SOLUTIONS:
@@ -261,7 +261,7 @@ POSSIBLE SOLUTIONS:
             fi
         fi
 
-        git -c advice.detachedHead=false checkout "$project_last_version" && # use the latest repository tag
+        git checkout -q "$project_last_version" && # use the latest repository tag
         make_call install "$make_args" # install the program
         ;;
     uninstall)
@@ -272,7 +272,7 @@ SUCCESS"
         fi
 
         fill_project_current_version "$project_name" || exit
-        git -c advice.detachedHead=false checkout "$project_current_version" && # use the program version as a tag
+        git checkout -q "$project_current_version" && # use the program version as a tag
         make_call uninstall "$make_args" # uninstall the program
         ;;
     update)
@@ -291,10 +291,10 @@ POSSIBLE SOLUTIONS:
         fi
 
         fill_project_current_version "$project_name" || exit
-        git -c advice.detachedHead=false checkout "$project_current_version" && # use the program version as a tag
+        git checkout -q "$project_current_version" && # use the program version as a tag
         make_call uninstall "$make_args" && # uninstall the program
 
-        git -c advice.detachedHead=false checkout "$project_last_version" && # use the latest repository tag
+        git checkout -q "$project_last_version" && # use the latest repository tag
         make_call install "$make_args" # install the program again
         ;;
 esac || {

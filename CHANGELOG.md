@@ -9,6 +9,7 @@ The changes not yet present in any release are listed in this section.
 ### Changed
 
 * Created *install* and *uninstall* scripts that are called by appropriate targets from *makefile*.
+* Git commands are now quiet, unless they are downloading some content and reporting the progress.
 
 ### Fixed
 
