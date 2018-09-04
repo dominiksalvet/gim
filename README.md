@@ -4,7 +4,7 @@
 
 Nearly every hosted **Git project needs to take different steps to being successfully installed, uninstalled or updated**. That makes sense as requirements per project differ. However, very often an **end user must deal with those differences** during reading an exhaustive README file to get out of it how to install the project. And that does not make sense.
 
-Therefore, the goal of this project is to **make managing Git projects as easy as possible for end users**. Projects that support this way of installation management are marked as **gim compliant** and once they are marked so, they **must meet the rules** stated in the [RULES.md](RULES.md) file. These rules are as least restrictive as possible to be also friendly to the projects developers.
+Therefore, the goal of this project is to **make managing Git projects as easy as possible for end users**. Projects that support this way of installation management are marked as **gim compliant** and once they are marked so, they **must meet the rules** stated in the [*RULES.md*](RULES.md) file. These rules are as least restrictive as possible to be also friendly to the projects developers.
 
 ---
 
@@ -31,12 +31,13 @@ git clone https://gitlab.com/dominiksalvet/gim.git && # clone it
 cd gim/ && # change directory to the cloned repository
 git checkout "$(git describe --abbrev=0)" && # use the latest repository tag
 sudo make install && # install the program
-cd ~/Downloads/ && # change directory to the 'Downloads' directory again
-rm -rf gim/ && # remove cloned repository (can be omitted if you want)
 echo 'SUCCESS' # print a message if everything succeeded
 ```
 
-After the steps above are successfully executed, gim will be installed on your system and in case of requiring to **uninstall gim** or **update gim**, you can **use gim itself for these operations** as shown in the [Usage](#usage) section below.
+After the steps above are successfully executed:
+
+* Gim will be installed on your system and in case of requiring to **uninstall gim** or **update gim**, you can **use gim itself for these operations** as demonstrated in the [Usage](#usage) section below.
+* The *~/Downloads/gim* directory won't be required for the program to be working and so it can be manually removed.
 
 ## Usage
 
@@ -62,9 +63,9 @@ For example, if you want to **uninstall gim itself**, you can use the following 
 sudo gim uninstall https://gitlab.com/dominiksalvet/gim.git
 ```
 
-You may want to remove gim's cached Git repositories as well if you haven't planned to install gim again. You can do it by executing the `gim -clear-cache` command before gim is uninstalled. Note that **in no case any program installed by gim will be uninstalled** after following those steps. These programs must be uninstalled directly by gim's `uninstall` action if required.
+You may want to remove gim's cached Git repositories as well if you haven't planned to install and use gim again. You can do it by executing the `gim -clear-cache` command before gim is uninstalled. Note that **in no case any program installed by gim will be uninstalled** after following those steps. These programs must be uninstalled directly by gim's `uninstall` action or using their makefiles if required.
 
-Once gim is uninstalled and its cache has been cleared, it is required to use the steps described in the [Install](#install) section in case to install it again.
+Once gim is uninstalled, it is required to use the steps described in the [Install](#install) section in case to install it again.
 
 ---
 
@@ -80,7 +81,7 @@ gim update <git_url>
 
 ## Badge
 
-If **your project is gim compliant** and so it meets the rules stated in the [RULES.md](RULES.md) file, **you can use the following badge** in Markdown format in connection with the project as a sign of a gim compliance:
+If **your project is gim compliant** and so it meets the rules stated in the [*RULES.md*](RULES.md) file, **you can use the following badge** in Markdown format in connection with the project as a sign of a gim compliance:
 
 ```
 [![gim compliant](https://img.shields.io/badge/gim-compliant-b045ff.svg)](https://gitlab.com/dominiksalvet/gim)
