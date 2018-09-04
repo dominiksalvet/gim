@@ -18,12 +18,9 @@ SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls umask logname sudo 
 for i in $SW_REQUIRED; do
     # software is missing if at least one piece of software is missing
     if ! command -v "$i" > /dev/null; then
-        echo "$0: Required software '$i' is missing." >&2
-        # the program dependencies may be missing
-        if [ "$i" = hda-verb ]; then
-            echo 'POSSIBLE SOLUTIONS:
-  * install program dependencies' >&2
-        fi
+        echo "$0: Required software $i is missing.
+POSSIBLE SOLUTIONS:
+  * Install $i with a package manager used on your system." >&2
         exit 1
     fi
 done
@@ -64,7 +61,7 @@ SPDX License Identifier: MIT
 https://gitlab.com/dominiksalvet/gim'
 
 HINT_MESSAGE="POSSIBLE SOLUTIONS:
-  * use the '$0 -help' command for more information"
+  * Use the '$0 -help' command for getting help."
 
 # cache directory to store downloaded Git repositories
 CACHE_DIR=~/.cache/gim
@@ -95,7 +92,7 @@ fill_project_current_version() {
     if [ -z "$project_current_version" ]; then
         echo "$0: Neither the '--version' flag nor the '-version' flag has been recognized.
 POSSIBLE SOLUTIONS:
-  * refer to a '$project_name' developer about gim compliance"
+  * Contact a $project_name developer about gim compliance."
         return 1
     fi
 }
@@ -173,9 +170,9 @@ $HINT_MESSAGE" >&2
 else # both arguments provided
     # check the format of given Git URL
     if ! echo "$project_url" | grep -q -E -e 'https://[^\.]+\.[^/]+/[^/]+/[^\.]+\.git'; then
-        echo "$0: Supplied Git URL is invalid.
+        echo "$0: Supplied Git URL is not valid.
 POSSIBLE SOLUTIONS:
-  * use the '$GIT_URL_FORMAT' format" >&2
+  * Follow the '$GIT_URL_FORMAT' format." >&2
         exit 1
     fi
 
@@ -194,10 +191,10 @@ umask 000
 # create a cache directory for the program
 mkdir -p "$CACHE_DIR/$project_author/$project_name/" &&
 cd "$CACHE_DIR/$project_author/$project_name/" || {
-    echo "$0: It wasn't possible to access gim's cache directory.
+    echo "$0: Can't access gim's cache directory.
 POSSIBLE SOLUTIONS:
-  * free up some storage space
-  * contact a gim developer" >&2
+  * Free up some storage space.
+  * Contact a gim developer." >&2
     exit 1
 }
 
@@ -210,16 +207,18 @@ else # if not empty
         git pull && # get the most recent state of the repository
         git fetch --tags # get the most recent state of the repository tags
     else
-        echo "$0: The Git repository in cache is corrupted.
+        echo "$0: Cached $project_name repository is corrupted.
 POSSIBLE SOLUTIONS:
-  * clear the program's cache using the '$0 -clear-cache' command" >&2
+  * Clear the cache using the '$0 -clear-cache' command." >&2
         exit 1
     fi
 fi || {
-    echo "$0: The Git repository can't be obtained in the most recent state.
-POSSIBLE CAUSES:
-  * your device is not connected to the Internet
-  * your device is low on storage" >&2
+    echo "$0: Can't obtain $project_name repository in the most recent state.
+POSSIBLE SOLUTIONS:
+  * Make sure that $project_name repository exists on the given Git URL.
+  * Connect your device to the Internet.
+  * Clear the cache using the '$0 -clear-cache' command.
+  * Free up some storage space." >&2
     exit 1
 }
 
@@ -228,9 +227,9 @@ project_last_version="$(git describe --abbrev=0)"
 
 # verify that the repository has at least one tag
 if [ -z "$project_last_version" ]; then
-    echo "$0: The given Git repository has no commit tagged.
+    echo "$0: Repository $project_name has no commit tagged.
 POSSIBLE SOLUTIONS:
-  * refer to a '$project_name' developer about gim compliance" >&2
+  * Contact a $project_name developer about gim compliance." >&2
     exit 1
 fi
 
@@ -239,11 +238,11 @@ fi
 #-------------------------------------------------------------------------------
 
 if [ "$(id -u)" -eq 0 ]; then # if running as root
-    # use user's '$PATH' variable instead of the root's one to detect installations in user's '$PATH' when running as root
+    # use user's '$PATH' variable instead of the root's one to detect all installations when running as root
     PATH="$(sudo -iu "$(logname)" printenv PATH)" || {
-        echo "$0: It wasn't possible to obtain user's '$PATH' variable to detect all gim installations.
+        echo "$0: Can't obtain user's "'$PATH'" variable to detect all gim installations.
 POSSIBLE SOLUTIONS:
-  * contact a gim developer" >&2
+  * Contact a gim developer." >&2
         exit 1
     }
 fi
@@ -253,13 +252,13 @@ case "$action" in
         if [ -x "$(command -v "$project_name")" ]; then # check if the project already installed
             fill_project_current_version "$project_name" || exit
             if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
-                echo "'$project_name' is already installed and updated.
+                echo "$project_name is already installed and updated ($project_current_version).
 SUCCESS"
                 exit 0
             else
-                echo "$0: '$project_name' is already installed but not updated.
+                echo "$0: $project_name is already installed but not updated ($project_current_version).
 POSSIBLE SOLUTIONS:
-  * use the 'update' action instead of the used 'install' action" >&2
+  * Use the 'update' action instead of the used 'install' action." >&2
                 exit 1
             fi
         fi
@@ -269,7 +268,7 @@ POSSIBLE SOLUTIONS:
         ;;
     uninstall)
         if [ ! -x "$(command -v "$project_name")" ]; then # if the project is not installed
-            echo "'$project_name' is not installed.
+            echo "$project_name is not installed.
 SUCCESS"
             exit 0 # uninstallation exits with a success eventually
         fi
@@ -282,14 +281,14 @@ SUCCESS"
         if [ -x "$(command -v "$project_name")" ]; then # check if the project installed
             fill_project_current_version "$project_name" || exit
             if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
-                echo "'$project_name' is already installed and updated.
+                echo "$project_name is already installed and updated ($project_current_version).
 SUCCESS"
                 exit 0
             fi
         else # the project is not installed
-            echo "$0: '$project_name' is not installed.
+            echo "$0: $project_name is not installed.
 POSSIBLE SOLUTIONS:
-  * use the 'install' action instead of the used 'update' action" >&2
+  * Use the 'install' action instead of the used 'update' action." >&2
             exit 1
         fi
 
@@ -301,10 +300,10 @@ POSSIBLE SOLUTIONS:
         make_call install "$make_args" # install the program again
         ;;
 esac || {
-    echo "$0: An error has occurred during the '$action' process.
+    echo "$0: An error has occurred during the $action action.
 POSSIBLE SOLUTIONS:
-  * read the report above as it can provide required information
-  * refer to a '$project_name' developer" >&2
+  * Read the report above as it can provide required information.
+  * Contact a $project_name developer." >&2
     exit 1
 }
 
@@ -315,17 +314,17 @@ POSSIBLE SOLUTIONS:
 case "$action" in
     install | update)
         if [ ! -x "$(command -v "$project_name")" ]; then # if the project is not installed (as it should be now)
-            echo "$0: '$project_name' should have been installed, but it is not.
+            echo "$0: $project_name should have been installed, but it is not.
 POSSIBLE SOLUTIONS:
-  * refer to a '$project_name' developer" >&2
+  * Contact a $project_name developer." >&2
             exit 1
         fi
         ;;
     uninstall)
         if [ -x "$(command -v "$project_name")" ]; then # if the project is installed (as it shouldn't be now)
-            echo "$0: '$project_name' should have been uninstalled, but it is not.
+            echo "$0: $project_name should have been uninstalled, but it is not.
 POSSIBLE SOLUTIONS:
-  * refer to a '$project_name' developer" >&2
+  * Contact a $project_name developer." >&2
             exit 1
         fi
         ;;
