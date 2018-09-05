@@ -10,6 +10,7 @@ The changes not yet present in any release are listed in this section.
 
 * Created *install* and *uninstall* scripts that are called by appropriate targets from *makefile*.
 * Git commands are now quiet, unless they are downloading some content and reporting the progress.
+* Gim now accepts nearly arbitrary Git URL. E.g., name of author and project in the URL can now also contain `.`, full stop character.
 
 ### Fixed
 
