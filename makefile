@@ -17,6 +17,7 @@ COLUMN := column
 
 # directory definitions
 MAKE_DIR := make
+INSTALL_DIR := /usr/local/bin
 BUILD_DIR := build
 
 #-------------------------------------------------------------------------------
@@ -50,10 +51,10 @@ endef
 all: help
 
 install: # install the entire project automatically
-	./$(MAKE_DIR)/install '$(BUILD_DIR)'
+	./$(MAKE_DIR)/install '$(INSTALL_DIR)' '$(BUILD_DIR)'
 
 uninstall: # uninstall the project
-	./$(MAKE_DIR)/uninstall
+	./$(MAKE_DIR)/uninstall '$(INSTALL_DIR)'
 
 help: # default, show this help
 	$(call show_generated_help,makefile)
