@@ -6,19 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+## 1.2.0 (2018-09-05)
+
 ### Changed
 
 * Created *install* and *uninstall* scripts that are called by appropriate targets from *makefile*.
 * Git commands are now quiet, unless they are downloading some content and reporting the progress.
-* Gim now accepts nearly arbitrary Git URL. E.g., name of author and project in the URL can now also contain `.`, full stop character.
+* Git URL validation has been improved and amount of accepted Git URLs has been increased.
 
 ### Fixed
 
-* Gim now accept only Git URLs, which completely meet described Git URL format. If only their subparts meet the format, they are reported as invalid.
+* Gim don't accept Git URLs whose only a subpart meet a valid Git URL format.
 
 ### Security
 
-* Refuse Git URL with an author name or a project name defined only as `.` or `..` as it can cause accessing wrong directory instead of the cache directory.
+* Git URLs with an author name or a project name defined as `.` or `..` are refused as it can cause accessing wrong directory instead of the cache directory.
 * Initialize variables to an empty string when they have been read before assigning.
 
 ## 1.1.2 (2018-09-04)
