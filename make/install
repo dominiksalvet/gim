@@ -47,7 +47,7 @@ fi
 
 # check if already installed
 if [ -f "$INSTALL_DIR/gim" ]; then
-    echo 'The program is already installed.'
+    echo 'The program is already installed in the given installation directory.'
     exit 0
 fi
 
