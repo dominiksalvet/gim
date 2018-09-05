@@ -19,6 +19,7 @@ The changes not yet present in any release are listed in this section.
 ### Security
 
 * Refuse Git URL with an author name or a project name defined only as `.` or `..` as it can cause accessing wrong directory instead of the cache directory.
+* Initialize variables to an empty string when they have been read before assigning.
 
 ## 1.1.2 (2018-09-04)
 

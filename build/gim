@@ -67,18 +67,6 @@ HINT_MESSAGE="POSSIBLE SOLUTIONS:
 CACHE_DIR=~/.cache/gim
 
 # DESCRIPTION:
-#   Add a given make argument to the '$make_args' variable.
-# PARAMETERS:
-#   $1 - make argument to be added
-add_make_arg() {
-    if [ -z "$make_args" ]; then
-        make_args="$1"
-    else
-        make_args="$make_args $1"
-    fi
-}
-
-# DESCRIPTION:
 #   Fill the '$project_current_version' variable with the current version of a given project.
 # PARAMETERS:
 #   $1 - project name
@@ -114,13 +102,19 @@ make_call() {
 # PROCESSING PARAMETERS
 #-------------------------------------------------------------------------------
 
+action=
+project_url=
+make_args=
 # processing each parameter separately
 for i in "$@"; do
     if [ ! -z "$action" ]; then # if the action has been selected
         if [ -z "$project_url" ]; then # if the project Git URL is not set
             project_url="$i" # next up are only make arguments
-        else # accept only make arguments
-            add_make_arg "$i"
+        # accept only make arguments
+        elif [ -z "$make_args" ]; then
+            make_args="$i"
+        else
+            make_args="$make_args $i"
         fi
     else
         case "$i" in
@@ -224,16 +218,13 @@ POSSIBLE SOLUTIONS:
     exit 1
 }
 
-# get the latest stable release of the obtained Git project
-project_last_version="$(git describe --abbrev=0)"
-
-# verify that the repository has at least one tag
-if [ -z "$project_last_version" ]; then
+# get version of the most recent annotated tag of the obtained Git project
+project_last_version="$(git describe --abbrev=0)" || {
     echo "$0: Repository $project_name has no annotated tag.
 POSSIBLE SOLUTIONS:
   * Contact a $project_name developer about gim compliance." >&2
     exit 1
-fi
+}
 
 #-------------------------------------------------------------------------------
 # EXECUTE SELECTED ACTION
