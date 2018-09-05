@@ -23,5 +23,5 @@ To **allow existing projects to adapt** to gim, a Git project is also **gim comp
 **Suggestions in this section are optional to follow** and they do not affect the gim compliance. These are the suggestions:
 
 1. In a *makefile* of every annotated tag's commit checks whether a project is installed before allowing to install or uninstall it using the *makefile* to prevent problems while using only `make` tool without gim, which does the check automatically.
-2. When the Git project's software requires root permissions, a user is informed about this fact by the software if they are not given.
+2. When the Git project's software requires root permissions, a user is informed about this fact by the software if they are not granted.
 3. The executable file named as the Git project do not require root permissions for returning its version using `--version` or `-version` flag.
