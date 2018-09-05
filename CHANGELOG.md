@@ -14,6 +14,7 @@ The changes not yet present in any release are listed in this section.
 ### Fixed
 
 * No more checking for `hda-verb` software as gim dependency.
+* Gim now accept only Git URLs, which completely meet described Git URL format. When only their subparts meet the format, they are reported as invalid.
 
 ## 1.1.2 (2018-09-04)
 

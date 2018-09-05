@@ -32,7 +32,7 @@ done
 # the current version of the program
 VERSION=1.1.2
 
-GIT_URL_FORMAT='https://<provider>.<domain>/<author>/<project>.git'
+GIT_URL_FORMAT='https://<hostname>/<author>/<project>.git'
 
 HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION GIT_URL [MAKE_ARG]...
 
@@ -169,7 +169,7 @@ $HINT_MESSAGE" >&2
     exit 1
 else # both arguments provided
     # check the format of given Git URL
-    if ! echo "$project_url" | grep -q -E -e 'https://[^\.]+\.[^/]+/[^/]+/[^\.]+\.git'; then
+    if ! echo "$project_url" | grep -q -E -e '^https://[^/]+/[^/]+/[^/]+\.git$'; then
         echo "$0: Supplied Git URL is not valid.
 POSSIBLE SOLUTIONS:
   * Follow the '$GIT_URL_FORMAT' format." >&2
