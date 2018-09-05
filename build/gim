@@ -303,7 +303,8 @@ esac || {
     echo "$0: An error has occurred during the $action action.
 POSSIBLE SOLUTIONS:
   * Read the report above as it can provide required information.
-  * Contact a $project_name developer." >&2
+  * Contact a $project_name developer.
+  * Run with root permissions inserting 'sudo' and a space before your command." >&2
     exit 1
 }
 
