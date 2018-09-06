@@ -16,13 +16,15 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ id cp grep'
+SW_REQUIRED='command echo [ id cp grep git'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
     # software is missing if at least one piece of software is missing
     if ! command -v "$i" > /dev/null; then
-        echo "$0: Required software '$i' is missing." >&2
+        echo "$0: Required software '$i' is missing.
+POSSIBLE SOLUTIONS:
+  * Install $i using an installed package manager." >&2
         exit 1
     fi
 done
@@ -57,17 +59,9 @@ if [ -z "$BUILD_DIR" ]; then
     exit 1
 fi
 
-# check if gim file exists
-if [ ! -f "$BUILD_DIR/gim" ]; then
-    echo "$0: '$BUILD_DIR/gim' does not exist.
-POSSIBLE SOLUTIONS:
-  * Download the project again and repeat the action." >&2
-    exit 1
-fi
-
-# check if gim_completion file exists
-if [ ! -f "$BUILD_DIR/gim_completion" ]; then
-    echo "$0: '$BUILD_DIR/gim_completion' does not exist.
+# check if any unwanted changes of the repository have been done
+if ! git diff --quiet; then
+    echo "$0: This Git repository of the project is corrupted.
 POSSIBLE SOLUTIONS:
   * Download the project again and repeat the action." >&2
     exit 1
