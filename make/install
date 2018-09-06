@@ -65,6 +65,14 @@ POSSIBLE SOLUTIONS:
     exit 1
 fi
 
+# check if gim_completion file exists
+if [ ! -f "$BUILD_DIR/gim_completion" ]; then
+    echo "$0: '$BUILD_DIR/gim_completion' does not exist.
+POSSIBLE SOLUTIONS:
+  * Download the project again and repeat the action." >&2
+    exit 1
+fi
+
 #-------------------------------------------------------------------------------
 # INSTALLATION
 #-------------------------------------------------------------------------------
@@ -76,4 +84,20 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # copy the program itself
-cp "$BUILD_DIR/gim" "$INSTALL_DIR/"
+cp "$BUILD_DIR/gim" "$INSTALL_DIR/" || {
+    echo "$0: Can't finish the installation.
+POSSIBLE SOLUTIONS:
+  * Free up some storage space.
+  * Contact a gim developer." >&2
+    exit 1
+}
+
+# install TAB completion for bash shell
+if echo /etc/shells | grep -q -E -e '^/bin/bash$'; then
+    cp "$BUILD_DIR/gim_completion" /etc/bash_completion.d/
+fi || {
+    echo "$0: Can't set up TAB completion.
+POSSIBLE SOLUTIONS:
+  * Free up some storage space, uninstall gim and install it again.
+  * Contact a gim developer." >&2
+}
