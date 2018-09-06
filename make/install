@@ -16,7 +16,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ id cp'
+SW_REQUIRED='command echo [ id cp grep'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
@@ -93,11 +93,13 @@ POSSIBLE SOLUTIONS:
 }
 
 # install TAB completion for bash shell
-if echo /etc/shells | grep -q -E -e '^/bin/bash$'; then
-    cp "$BUILD_DIR/gim_completion" /etc/bash_completion.d/
-fi || {
-    echo "$0: Can't set up TAB completion.
+if grep -q -E -e '^/bin/bash$' /etc/shells; then
+    if cp "$BUILD_DIR/gim_completion" /etc/bash_completion.d/; then
+        echo "Reset bash to use TAB completion now using the 'exec bash' command."
+    else
+        echo "$0: Can't set up TAB completion.
 POSSIBLE SOLUTIONS:
   * Free up some storage space, uninstall gim and install it again.
   * Contact a gim developer." >&2
-}
+    fi
+fi
