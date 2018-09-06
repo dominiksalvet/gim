@@ -203,7 +203,7 @@ else # if not empty
         git pull -q --progress && # get the most recent state of the repository
         git fetch -q --progress --tags # get the most recent state of the repository tags
     else
-        echo "$0: Cached $project_name repository is corrupted.
+        echo "$0: Cached $project_name Git repository is corrupted.
 POSSIBLE SOLUTIONS:
   * Clear the cache using the '$0 -clear-cache' command." >&2
         exit 1
