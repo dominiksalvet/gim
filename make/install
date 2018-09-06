@@ -63,7 +63,7 @@ fi
 if ! git diff --quiet; then
     echo "$0: This Git repository of the project is corrupted.
 POSSIBLE SOLUTIONS:
-  * Download the project again and repeat the action." >&2
+  * Download the repository again and repeat the action." >&2
     exit 1
 fi
 
