@@ -8,13 +8,12 @@ A Git project is **gim compliant** if it meets all of the following rules:
    * Target `uninstall` uninstalls the project of the commit automatically. The project's configuration files are not removed to make updating the project using gim possible.
 3. The status of installed/uninstalled project is determined by existence of an executable file with the same name as the Git project name located in any directory defined by the `$PATH` variable of the current user, where:
   * It supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
-4. If an annotated tag's commit has a README file with an install section, it contains a link to the gim project website, `https://gitlab.com/dominiksalvet/gim`, somewhere at the section's beginning. This could be as easy as: "This project is [gim](https://gitlab.com/dominiksalvet/gim) compliant."
 
 ## Compliance since a certain version
 
 To **allow existing projects to adapt** to gim, a Git project is also **gim compliant** if it meets all of the [previous rules](#rules) and the following rules **since it's certain version**:
 
-1. Every annotated tag's commit has a README file with an install section and contains the information about gim compliance since a certain version somewhere at the section's beginning. Together with the 4th point of the previous rules it could look like that: "This project is [gim](https://gitlab.com/dominiksalvet/gim) compliant since version \<version\>."
+1. Every annotated tag's commit has a README file with an install section and contains the information about gim compliance since a certain version somewhere at the section's beginning. This could be as easy as: "This project is [gim](https://gitlab.com/dominiksalvet/gim) compliant since version \<version\>."
 
 ---
 
