@@ -45,7 +45,7 @@ if [ -z "$INSTALL_DIR" ]; then
 fi
 
 # check if not installed
-if [ ! -f "$INSTALL_DIR/gim" ]; then
+if [ ! -x "$INSTALL_DIR/gim" ]; then
     echo 'The program is not installed in the given installation directory.'
     exit 0
 fi
@@ -61,7 +61,12 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # remove bash TAB completion if used
-rm -f /etc/bash_completion.d/gim_completion
-
+rm -f /etc/bash_completion.d/gim_completion &&
 # remove the program itself
-rm -f "$INSTALL_DIR/gim"
+rm -f "$INSTALL_DIR/gim" || {
+    echo "$0: Can't finish the uninstallation.
+POSSIBLE SOLUTIONS:
+  * Try uninstall gim again.
+  * Contact a gim developer." >&2
+    exit 1
+}
