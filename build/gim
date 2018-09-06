@@ -198,7 +198,7 @@ if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is em
     git clone -q --progress "$project_url" . # clone the Git repository to the this directory
 else # if not empty
     # check if the directory is a valid Git repository
-    if [ -d '.git' ] && git diff --quiet; then # expecting that the '.git' contents is not corrupted
+    if git diff --quiet; then # expecting that the '.git' contents is not corrupted
         git checkout -q master && # checkout the master branch for the following commands
         git pull -q --progress && # get the most recent state of the repository
         git fetch -q --progress --tags # get the most recent state of the repository tags
