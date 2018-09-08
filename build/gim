@@ -67,17 +67,17 @@ HINT_MESSAGE="POSSIBLE SOLUTIONS:
 CACHE_DIR=~/.cache/gim
 
 # DESCRIPTION:
-#   Fill the '$project_current_version' variable with the current version of a given project.
+#   Fill the '$project_local_version' variable with the current version of a given project.
 # PARAMETERS:
 #   $1 - project name
-fill_project_current_version() {
+fill_project_local_version() {
     # get the current version of the program
-    if ! project_current_version="$("$1" --version)" 2>/dev/null; then
-        project_current_version="$("$1" -version)" 2>/dev/null
-    fi || project_current_version=
+    if ! project_local_version="$("$1" --version)" 2>/dev/null; then
+        project_local_version="$("$1" -version)" 2>/dev/null
+    fi || project_local_version=
 
     # check if non-empty version was returned
-    if [ -z "$project_current_version" ]; then
+    if [ -z "$project_local_version" ]; then
         echo "$0: Neither the '--version' flag nor the '-version' flag is supported.
 POSSIBLE SOLUTIONS:
   * Contact a $project_name developer about gim compliance."
@@ -219,7 +219,7 @@ POSSIBLE SOLUTIONS:
 }
 
 # get version of the most recent annotated tag of the obtained Git project
-project_last_version="$(git describe --abbrev=0)" || {
+project_lastest_version="$(git describe --abbrev=0)" || {
     echo "$0: Repository $project_name has no annotated tag.
 POSSIBLE SOLUTIONS:
   * Contact a $project_name developer about gim compliance." >&2
@@ -241,20 +241,20 @@ POSSIBLE SOLUTIONS:
 case "$action" in
     install)
         if [ -x "$(command -v "$project_name")" ]; then # check if the project already installed
-            fill_project_current_version "$project_name" || exit
-            if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
-                echo "$project_name is already installed and updated ($project_current_version).
+            fill_project_local_version "$project_name" || exit
+            if [ "$project_local_version" = "$project_lastest_version" ]; then # if the versions are the same
+                echo "$project_name is already installed and updated ($project_local_version).
 SUCCESS"
                 exit 0
             else
-                echo "$0: $project_name is already installed but not updated ($project_current_version).
+                echo "$0: $project_name is already installed but not updated ($project_local_version).
 POSSIBLE SOLUTIONS:
   * Use the 'update' action instead of the used 'install' action." >&2
                 exit 1
             fi
         fi
 
-        git checkout -q "$project_last_version" && # use the latest repository tag
+        git checkout -q "$project_lastest_version" && # use the latest repository tag
         make_call install "$make_args" # install the program
         ;;
     uninstall)
@@ -264,15 +264,15 @@ SUCCESS"
             exit 0 # uninstallation exits with a success eventually
         fi
 
-        fill_project_current_version "$project_name" || exit
-        git checkout -q "$project_current_version" && # use the program version as a tag
+        fill_project_local_version "$project_name" || exit
+        git checkout -q "$project_local_version" && # use the program version as a tag
         make_call uninstall "$make_args" # uninstall the program
         ;;
     update)
         if [ -x "$(command -v "$project_name")" ]; then # check if the project installed
-            fill_project_current_version "$project_name" || exit
-            if [ "$project_current_version" = "$project_last_version" ]; then # if the versions are the same
-                echo "$project_name is already installed and updated ($project_current_version).
+            fill_project_local_version "$project_name" || exit
+            if [ "$project_local_version" = "$project_lastest_version" ]; then # if the versions are the same
+                echo "$project_name is already installed and updated ($project_local_version).
 SUCCESS"
                 exit 0
             fi
@@ -283,11 +283,11 @@ POSSIBLE SOLUTIONS:
             exit 1
         fi
 
-        fill_project_current_version "$project_name" || exit
-        git checkout -q "$project_current_version" && # use the program version as a tag
+        fill_project_local_version "$project_name" || exit
+        git checkout -q "$project_local_version" && # use the program version as a tag
         make_call uninstall "$make_args" && # uninstall the program
 
-        git checkout -q "$project_last_version" && # use the latest repository tag
+        git checkout -q "$project_lastest_version" && # use the latest repository tag
         make_call install "$make_args" # install the program again
         ;;
 esac || {
