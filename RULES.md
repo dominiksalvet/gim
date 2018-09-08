@@ -7,7 +7,7 @@ A Git project is **gim compliant** if it meets all of the following rules:
    * Target `install` installs all dependencies of the project of the commit and then the project itself automatically, whatever steps needed to be taken and default arguments needed to be used to achieve it.
    * Target `uninstall` uninstalls the project of the commit automatically. The project's configuration files are not removed to make updating the project using gim possible.
 3. The status of installed/uninstalled project is determined by existence of an executable file with the same name as the Git project name located in any directory defined by the `$PATH` variable of the current user, where:
-  * It supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
+   * It supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
 
 ## Compliance since a certain version
 
