@@ -64,7 +64,16 @@ HINT_MESSAGE="POSSIBLE SOLUTIONS:
   * Use the '$0 -help' command for getting help."
 
 # cache directory to store downloaded Git repositories
-CACHE_DIR=~/.cache/gim
+CACHE_DIR=/etc/gim/cache
+
+# DESCRIPTION:
+#   Check if running as root.
+root_check() {
+    if [ "$(id -u)" -ne 0 ]; then
+        echo "$0: Please run as root." >&2
+        return 1
+    fi
+}
 
 # DESCRIPTION:
 #   Fill the '$project_local_version' variable with the current version of a given project.
@@ -128,6 +137,8 @@ for i in "$@"; do
                 action=update
                 ;;
             -clear-cache)
+                # check if running as root
+                root_check || exit
                 rm -rf "${CACHE_DIR:?}/"
                 exit 0
                 ;;
@@ -181,10 +192,10 @@ project_name="$(echo "$project_url" | sed -E -e 's/.git$//; s|.*/||')"
 # OBTAINING THE REPOSITORY
 #-------------------------------------------------------------------------------
 
-# set up the mask for permissions of manipulated files
-umask 000
+# check if running as root
+root_check || exit
 
-# create a cache directory for the program
+# create a cache directory for the project
 mkdir -p "$CACHE_DIR/$project_author/$project_name/" &&
 cd "$CACHE_DIR/$project_author/$project_name/" || {
     echo "$0: Can't access gim's cache directory.
@@ -196,18 +207,15 @@ POSSIBLE SOLUTIONS:
 
 if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
     git clone -q --progress "$project_url" . # clone the Git repository to the this directory
-else # if not empty
-    # check if the directory is a valid Git repository
-    if git diff --quiet; then # expecting that the '.git' contents is not corrupted
-        git checkout -q master && # checkout the master branch for the following commands
-        git pull -q --progress && # get the most recent state of the repository
-        git fetch -q --progress --tags # get the most recent state of the repository tags
-    else
-        echo "$0: Cached $project_name Git repository is corrupted.
+elif git diff --quiet; then # check if the Git directory doesn't contain any changes
+    git checkout -q master && # checkout the master branch for the following commands
+    git pull -q --progress && # get the most recent state of the repository
+    git fetch -q --progress --tags # get the most recent state of the repository tags
+else
+    echo "$0: Cached $project_name Git repository is corrupted.
 POSSIBLE SOLUTIONS:
   * Clear the cache using the '$0 -clear-cache' command." >&2
-        exit 1
-    fi
+    exit 1
 fi || {
     echo "$0: Can't obtain $project_name repository in the most recent state.
 POSSIBLE SOLUTIONS:
@@ -230,14 +238,6 @@ POSSIBLE SOLUTIONS:
 # EXECUTE SELECTED ACTION
 #-------------------------------------------------------------------------------
 
-# use user's '$PATH' variable when running as root instead of the root's one to detect all installations
-PATH="$(sudo -iu "$(logname)" printenv PATH)" || {
-    echo "$0: Can't obtain user's "'$PATH'" variable to detect all gim installations.
-POSSIBLE SOLUTIONS:
-  * Contact a gim developer." >&2
-    exit 1
-}
-
 case "$action" in
     install)
         if [ -x "$(command -v "$project_name")" ]; then # check if the project already installed
@@ -247,7 +247,7 @@ case "$action" in
 SUCCESS"
                 exit 0
             else
-                echo "$0: $project_name is already installed but not updated ($project_local_version).
+                echo "$0: $project_name is already installed ($project_local_version) but not updated ($project_latest_version).
 POSSIBLE SOLUTIONS:
   * Use the 'update' action instead of the used 'install' action." >&2
                 exit 1

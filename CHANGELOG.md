@@ -10,6 +10,10 @@ The changes not yet present in any release are listed in this section.
 
 * Support for TAB completion for bash shell.
 
+### Removed
+
+* Removed support for installation of a project to a user's directory. Root permissions are now required.
+
 ## 1.2.0 (2018-09-05)
 
 ### Changed
