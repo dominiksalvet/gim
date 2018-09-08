@@ -1,6 +1,6 @@
 # Git Installation Manager *(gim)*
 
-> Install, uninstall or update Git projects in an easy way with a single command.
+> Install, update or uninstall Git projects in an easy way with a single command.
 
 Nearly every hosted **Git project needs to take different steps to being successfully installed, uninstalled or updated**. That makes sense as requirements per project differ. However, very often an **end user must deal with those differences** during reading an exhaustive README file to get out of it how to install the project. And that does not make sense.
 
@@ -65,7 +65,7 @@ For example, if you want to **uninstall gim itself**, you can use the following 
 sudo gim uninstall https://gitlab.com/dominiksalvet/gim.git
 ```
 
-You may want to remove gim's cached Git repositories as well if you haven't planned to install and use gim again. You can do it by executing the `gim -clear-cache` command before gim will be uninstalled. Note that **in no case any program installed by gim will be uninstalled** after following those steps. These programs must be uninstalled directly by gim's `uninstall` action or using their makefiles if required.
+You may want to remove gim's cached Git repositories as well if you haven't planned to install and use gim again. You can do it by executing the `gim -clean` command before gim will be uninstalled. Note that **in no case any program installed by gim will be uninstalled** after following those steps. These programs must be uninstalled directly by gim's `uninstall` action or using their makefiles if required.
 
 Once gim is uninstalled, the easiest way to install it again is to use the steps described in the [Install](#install) section.
 

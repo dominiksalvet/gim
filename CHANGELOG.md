@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Added
+
+* Intelligent removing cache using the `-autoclean` options. This will remove only cached Git repositories for projects that aren't installed on the system.
+
+### Changed
+
+* The `-clear-cache` options has been changed to `-clean`.
+
 ## 2.0.0 (2018-09-08)
 
 ### Added

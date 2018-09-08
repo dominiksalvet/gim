@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls umask logname sudo printenv'
+SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
@@ -37,24 +37,25 @@ GIT_URL_FORMAT='https://<hostname>/<author>/<project>.git'
 HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION GIT_URL [MAKE_ARG]...
 
 ACTION:
-  install    install a program originating from the given Git URL
-  uninstall  uninstall a program originating from the given Git URL
-  update     update a program originating from the given Git URL
+  install    install a Git project in the latest version
+  update     update a Git project to the latest version
+  uninstall  uninstall a Git project
 
 GIT_URL:
   $GIT_URL_FORMAT
 
 OPTION:
-  -clear-cache  clear cache of downloaded Git project repositories and exit
-  -help         show this help and exit
-  -about        show information and exit
-  -version      show version and exit
+  -autoclean  remove old cached Git repositories and exit
+  -clean      remove all cached Git repositories and exit
+  -help       show this help and exit
+  -about      show information and exit
+  -version    show version and exit
 
 MAKE_ARG:
-  arguments for all make commands of a selected action in format <VAR>=<value>"
+  Arguments for all make commands of a selected action in format <VAR>=<value>."
 
 ABOUT_MESSAGE="gim $VERSION
-Install, uninstall or update Git projects in an easy way with a single command.
+Install, update or uninstall Git projects in an easy way with a single command.
 
 Copy"'right 2018 Dominik Salvet
 SPDX License Identifier: MIT
@@ -130,16 +131,39 @@ for i in "$@"; do
             install)
                 action=install
                 ;;
-            uninstall)
-                action=uninstall
-                ;;
             update)
                 action=update
                 ;;
-            -clear-cache)
+            uninstall)
+                action=uninstall
+                ;;
+            -autoclean)
                 # check if running as root
                 root_check || exit
-                rm -rf "${CACHE_DIR:?}/"
+                # go through all cached projects Git repositories
+                for j in "${CACHE_DIR:?}/"*/*; do
+                    # expecting a Git repository, so check if it is a directory
+                    if [ -d "$j" ]; then
+                        # get project name from the path
+                        project_name="$(echo "$j" | sed -E -e 's|.*/||')"
+                        # if not installed
+                        if [ ! -x "$(command -v "$project_name")" ]; then
+                            # remove the project's cached Git repository
+                            rm -rf "${j:?}/"
+                        fi
+                    fi
+                done
+
+                # remove author directories if they are empty
+                for j in "${CACHE_DIR:?}/"*; do
+                    rmdir --ignore-fail-on-non-empty "$j/"
+                done
+                exit 0
+                ;;
+            -clean)
+                # check if running as root
+                root_check || exit
+                rm -rf "${CACHE_DIR:?}/"*
                 exit 0
                 ;;
             -help)
@@ -214,14 +238,14 @@ elif git diff --quiet; then # check if the Git directory doesn't contain any cha
 else
     echo "$0: Cached $project_name Git repository is corrupted.
 POSSIBLE SOLUTIONS:
-  * Clear the cache using the '$0 -clear-cache' command." >&2
+  * Remove the cache using the '$0 -clean' command." >&2
     exit 1
 fi || {
     echo "$0: Can't obtain $project_name repository in the most recent state.
 POSSIBLE SOLUTIONS:
   * Make sure that $project_name repository exists on the given Git URL.
   * Connect your device to the Internet.
-  * Clear the cache using the '$0 -clear-cache' command.
+  * Remove the cache using the '$0 -clean' command.
   * Free up some storage space." >&2
     exit 1
 }
@@ -257,17 +281,6 @@ POSSIBLE SOLUTIONS:
         git checkout -q "$project_latest_version" && # use the latest repository tag
         make_call install "$make_args" # install the program
         ;;
-    uninstall)
-        if [ ! -x "$(command -v "$project_name")" ]; then # if the project is not installed
-            echo "$project_name is not installed.
-SUCCESS"
-            exit 0 # uninstallation exits with a success eventually
-        fi
-
-        fill_project_local_version "$project_name" || exit
-        git checkout -q "$project_local_version" && # use the program version as a tag
-        make_call uninstall "$make_args" # uninstall the program
-        ;;
     update)
         if [ -x "$(command -v "$project_name")" ]; then # check if the project installed
             fill_project_local_version "$project_name" || exit
@@ -290,12 +303,22 @@ POSSIBLE SOLUTIONS:
         git checkout -q "$project_latest_version" && # use the latest repository tag
         make_call install "$make_args" # install the program again
         ;;
+    uninstall)
+        if [ ! -x "$(command -v "$project_name")" ]; then # if the project is not installed
+            echo "$project_name is not installed.
+SUCCESS"
+            exit 0 # uninstallation exits with a success eventually
+        fi
+
+        fill_project_local_version "$project_name" || exit
+        git checkout -q "$project_local_version" && # use the program version as a tag
+        make_call uninstall "$make_args" # uninstall the program
+        ;;
 esac || {
     echo "$0: An error has occurred during the $action action.
 POSSIBLE SOLUTIONS:
   * Read the report above as it can provide required information.
-  * Contact a $project_name developer.
-  * Run with root permissions inserting 'sudo' and a space before your command." >&2
+  * Contact a $project_name developer." >&2
     exit 1
 }
 
