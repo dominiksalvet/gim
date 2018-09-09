@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Fixed
+
+* Create the `/etc/bash_completion.d/` directory if it doesn't exist.
+
 ## 3.0.0 (2018-09-09)
 
 ### Added
