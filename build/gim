@@ -32,7 +32,7 @@ done
 # the current version of the program
 VERSION=2.0.0
 
-GIT_URL_FORMAT='https://<hostname>/<author>/<project>.git'
+GIT_URL_FORMAT='https://<hostname>/<author>/<project>[.git]'
 
 HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION GIT_URL [MAKE_ARG]...
 
@@ -153,7 +153,6 @@ for i in "$@"; do
                         fi
                     fi
                 done
-
                 # remove author directories if they are empty
                 for j in "${CACHE_DIR:?}/"*; do
                     rmdir --ignore-fail-on-non-empty "$j/"
@@ -202,10 +201,16 @@ $HINT_MESSAGE" >&2
 fi
 
 # check the format of given Git URL
-if ! echo "$project_url" | grep -q -E -e '^https://[^/]+(/([^\./]|\.[^\./]|\.\.[^/])[^/]*){2}\.git$'; then
+if ! echo "$project_url" | grep -q -E -e '^https://[^/]+(/[^\.][^/]*){2}(|\.git)$'; then
     echo "$0: Supplied Git URL is not valid.
 $HINT_MESSAGE" >&2
     exit 1
+fi
+
+# if the Git URL doesn't end with '.git'
+if ! echo "$project_url" | grep -q -E -e '\.git$'; then
+    # append '.git'
+    project_url="${project_url}.git"
 fi
 
 # get the project author and the project name from the given Git URL
