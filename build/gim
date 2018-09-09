@@ -128,7 +128,8 @@ POSSIBLE SOLUTIONS:
 }
 
 # DESCRIPTION:
-#   Fill the '$project_local_version' variable with the current version of a given project.
+#   Fill the '$project_local_version' variable with the current version of a
+#   given project.
 # PARAMETERS:
 #   $1 - project name
 fill_project_local_version() {
