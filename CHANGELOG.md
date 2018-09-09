@@ -14,6 +14,7 @@ The changes not yet present in any release are listed in this section.
 
 * The `-clear-cache` options has been changed to `-clean`.
 * The project's Git URL doesn't have to end with `.git`.
+* Checking for root permissions and downloading a given Git repository are not performed until necessary.
 
 ## 2.0.0 (2018-09-08)
 
