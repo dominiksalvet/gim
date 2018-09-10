@@ -6,7 +6,7 @@ A Git project is **gim compliant** if it meets all of the following rules:
 2. Once an annotated tag is publicly created, it can be removed only to immediately create an annotated tag with the same name on a different commit with the same functionality as the previously tagged commit.
 3. Every annotated tag's commit contains a *makefile* with at least `install` and `uninstall` targets, where:
    * Target `install` installs all dependencies of the project of the commit and then the project itself automatically, whatever steps needed to be taken and default arguments needed to be used to achieve it.
-   * Target `uninstall` uninstalls the project of the commit automatically. The project's configuration files are not removed to make updating the project using gim possible.
+   * Target `uninstall` uninstalls the project of the commit automatically. The project's configuration files and dependencies are not removed to make updating the project using gim possible.
 4. The status of installed/uninstalled project is determined by existence of an executable file with the same name as the Git project name located in any directory defined by the `$PATH` variable of the root user, where:
    * It supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
 
