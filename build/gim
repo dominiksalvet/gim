@@ -77,57 +77,6 @@ root_check() {
 }
 
 # DESCRIPTION:
-#   Obtain the Git repository in the most recent state. Also fill the
-#   '$project_latest_version' variable with the latest version of the project.
-# PARAMETERS:
-#   $1 - Git project URL
-#   $2 - Git project author
-#   $3 - Git project name
-obtain_repository() {
-    # check if running as root
-    root_check || return
-    
-    # create a cache directory for the project
-    mkdir -p "$CACHE_DIR/$2/$3/" &&
-    cd "$CACHE_DIR/$2/$3/" || {
-        echo "$0: Can't access gim's cache directory.
-POSSIBLE SOLUTIONS:
-  * Free up some storage space.
-  * Contact a gim developer." >&2
-        return 1
-    }
-    
-    if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
-        git clone -q --progress "$1" . # clone the Git repository to the this directory
-    elif git diff --quiet; then # check if the Git directory doesn't contain any changes
-        git checkout -q master && # checkout the master branch for the following commands
-        git pull -q --progress && # get the most recent state of the repository
-        git fetch -q --progress --tags # get the most recent state of the repository tags
-    else
-        echo "$0: Cached $3 Git repository is corrupted.
-POSSIBLE SOLUTIONS:
-  * Remove the cache using the '$0 -clean' command." >&2
-        return 1
-    fi || {
-        echo "$0: Can't obtain $3 repository in the most recent state.
-POSSIBLE SOLUTIONS:
-  * Make sure that $3 repository exists on the given Git URL.
-  * Connect your device to the Internet.
-  * Remove the cache using the '$0 -clean' command.
-  * Free up some storage space." >&2
-        return 1
-    }
-    
-    # get version of the most recent annotated tag of the obtained Git project
-    project_latest_version="$(git describe --abbrev=0)" || {
-        echo "$0: Repository $3 has no annotated tag.
-POSSIBLE SOLUTIONS:
-  * Contact a $3 developer about gim compliance." >&2
-        return 1
-    }
-}
-
-# DESCRIPTION:
 #   Fill the '$project_local_version' variable with the current version of a
 #   given project.
 # PARAMETERS:
@@ -270,12 +219,57 @@ project_author="$(echo "$project_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
 project_name="$(echo "$project_url" | sed -E -e 's/.git$//; s|.*/||')"
 
 #-------------------------------------------------------------------------------
+# OBTAINING THE REPOSITORY
+#-------------------------------------------------------------------------------
+
+# check if running as root
+root_check || exit
+    
+# create a cache directory for the project
+mkdir -p "$CACHE_DIR/$project_author/$project_name/" &&
+cd "$CACHE_DIR/$project_author/$project_name/" || {
+    echo "$0: Can't access gim's cache directory.
+POSSIBLE SOLUTIONS:
+  * Free up some storage space.
+  * Contact a gim developer." >&2
+    exit 1
+}
+    
+if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
+    git clone -q --progress "$project_url" . # clone the Git repository to the this directory
+elif git diff --quiet; then # check if the Git directory doesn't contain any changes
+    git checkout -q master && # checkout the master branch for the following commands
+    git pull -q --progress && # get the most recent state of the repository
+    git fetch -q --progress --tags # get the most recent state of the repository tags
+else
+    echo "$0: Cached $project_name Git repository is corrupted.
+POSSIBLE SOLUTIONS:
+  * Remove the cache using the '$0 -clean' command." >&2
+    exit 1
+fi || {
+    echo "$0: Can't obtain $project_name repository in the most recent state.
+POSSIBLE SOLUTIONS:
+  * Make sure that $project_name repository exists on the given Git URL.
+  * Connect your device to the Internet.
+  * Remove the cache using the '$0 -clean' command.
+  * Free up some storage space." >&2
+    exit 1
+}
+    
+# get version of the most recent annotated tag of the obtained Git project
+project_latest_version="$(git describe --abbrev=0)" || {
+    echo "$0: Repository $project_name has no annotated tag.
+POSSIBLE SOLUTIONS:
+  * Contact a $project_name developer about gim compliance." >&2
+    exit 1
+}
+
+#-------------------------------------------------------------------------------
 # EXECUTE SELECTED ACTION
 #-------------------------------------------------------------------------------
 
 case "$action" in
     install)
-        obtain_repository "$project_url" "$project_author" "$project_name" || exit
         if [ -x "$(command -v "$project_name")" ]; then # check if the project already installed
             fill_project_local_version "$project_name" || exit
             if [ "$project_local_version" = "$project_latest_version" ]; then # if the versions are the same
@@ -295,7 +289,6 @@ POSSIBLE SOLUTIONS:
         ;;
     update)
         if [ -x "$(command -v "$project_name")" ]; then # check if the project installed
-            obtain_repository "$project_url" "$project_author" "$project_name" || exit
             fill_project_local_version "$project_name" || exit
 
             if [ "$project_local_version" = "$project_latest_version" ]; then # if the versions are the same
@@ -310,7 +303,6 @@ POSSIBLE SOLUTIONS:
             exit 1
         fi
 
-        obtain_repository "$project_url" "$project_author" "$project_name" || exit
         fill_project_local_version "$project_name" || exit
 
         git checkout -q "$project_local_version" && # use the program version as a tag
@@ -325,8 +317,7 @@ POSSIBLE SOLUTIONS:
 SUCCESS"
             exit 0 # uninstallation exits with a success eventually
         fi
-        
-        obtain_repository "$project_url" "$project_author" "$project_name" || exit
+
         fill_project_local_version "$project_name" || exit
 
         git checkout -q "$project_local_version" && # use the program version as a tag
