@@ -28,7 +28,8 @@ done
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Prepare a hint consisting of words that can be used from the current part of word.
+#   Prepare a hint consisting of words that can be used from the current part of
+#   word.
 _gim() {
     # a hint will be shown only when a part of first argument is written
     if [ "$COMP_CWORD" -eq 1 ]; then
