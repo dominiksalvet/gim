@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Added
+
+* The support for renaming gim compliant Git projects has been added.
+
 ### Fixed
 
 * Create the `/etc/bash_completion.d/` directory if it doesn't exist.

@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir'
+SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
@@ -32,17 +32,17 @@ done
 # the current version of the program
 VERSION=3.0.0
 
-GIT_URL_FORMAT='https://<hostname>/<author>/<project>[.git]'
+URL_FORMAT='https://<hostname>/<author>/<project>[.git]'
 
-HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION GIT_URL [MAKE_ARG]...
+HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION URL [MAKE_ARG]...
 
 ACTION:
   install    install a Git project in the latest version
   update     update a Git project to the latest version
   uninstall  uninstall a Git project
 
-GIT_URL:
-  $GIT_URL_FORMAT
+URL:
+  $URL_FORMAT
 
 OPTION:
   -autoclean  remove old cached Git repositories and exit
@@ -77,23 +77,42 @@ root_check() {
 }
 
 # DESCRIPTION:
-#   Fill the '$project_local_version' variable with the current version of a
-#   given project.
-# PARAMETERS:
-#   $1 - project name
-fill_project_local_version() {
-    # get the current version of the program
-    if ! project_local_version="$("$1" --version)" 2>/dev/null; then
-        project_local_version="$("$1" -version)" 2>/dev/null
-    fi || project_local_version=
-
-    # check if non-empty version was returned
-    if [ -z "$project_local_version" ]; then
-        echo "$0: Neither the '--version' flag nor the '-version' flag is supported.
-POSSIBLE SOLUTIONS:
-  * Contact a $project_name developer about gim compliance."
-        return 1
+#   Returns all names of a gim compliant project contained in a given Git
+#   repository as a directory path.
+# PARAMETETRS:
+#   $1 - project repository directory
+get_repository_project_names() {
+    if [ ! -f "$1/gim/names" ]; then
+        echo "$1" | sed -E -e 's|/*$||; s|^.*/||'
+    else
+        head -n 1 "$1/gim/names"
     fi
+}
+
+# DESCRIPTION:
+#   Returns name of locally installed project based on given repository project
+#   names if found.
+# PARAMETETRS:
+#   $1 - repository project names
+get_local_project_name() {
+    for i in $1; do
+        if [ -x "$(command -v "$i")" ]; then
+            echo "$i"
+            break
+        fi
+    done
+}
+
+# DESCRIPTION:
+#   Returns the current version of a locally installed given project.
+# PARAMETERS:
+#   $1 - local project name
+get_local_project_version() {
+    # get the current version of the project
+    if ! LOCAL_version="$("$1" --version)" 2>/dev/null; then
+        LOCAL_version="$("$1" -version)" 2>/dev/null
+    fi || LOCAL_version=
+    echo "$LOCAL_version"
 }
 
 # DESCRIPTION:
@@ -114,13 +133,13 @@ make_call() {
 #-------------------------------------------------------------------------------
 
 action=
-project_url=
+repository_url=
 make_args=
 # processing each parameter separately
 for i in "$@"; do
     if [ ! -z "$action" ]; then # if the action has been selected
-        if [ -z "$project_url" ]; then # if the project Git URL is not set
-            project_url="$i" # next up are only make arguments
+        if [ -z "$repository_url" ]; then # if the project repository URL is not set
+            repository_url="$i" # next up are only make arguments
         # accept only make arguments
         elif [ -z "$make_args" ]; then
             make_args="$i"
@@ -145,10 +164,8 @@ for i in "$@"; do
                 for j in "${CACHE_DIR:?}/"*/*; do
                     # expecting a Git repository, so check if it is a directory
                     if [ -d "$j" ]; then
-                        # get project name from the path
-                        project_name="$(echo "$j" | sed -E -e 's|.*/||')"
-                        # if not installed
-                        if [ ! -x "$(command -v "$project_name")" ]; then
+                        # check if the project not installed
+                        if [ -z "$(get_local_project_name "$(get_repository_project_names "$j")")" ]; then
                             # remove the project's cached Git repository
                             rm -rf "${j:?}/"
                         fi
@@ -194,29 +211,25 @@ $HINT_MESSAGE" >&2
     exit 1
 fi
 
-# check if argument with Git URL provided
-if [ -z "$project_url" ]; then
-    echo "$0: No argument with Git URL provided.
+# check if argument with repository URL provided
+if [ -z "$repository_url" ]; then
+    echo "$0: No argument with repository URL provided.
 $HINT_MESSAGE" >&2
     exit 1
 fi
 
-# check the format of given Git URL
-if ! echo "$project_url" | grep -q -E -e '^https://[^/]+(/[^\.][^/]*){2}(|\.git)$'; then
-    echo "$0: Supplied Git URL is not valid.
+# check the format of given repository URL
+if ! echo "$repository_url" | grep -q -E -e '^https://[^/]+(/[^\.][^/]*){2}(|\.git)$'; then
+    echo "$0: Supplied repository URL is not valid.
 $HINT_MESSAGE" >&2
     exit 1
 fi
 
-# if the Git URL doesn't end with '.git'
-if ! echo "$project_url" | grep -q -E -e '\.git$'; then
+# if the repository URL doesn't end with '.git'
+if ! echo "$repository_url" | grep -q -E -e '\.git$'; then
     # append '.git'
-    project_url="${project_url}.git"
+    repository_url="${repository_url}.git"
 fi
-
-# get the project author and the project name from the given Git URL
-project_author="$(echo "$project_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
-project_name="$(echo "$project_url" | sed -E -e 's/.git$//; s|.*/||')"
 
 #-------------------------------------------------------------------------------
 # OBTAINING THE REPOSITORY
@@ -224,43 +237,48 @@ project_name="$(echo "$project_url" | sed -E -e 's/.git$//; s|.*/||')"
 
 # check if running as root
 root_check || exit
-    
+
+# extract required information from the given repository URL
+repository_author="$(echo "$repository_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
+repository_name="$(echo "$repository_url" | sed -E -e 's/.git$//; s|.*/||')"
+repository_dir="$CACHE_DIR/$repository_author/$repository_name"
+
 # create a cache directory for the project
-mkdir -p "$CACHE_DIR/$project_author/$project_name/" &&
-cd "$CACHE_DIR/$project_author/$project_name/" || {
+mkdir -p "$repository_dir/" &&
+cd "$repository_dir/" || {
     echo "$0: Can't access gim's cache directory.
 POSSIBLE SOLUTIONS:
   * Free up some storage space.
   * Contact a gim developer." >&2
     exit 1
 }
-    
+
 if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
-    git clone -q --progress "$project_url" . # clone the Git repository to the this directory
-elif git diff --quiet; then # check if the Git directory doesn't contain any changes
+    git clone -q --progress "$repository_url" . # clone the Git repository to the this directory
+elif [ -z "$(git status --porcelain)" ]; then # check if the Git directory doesn't contain any changes
     git checkout -q master && # checkout the master branch for the following commands
     git pull -q --progress && # get the most recent state of the repository
     git fetch -q --progress --tags # get the most recent state of the repository tags
 else
-    echo "$0: Cached $project_name Git repository is corrupted.
+    echo "$0: Cached $repository_name repository is corrupted.
 POSSIBLE SOLUTIONS:
-  * Remove the cache using the '$0 -clean' command." >&2
+  * Remove the cache using the 'sudo $0 -clean' command." >&2
     exit 1
 fi || {
-    echo "$0: Can't obtain $project_name repository in the most recent state.
+    echo "$0: Can't obtain $repository_name repository in the most recent state.
 POSSIBLE SOLUTIONS:
-  * Make sure that $project_name repository exists on the given Git URL.
+  * Make sure that $repository_name repository exists on the given URL.
   * Connect your device to the Internet.
-  * Remove the cache using the '$0 -clean' command.
+  * Remove the cache using the 'sudo $0 -clean' command.
   * Free up some storage space." >&2
     exit 1
 }
-    
+
 # get version of the most recent annotated tag of the obtained Git project
-project_latest_version="$(git describe --abbrev=0)" || {
-    echo "$0: Repository $project_name has no annotated tag.
+repository_project_version="$(git describe --abbrev=0)" || {
+    echo "$0: Repository $repository_name has no annotated tag.
 POSSIBLE SOLUTIONS:
-  * Contact a $project_name developer about gim compliance." >&2
+  * Contact a $repository_name repository developer about gim compliance." >&2
     exit 1
 }
 
@@ -268,66 +286,75 @@ POSSIBLE SOLUTIONS:
 # EXECUTE SELECTED ACTION
 #-------------------------------------------------------------------------------
 
+# get information about the local project (if installed)
+local_project_name="$(get_local_project_name "$(get_repository_project_names "$repository_dir/")")"
+local_project_version="$(get_local_project_version "$local_project_name")"
+
 case "$action" in
     install)
-        if [ -x "$(command -v "$project_name")" ]; then # check if the project already installed
-            fill_project_local_version "$project_name" || exit
-            if [ "$project_local_version" = "$project_latest_version" ]; then # if the versions are the same
-                echo "$project_name is already installed and updated ($project_local_version).
-SUCCESS"
+        if [ ! -z "$local_project_name" ]; then # check if the project already installed
+            if [ "$local_project_version" = "$repository_project_version" ]; then # if the versions are the same
+                echo "$local_project_name is already installed and updated ($local_project_version)."
                 exit 0
+            elif [ -z "$local_project_version" ]; then # if not and version flags not supported
+                echo "$0: $local_project_name is already installed but no version information was provided.
+POSSIBLE SOLUTIONS:
+  * Contact a $local_project_name developer about gim compliance." >&2
+                exit 1
             else
-                echo "$0: $project_name is already installed ($project_local_version) but not updated ($project_latest_version).
+                echo "$0: $local_project_name is already installed ($local_project_version) but not updated ($repository_project_version).
 POSSIBLE SOLUTIONS:
   * Use the 'update' action instead of the used 'install' action." >&2
                 exit 1
             fi
         fi
 
-        git checkout -q "$project_latest_version" && # use the latest repository tag
+        git checkout -q "$repository_project_version" && # use the latest repository tag
         make_call install "$make_args" # install the program
         ;;
     update)
-        if [ -x "$(command -v "$project_name")" ]; then # check if the project installed
-            fill_project_local_version "$project_name" || exit
-
-            if [ "$project_local_version" = "$project_latest_version" ]; then # if the versions are the same
-                echo "$project_name is already installed and updated ($project_local_version).
-SUCCESS"
+        if [ ! -z "$local_project_name" ]; then # check if the project installed
+            if [ "$local_project_version" = "$repository_project_version" ]; then # if the versions are the same
+                echo "$local_project_name is already installed and updated ($local_project_version)."
                 exit 0
+            elif [ -z "$local_project_version" ]; then # if not and version flags not supported
+                echo "$0: $local_project_name is installed but no version information was provided.
+POSSIBLE SOLUTIONS:
+  * Contact a $local_project_name developer about gim compliance." >&2
+                exit 1
             fi
         else # the project is not installed
-            echo "$0: $project_name is not installed.
+            echo "$0: Nothing is installed from $repository_name repository.
 POSSIBLE SOLUTIONS:
   * Use the 'install' action instead of the used 'update' action." >&2
             exit 1
         fi
 
-        fill_project_local_version "$project_name" || exit
-
-        git checkout -q "$project_local_version" && # use the program version as a tag
+        git checkout -q "$local_project_version" && # use the program version as a tag
         make_call uninstall "$make_args" && # uninstall the program
 
-        git checkout -q "$project_latest_version" && # use the latest repository tag
+        git checkout -q "$repository_project_version" && # use the latest repository tag
         make_call install "$make_args" # install the program again
         ;;
     uninstall)
-        if [ ! -x "$(command -v "$project_name")" ]; then # if the project is not installed
-            echo "$project_name is not installed.
-SUCCESS"
+        if [ -z "$local_project_name" ]; then # if the project is not installed
+            echo "Nothing is installed from $repository_name repository."
             exit 0 # uninstallation exits with a success eventually
+        elif [ -z "$local_project_version" ]; then
+            echo "$0: $local_project_name is installed but no version information was provided.
+POSSIBLE SOLUTIONS:
+  * Contact a $local_project_name developer about gim compliance." >&2
+            exit 1
         fi
 
-        fill_project_local_version "$project_name" || exit
-
-        git checkout -q "$project_local_version" && # use the program version as a tag
+        git checkout -q "$local_project_version" && # use the program version as a tag
         make_call uninstall "$make_args" # uninstall the program
         ;;
 esac || {
     echo "$0: An error has occurred during the $action action.
 POSSIBLE SOLUTIONS:
   * Read the report above as it can provide required information.
-  * Contact a $project_name developer." >&2
+  * Contact a $local_project_name developer." >&2
     exit 1
 }
 
@@ -335,23 +362,42 @@ POSSIBLE SOLUTIONS:
 # VERIFY THE PROJECT'S STATUS
 #-------------------------------------------------------------------------------
 
+# refresh information about the local project
+new_local_project_name="$(get_local_project_name "$(get_repository_project_names "$repository_dir/")")"
+new_local_project_version="$(get_local_project_version "$new_local_project_name")"
+
 case "$action" in
-    install | update)
-        if [ ! -x "$(command -v "$project_name")" ]; then # if the project is not installed (as it should be now)
-            echo "$0: $project_name should have been installed, but it is not.
+    install)
+        if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
+            echo "$0: The project from $repository_name repository should have been installed, but it is not.
 POSSIBLE SOLUTIONS:
-  * Contact a $project_name developer." >&2
+  * Contact a $repository_name repository developer about gim compliance.
+  * Install the project again." >&2
             exit 1
+        else
+            echo "$new_local_project_name was installed ($new_local_project_version)."
+        fi
+        ;;
+    update)
+        if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
+            echo "$0: The project from $repository_name repository should have been installed, but it is not.
+POSSIBLE SOLUTIONS:
+  * Contact a $repository_name repository developer about gim compliance.
+  * Use the 'install' action instead of the used 'update' action." >&2
+            exit 1
+        else
+            echo "$local_project_name ($local_project_version) was updated to $new_local_project_name ($new_local_project_version)."
         fi
         ;;
     uninstall)
-        if [ -x "$(command -v "$project_name")" ]; then # if the project is installed (as it shouldn't be now)
-            echo "$0: $project_name should have been uninstalled, but it is not.
+        if [ ! -z "$new_local_project_name" ]; then # if the project is installed (as it shouldn't be now)
+            echo "$0: The project from $repository_name repository should have been uninstalled, but it is not.
 POSSIBLE SOLUTIONS:
-  * Contact a $project_name developer." >&2
+  * Contact a $repository_name repository developer about gim compliance.
+  * Uninstall the project again." >&2
             exit 1
+        else
+            echo "$local_project_name was uninstalled."
         fi
         ;;
 esac
-
-echo 'SUCCESS'
