@@ -362,6 +362,9 @@ POSSIBLE SOLUTIONS:
 # VERIFY THE STATUS
 #-------------------------------------------------------------------------------
 
+# checkout the master branch for current information about project names from the repository
+git checkout -q master
+
 # refresh information about the local project
 new_local_project_name="$(get_local_project_name "$(get_repository_project_names "$repository_dir/")")"
 new_local_project_version="$(get_local_project_version "$new_local_project_name")"

@@ -11,6 +11,7 @@ The changes not yet present in any release are listed in this section.
 ### Fixed
 
 * Fixed error `logged_user: command not found`.
+* Look for project names in latest master branch commit instead of the latest commit that is tagged with an annotated tag to make changing Git repository name between two releases possible.
 
 ## 3.1.0 (2018-09-12)
 
