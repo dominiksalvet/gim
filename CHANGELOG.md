@@ -9,10 +9,11 @@ The changes not yet present in any release are listed in this section.
 ### Added
 
 * The support for renaming gim compliant Git projects has been added.
+* When a gim compliant Git project changes its name, configuration files are copied automatically during the update process if they are placed in */etc/\<project\>/* or *~/.config/\<project\>/*.
 
 ### Fixed
 
-* Create the `/etc/bash_completion.d/` directory if it doesn't exist.
+* Create the */etc/bash_completion.d/* directory if it doesn't exist.
 
 ## 3.0.0 (2018-09-09)
 

@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id'
+SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id logname'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
@@ -359,7 +359,7 @@ POSSIBLE SOLUTIONS:
 }
 
 #-------------------------------------------------------------------------------
-# VERIFY THE PROJECT'S STATUS
+# VERIFY THE STATUS
 #-------------------------------------------------------------------------------
 
 # refresh information about the local project
@@ -401,3 +401,61 @@ POSSIBLE SOLUTIONS:
         fi
         ;;
 esac
+
+#-------------------------------------------------------------------------------
+# COPY CONFIGURATION FILES
+#-------------------------------------------------------------------------------
+
+# trying to use previously used configuration files
+case "$action" in
+    install)
+        # get all possible project names to look for
+        repository_project_names="$(get_repository_project_names "$repository_dir/")"
+        # check if there are system-wide configuration files for any of the names
+        for i in $repository_project_names; do
+            if [ -d "/etc/$i/" ]; then
+                # found, last name will be kept in this variable
+                previous_local_project_name="$i"
+            fi
+        done
+
+        # if found any project configuration
+        if [ ! -z "$previous_local_project_name" ]; then
+            # if there is no system-wide configuration for current project name
+            if [ ! -d "/etc/$new_local_project_name/" ]; then
+                # copy from the previously uninstalled
+                cp -R -a "/etc/$previous_local_project_name/" "/etc/$new_local_project_name/"
+            fi &&
+            logged_user="$(logname)" && # get logged user name for user-specific configuration
+            [ ! -z "$(logged_user)" ] && # logged user name must not be an empty string
+            if [ -d "/home/$logged_user/.config/$previous_local_project_name/" ] && # if there are user configuration files
+               [ ! -d "/home/$logged_user/.config/$new_local_project_name/" ]; then # and none of them with current project name
+                # copy them from the previously uninstalled
+                cp -R -a "/home/$logged_user/.config/$previous_local_project_name/" "/home/$logged_user/.config/$new_local_project_name/"
+            fi
+        fi
+        ;;
+    update)
+        # if the updated project name is not the same as the one before the update
+        if [ "$new_local_project_name" != "$local_project_name" ]; then
+            if [ -d "/etc/$local_project_name/" ] && # if there are any configuration files used before the update
+               [ ! -d "/etc/$new_local_project_name/" ]; then # and if there is no system-wide configuration for the current project name
+                # copy configuration files for the updated project with a new name
+                cp -R -a "/etc/$local_project_name/" "/etc/$new_local_project_name/"
+            fi &&
+            logged_user="$(logname)" && # get logged user name for user-specific configuration
+            [ ! -z "$(logged_user)" ] && # logged user name must not be an empty string
+            if [ -d "/home/$logged_user/.config/$local_project_name/" ] && # if there are user configuration files
+               [ ! -d "/home/$logged_user/.config/$new_local_project_name/" ]; then # and none of them with current project name
+                # copy them for the updated project with a new name
+                cp -R -a "/home/$logged_user/.config/$local_project_name/" "/home/$logged_user/.config/$new_local_project_name/"
+            fi
+        fi
+        ;;
+esac || {
+    echo "$0: Can't use previously used configuration files for $new_local_project_name ($new_local_project_version).
+POSSIBLE SOLUTIONS:
+  * Uninstall $new_local_project_name, free up some storage space and install it again.
+  * Make sure that the 'logname' command works on your system.
+  * Contact a gim developer." >&2
+}
