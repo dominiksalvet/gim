@@ -30,7 +30,7 @@ done
 #-------------------------------------------------------------------------------
 
 # the current version of the program
-VERSION=3.1.0
+VERSION=3.1.1
 
 URL_FORMAT='https://<hostname>/<author>/<project>[.git]'
 
@@ -427,7 +427,7 @@ case "$action" in
                 cp -R -a "/etc/$previous_local_project_name/" "/etc/$new_local_project_name/"
             fi &&
             logged_user="$(logname)" && # get logged user name for user-specific configuration
-            [ ! -z "$(logged_user)" ] && # logged user name must not be an empty string
+            [ ! -z "$logged_user" ] && # logged user name must not be an empty string
             if [ -d "/home/$logged_user/.config/$previous_local_project_name/" ] && # if there are user configuration files
                [ ! -d "/home/$logged_user/.config/$new_local_project_name/" ]; then # and none of them with current project name
                 # copy them from the previously uninstalled
@@ -444,7 +444,7 @@ case "$action" in
                 cp -R -a "/etc/$local_project_name/" "/etc/$new_local_project_name/"
             fi &&
             logged_user="$(logname)" && # get logged user name for user-specific configuration
-            [ ! -z "$(logged_user)" ] && # logged user name must not be an empty string
+            [ ! -z "$logged_user" ] && # logged user name must not be an empty string
             if [ -d "/home/$logged_user/.config/$local_project_name/" ] && # if there are user configuration files
                [ ! -d "/home/$logged_user/.config/$new_local_project_name/" ]; then # and none of them with current project name
                 # copy them for the updated project with a new name
