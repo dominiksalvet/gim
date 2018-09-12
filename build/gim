@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 # list of required software
-SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id logname'
+SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id logname cp'
 
 # check if some software is missing
 for i in $SW_REQUIRED; do
