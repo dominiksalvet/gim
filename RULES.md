@@ -11,7 +11,7 @@ A Git repository is **gim compliant** if it meets all of the following rules:
    * The name of the file is equal to the repository name if the *gim/names* file is not present in the repository. Otherwise, the name is equal to one of the names stated in the *gim/names* file with the following restrictions applied for the *gim/names* file:
      * The file mustn't be create empty and once it is created, it can't be removed.
      * The file can only be modified by appending a new project name on the end of the first line separating the last stated project name by a space. The only exception is fixing a typo.
-     * In case of renaming the repository, create the file with the `<old-name> <new-name>` contents and push it to the repository. Then rename the repository from \<old-name\> to \<new-name\>.
+     * In case of renaming the repository, first create the file with the `<old-name> <new-name>` contents and push it to the repository. Then rename the repository from \<old-name\> to \<new-name\>.
    * It supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
 
 ---
