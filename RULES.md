@@ -7,11 +7,11 @@ A Git repository is **gim compliant** if it meets all of the following rules:
 3. Every annotated tag's commit contains a *makefile* with at least `install` and `uninstall` targets, where:
    * Target `install` installs all dependencies of the project of the commit and then the project itself automatically, whatever steps needed to be taken and default arguments needed to be used to achieve it.
    * Target `uninstall` uninstalls the project of the commit automatically. The project's configuration files and dependencies are not removed to make updating the project using gim possible.
-4. The status of installed/uninstalled repository is determined by existence of an executable file localed in any directory defined by the `$PATH` variable of the root user, where:
-   * The name of the file is equal to the repository name if the *gim/names* file is not present in the repository. Otherwise, the name is equal to one of the names stated in the *gim/names* file with the following restrictions applied for the *gim/names* file:
-     * The file mustn't be create empty and once it is created, it can't be removed.
-     * The file can only be modified by appending a new project name on the end of the first line separating the last stated project name by a space. The only exception is fixing a typo.
-     * Before renaming the repository, create the file with the `<old-name> <new-name>` contents or append ` <new-name>` to the existing file. Then renaming the repository from \<old-name\> to \<new-name\> and modifying other associated files can be done.
+4. The status of installed/uninstalled repository is determined by existence of an agent (an executable file) localed in any directory defined by the `$PATH` variable of the root user, where:
+   * The name of the agent is equal to the repository name if the *gim/names* file is not present in the repository. Otherwise, the agent's name is equal to one of the names stated in the *gim/names* file with the following restrictions applied for the *gim/names* file:
+     * The file must not be create empty and once it is created, it can't be removed.
+     * The file can only be modified by appending a new name on the end of the first line separating the last stated name by a space. The only exception of this rule is fixing a typo.
+     * Before making any changes that will cause renaming the agent or before renaming the repository itself, create the *gim/names* file containing `<old-name> <new-name>` or append ` <new-name>` to the existing one and propagate the changes to the repository. Then the rest can be done in no particular order.
    * It supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
 
 ---
