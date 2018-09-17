@@ -25,4 +25,4 @@ If you edit any source code, retain its original formatting.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same license as the affected files. In case of creating a new file, choose the most appropriate license with respect to the project [licensing policy](README.md#license) and the type of created file. Otherwise, the contributions may not be approved.
+By contributing, you agree that your contributions will be licensed under the same license as the affected files. In case of creating a new file, choose the most appropriate license with respect to the project [licensing policy](README.md#license) and the type of created file.
