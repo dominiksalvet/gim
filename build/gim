@@ -167,7 +167,7 @@ for i in "$@"; do
                         # check if the project not installed
                         if [ -z "$(get_local_project_name "$(get_repository_project_names "$j")")" ]; then
                             # remove the project's cached Git repository
-                            rm -rf "${j:?}/"
+                            rm -r -f "${j:?}/"
                         fi
                     fi
                 done
@@ -180,7 +180,7 @@ for i in "$@"; do
             -clean)
                 # check if running as root
                 root_check || exit
-                rm -rf "${CACHE_DIR:?}/"*
+                rm -r -f "${CACHE_DIR:?}/"*
                 exit 0
                 ;;
             -help)
