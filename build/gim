@@ -109,10 +109,10 @@ get_local_project_name() {
 #   $1 - local project name
 get_local_project_version() {
     # get the current version of the project
-    if ! LOCAL_version="$("$1" --version)" 2>/dev/null; then
-        LOCAL_version="$("$1" -version)" 2>/dev/null
-    fi || LOCAL_version=
-    echo "$LOCAL_version"
+    if ! local_project_version="$("$1" --version)" 2>/dev/null; then
+        local_project_version="$("$1" -version)" 2>/dev/null
+    fi || local_project_version=
+    echo "$local_project_version"
 }
 
 # DESCRIPTION:
