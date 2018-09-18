@@ -95,9 +95,9 @@ get_repository_project_names() {
 # PARAMETETRS:
 #   $1 - repository project names
 get_local_project_name() {
-    for i in $1; do
-        if [ -x "$(command -v "$i")" ]; then
-            echo "$i"
+    for LOCAL_name in $1; do
+        if [ -x "$(command -v "$LOCAL_name")" ]; then
+            echo "$LOCAL_name"
             break
         fi
     done
