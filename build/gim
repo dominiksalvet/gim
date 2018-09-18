@@ -427,14 +427,14 @@ case "$action" in
             # if there is no system-wide configuration for current project name
             if [ ! -d "/etc/$new_local_project_name/" ]; then
                 # copy from the previously uninstalled
-                cp -R -a "/etc/$previous_local_project_name/" "/etc/$new_local_project_name/"
+                cp -T -a "/etc/$previous_local_project_name/" "/etc/$new_local_project_name/"
             fi &&
             logged_user="$(logname)" && # get logged user name for user-specific configuration
             [ ! -z "$logged_user" ] && # logged user name must not be an empty string
             if [ -d "/home/$logged_user/.config/$previous_local_project_name/" ] && # if there are user configuration files
                [ ! -d "/home/$logged_user/.config/$new_local_project_name/" ]; then # and none of them with current project name
                 # copy them from the previously uninstalled
-                cp -R -a "/home/$logged_user/.config/$previous_local_project_name/" "/home/$logged_user/.config/$new_local_project_name/"
+                cp -T -a "/home/$logged_user/.config/$previous_local_project_name/" "/home/$logged_user/.config/$new_local_project_name/"
             fi
         fi
         ;;
@@ -444,14 +444,14 @@ case "$action" in
             if [ -d "/etc/$local_project_name/" ] && # if there are any configuration files used before the update
                [ ! -d "/etc/$new_local_project_name/" ]; then # and if there is no system-wide configuration for the current project name
                 # copy configuration files for the updated project with a new name
-                cp -R -a "/etc/$local_project_name/" "/etc/$new_local_project_name/"
+                cp -T -a "/etc/$local_project_name/" "/etc/$new_local_project_name/"
             fi &&
             logged_user="$(logname)" && # get logged user name for user-specific configuration
             [ ! -z "$logged_user" ] && # logged user name must not be an empty string
             if [ -d "/home/$logged_user/.config/$local_project_name/" ] && # if there are user configuration files
                [ ! -d "/home/$logged_user/.config/$new_local_project_name/" ]; then # and none of them with current project name
                 # copy them for the updated project with a new name
-                cp -R -a "/home/$logged_user/.config/$local_project_name/" "/home/$logged_user/.config/$new_local_project_name/"
+                cp -T -a "/home/$logged_user/.config/$local_project_name/" "/home/$logged_user/.config/$new_local_project_name/"
             fi
         fi
         ;;
