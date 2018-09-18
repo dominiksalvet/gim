@@ -6,7 +6,7 @@ A Git repository is **gim compliant** if it meets all of the following rules:
 2. Once an annotated tag is publicly created, it can be removed only to immediately create an annotated tag with the same name on a different commit with the same software functionality as the previously tagged commit.
 3. Every annotated tag's commit contains a *makefile* with at least `install` and `uninstall` targets, where:
    * Target `install` installs all dependencies of the project of the commit and then the project itself automatically, whatever steps needed to be taken and default arguments needed to be used to achieve it.
-   * Target `uninstall` uninstalls the project of the commit automatically. The project's configuration files and dependencies are not removed to make updating the project using gim possible.
+   * Target `uninstall` uninstalls the project of the commit automatically. The project's configuration files that are meant to be version independent and dependencies are not removed to make updating the project using gim possible.
 4. The status of installed/uninstalled repository is determined by existence of an agent (an executable file) localed in any directory defined by the `$PATH` variable of the root user, where:
    * The name of the agent is equal to the repository name if the *gim/names* file is not present in the repository. Otherwise, the agent's name is equal to one of the names stated in the *gim/names* file with the following restrictions applied for the *gim/names* file:
      * The file must not be create empty and once it is created, it can't be removed.
