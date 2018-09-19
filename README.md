@@ -2,7 +2,7 @@
 
 > Install, update or uninstall Git projects in an easy way with a single command.
 
-Nearly every hosted **Git project needs to take different steps to being successfully installed, uninstalled or updated**. That makes sense as requirements per project differ. However, very often an **end user must deal with those differences** during reading an exhaustive README file to get out of it how to install the project. And that does not make sense.
+Nearly every hosted **Git project needs to take different steps to being successfully installed, updated or uninstalled**. That makes sense as requirements per project differ. However, very often an **end user must deal with those differences** during reading an exhaustive README file to get out of it how to install the project. And that does not make sense.
 
 Therefore, the goal of this project is to **make managing Git projects as easy as possible for end users**. Projects that support this way of installation management are marked as **gim compliant** and once they are marked so, they **must meet the rules** stated in the [*RULES.md*](RULES.md) file. These rules are as least restrictive as possible to be also friendly to the projects developers.
 
@@ -15,8 +15,8 @@ This project is not a package manager, it is an installation manager. **It's mea
 * [Install](#install)
 * [Usage](#usage)
   * [Installation](#installation)
-  * [Uninstallation](#uninstallation)
   * [Update](#update)
+  * [Uninstallation](#uninstallation)
 * [Badge](#badge)
 * [Contribute](#contribute)
 * [License](#license)
@@ -49,6 +49,14 @@ To **automatically install the latest stable release** of a gim compliant projec
 sudo gim install <git_url>
 ```
 
+### Update
+
+To **automatically update to the latest stable release** a gim compliant project, use the following command:
+
+```sh
+sudo gim update <git_url>
+```
+
 ### Uninstallation
 
 To **automatically uninstall your current release** of a gim compliant project, use the following command:
@@ -68,15 +76,6 @@ sudo gim uninstall https://gitlab.com/dominiksalvet/gim.git
 You may want to remove gim's cached Git repositories as well if you haven't planned to install and use gim again. You can do it by executing the `gim -clean` command before gim will be uninstalled. Note that **in no case any program installed by gim will be uninstalled** after following those steps. These programs must be uninstalled directly by gim's `uninstall` action or using their makefiles if required.
 
 Once gim is uninstalled, the easiest way to install it again is to use the steps described in the [Install](#install) section.
-
-
-### Update
-
-To **automatically update to the latest stable release** a gim compliant project, use the following command:
-
-```sh
-sudo gim update <git_url>
-```
 
 ## Badge
 
