@@ -82,7 +82,7 @@ root_check() {
 # PARAMETETRS:
 #   $1 - project repository directory
 get_repository_project_names() {
-    if [ ! -f "$1/gim/names" ]; then
+    if [ ! -r "$1/gim/names" ]; then
         echo "$1" | sed -E -e 's|/*$||; s|^.*/||'
     else
         head -n 1 "$1/gim/names"
