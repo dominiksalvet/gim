@@ -15,6 +15,10 @@ The changes not yet present in any release are listed in this section.
 * Add support for TAB completion for bash shell of all possible arguments.
 * The project's Git URL doesn't have to start with `https://`. It will be added automatically.
 
+### Removed
+
+* Automatic configuration files copying has been removed as it is not always intended and soon it will be replaced by special gim scripts that could be used by developers.
+
 ## 3.1.2 (2018-09-19)
 
 ### Fixed
