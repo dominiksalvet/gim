@@ -32,7 +32,7 @@ done
 # the current version of the program
 VERSION=3.1.2
 
-URL_FORMAT='https://<hostname>/<author>/<project>[.git]'
+URL_FORMAT='[https://]<hostname>/<author>/<project>[.git]'
 
 HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION URL [MAKE_ARG]...
 
@@ -41,7 +41,7 @@ ACTION:
   update     update a Git project to the latest version
   uninstall  uninstall a Git project
 
-URL:
+URL format:
   $URL_FORMAT
 
 OPTION:
@@ -219,10 +219,16 @@ $HINT_MESSAGE" >&2
 fi
 
 # check the format of given repository URL
-if ! echo "$repository_url" | grep -q -E -e '^https://[^/]+(/[^\.][^/]*){2}(|\.git)$'; then
+if ! echo "$repository_url" | grep -q -E -e '^(|https://)[^/]+(/[^\.][^/]*){2}(|\.git)$'; then
     echo "$0: Supplied repository URL is not valid.
 $HINT_MESSAGE" >&2
     exit 1
+fi
+
+# if the repository URL doesn't start with 'https://'
+if ! echo "$repository_url" | grep -q -E -e '^https://'; then
+    # add 'https://'
+    repository_url="https://$repository_url"
 fi
 
 # if the repository URL doesn't end with '.git'

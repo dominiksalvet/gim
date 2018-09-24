@@ -13,6 +13,7 @@ The changes not yet present in any release are listed in this section.
 ### Changed
 
 * Add support for TAB completion for bash shell of all possible arguments.
+* The project's Git URL doesn't have to start with `https://`. It will be added automatically.
 
 ## 3.1.2 (2018-09-19)
 
