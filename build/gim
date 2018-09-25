@@ -267,7 +267,7 @@ else
     git reset -q --hard &&
 
     # fetch changes to master branch together with all repository tags
-    git fetch -q --progress --tags origin master &&
+    git fetch -q --progress --tags "$repository_url" master &&
     # merge all fetched remote master changes with local master branch
     git merge -q FETCH_HEAD
 fi || {

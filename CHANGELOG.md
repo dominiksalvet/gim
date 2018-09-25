@@ -11,6 +11,10 @@ The changes not yet present in any release are listed in this section.
 * The connection to a gim compliant project Git repository is established once instead of twice as before.
 * In case of corrupted cached Git repository, an error is no longer reported. The repository will undertake hard reset to the last commit's state.
 
+### Fixed
+
+* Once a Git repository is stored in gim cache, the Git URL for another operations with it no longer can contain an invalid URL ending with `<author>/<project>[.git]`.
+
 ## 3.2.0 (2018-09-24)
 
 ### Added
