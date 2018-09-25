@@ -260,16 +260,16 @@ POSSIBLE SOLUTIONS:
 }
 
 if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
-    git clone -q --progress "$repository_url" . # clone the Git repository to the this directory
-elif [ -z "$(git status --porcelain)" ]; then # check if the Git directory doesn't contain any changes
-    git checkout -q master && # checkout the master branch for the following commands
-    git pull -q --progress && # get the most recent state of the repository
-    git fetch -q --progress --tags # get the most recent state of the repository tags
+    # clone the Git repository master branch to the this directory
+    git clone -q --progress --branch master --single-branch "$repository_url" .
 else
-    echo "$0: Cached $repository_name repository is corrupted.
-POSSIBLE SOLUTIONS:
-  * Remove the cache using the 'sudo $0 -clean' command." >&2
-    exit 1
+    # discard all changes done to the cached repositories (there should not be done some anyway)
+    git reset -q --hard &&
+
+    # fetch changes to master branch together with all repository tags
+    git fetch -q --progress --tags origin master &&
+    # merge all fetched remote master changes with local master branch
+    git merge -q FETCH_HEAD
 fi || {
     echo "$0: Can't obtain $repository_name repository in the most recent state.
 POSSIBLE SOLUTIONS:

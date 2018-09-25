@@ -1,6 +1,6 @@
 # Rules
 
-A Git repository is **gim compliant** if it meets all of the following rules:
+A Git repository is **gim compliant** if it meets all of the following rules for it's master branch:
 
 1. It has at least one annotated tag.
 2. Once an annotated tag is publicly created, it can be removed only to immediately create an annotated tag with the same name on a different commit with the same software functionality as the previously tagged commit.

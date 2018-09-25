@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Changed
+
+* The connection to a gim compliant project Git repository is established once instead of twice as before.
+* In case of corrupted cached Git repository, an error is no longer reported. The repository will undertake hard reset to the last commit's state.
+
 ## 3.2.0 (2018-09-24)
 
 ### Added
