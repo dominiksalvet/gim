@@ -122,9 +122,9 @@ get_local_project_version() {
 #   $2 - make arguments
 make_call() {
     if [ -z "$2" ]; then
-        make "$1"
+        make --quiet "$1"
     else
-        make "$1" "$2"
+        make --quiet "$1" "$2"
     fi
 }
 
@@ -359,8 +359,12 @@ POSSIBLE SOLUTIONS:
 esac || {
     echo "$0: An error has occurred during the $action action.
 POSSIBLE SOLUTIONS:
-  * Read the report above as it can provide required information.
-  * Contact a $local_project_name developer." >&2
+  * Read the report above as it can provide required information." >&2
+    if [ ! -z "$local_project_name" ]; then
+        echo "  * Contact a $local_project_name developer." >&2
+    else
+        echo "  * Contact a $repository_name repository developer." >&2
+    fi
     exit 1
 }
 
