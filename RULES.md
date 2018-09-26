@@ -8,9 +8,10 @@ A Git repository is **gim compliant** if it meets all of the following rules for
    * Target `install` installs dependencies of the project of the commit and then the project itself automatically, whatever steps needed to be taken and default arguments needed to be used to achieve it.
    * Target `uninstall` uninstalls the project of the commit automatically. The project's configuration files and dependencies are not removed to make updating the project using gim possible.
 4. The status of installed/uninstalled repository is determined by existence of an agent (an executable file) localed in any directory defined by the `$PATH` variable of the root user, where:
-   * The name of the agent is equal to the repository name if the *gim/names* file is not present in the repository. Otherwise, the agent's name is equal to one of the names stated in the *gim/names* file with the following restrictions applied for the *gim/names* file:
-     * The file must not be create empty and once it is created, it can't be removed.
-     * The file can only be modified by appending a new name on the end of the first line separating the last stated name by a space. The only exception of this rule is fixing a typo.
+   * The name of the agent is equal to the repository name if the *gim/names* file is not present in the repository. Otherwise, the agent's name is equal to one of the names stated in the *gim/names* file with the following restrictions applied to the *gim/names* file:
+     * Once it is created, it can't be removed.
+     * It contains all previously used names (not only gim compliant ones) sorted from the oldest name to the current name.
+     * The names are placed only at the first line of the file and each two neighboring names are separated by a space.
      * Before making any changes that will cause renaming the agent or before renaming the repository itself, create the *gim/names* file containing `<old-name> <new-name>` or append ` <new-name>` to the existing one and propagate the changes to the repository. Then the rest can be done in no particular order.
    * It supports at least `--version` or `-version` flag, which returns version of currently installed project and it exactly matches project's Git tag names. When the `--version` flag is not supported, it exits with non-zero exit code to indicate to try the other flag.
 
