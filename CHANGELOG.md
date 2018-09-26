@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+## 3.3.0 (2018-09-26)
+
 ### Added
 
 * Support for `status` action, which prints whether a Git project is installed and updated.
