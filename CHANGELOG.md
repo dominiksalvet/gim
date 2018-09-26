@@ -10,6 +10,8 @@ The changes not yet present in any release are listed in this section.
 
 * The connection to a gim compliant project Git repository is established once instead of twice as before.
 * In case of corrupted cached Git repository, an error is no longer reported. The repository will undertake hard reset to the last commit's state.
+* The logo has been remastered.
+* The gim color for a badge is now defined as `571997` in hexadecimal representation, darker purple color than used before.
 
 ### Fixed
 

@@ -82,12 +82,12 @@ Once gim is uninstalled, the easiest way to install it again is to use the steps
 If **your project is gim compliant** and so it meets the rules stated in the [*RULES.md*](RULES.md) file, **you can use the following badge** in Markdown format in connection with the project as a sign of a gim compliance:
 
 ```
-[![gim compliant](https://img.shields.io/badge/gim-compliant-b045ff.svg)](https://gitlab.com/dominiksalvet/gim)
+[![gim compliant](https://img.shields.io/badge/gim-compliant-571997.svg)](https://gitlab.com/dominiksalvet/gim)
 ```
 
 Graphics form:
 
-[![gim compliant](https://img.shields.io/badge/gim-compliant-b045ff.svg)](https://gitlab.com/dominiksalvet/gim)
+[![gim compliant](https://img.shields.io/badge/gim-compliant-571997.svg)](https://gitlab.com/dominiksalvet/gim)
 
 ## Contribute
 
