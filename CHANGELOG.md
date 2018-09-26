@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Added
+
+* Support for `status` action, which prints whether a Git project is installed and updated.
+
 ### Changed
 
 * The connection to a gim compliant project Git repository is established once instead of twice as before.

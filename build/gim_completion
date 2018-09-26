@@ -34,7 +34,7 @@ _gim() {
     # a hint will be shown only when a part of first argument is written
     if [ "$COMP_CWORD" -eq 1 ]; then
         # generate hint from available gim's action
-        COMPREPLY=($(compgen -W "install uninstall update -autoclean -clean -help -about -version" -- "${COMP_WORDS[COMP_CWORD]}"))
+        COMPREPLY=($(compgen -W "install uninstall update status -autoclean -clean -help -about -version" -- "${COMP_WORDS[COMP_CWORD]}"))
     fi
 }
 

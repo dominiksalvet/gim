@@ -40,6 +40,7 @@ ACTION:
   install    install a Git project in the latest version
   update     update a Git project to the latest version
   uninstall  uninstall a Git project
+  status     show a Git project status
 
 URL format:
   $URL_FORMAT
@@ -156,6 +157,9 @@ for i in "$@"; do
                 ;;
             uninstall)
                 action=uninstall
+                ;;
+            status)
+                action=status
                 ;;
             -autoclean)
                 # check if running as root
@@ -355,6 +359,21 @@ POSSIBLE SOLUTIONS:
 
         git checkout -q "$local_project_version" && # use the program version as a tag
         make_call uninstall "$make_args" # uninstall the program
+        ;;
+    status)
+        if [ -z "$local_project_name" ]; then # if the project is not installed
+            echo "Nothing is installed from $repository_name repository."
+        else # project installed
+            if [ "$local_project_version" = "$repository_project_version" ]; then # if the versions are the same
+                echo "$local_project_name is installed and updated ($local_project_version)."
+            elif [ -z "$local_project_version" ]; then # if not and version flags not supported
+                echo "$local_project_name is installed but no version information was provided."
+            else
+                echo "$local_project_name is installed ($local_project_version) but not updated ($repository_project_version)."
+            fi
+        fi
+
+        exit 0
         ;;
 esac || {
     echo "$0: An error has occurred during the $action action.
