@@ -122,9 +122,9 @@ get_local_project_version() {
 #   $2 - make arguments
 make_call() {
     if [ -z "$2" ]; then
-        make --quiet "$1"
+        make "$1"
     else
-        make --quiet "$1" "$2"
+        make "$1" "$2"
     fi
 }
 
