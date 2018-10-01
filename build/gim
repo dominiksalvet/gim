@@ -407,7 +407,7 @@ POSSIBLE SOLUTIONS:
   * Install the project again." >&2
             exit 1
         else
-            echo "$new_local_project_name was installed ($new_local_project_version)."
+            echo "$new_local_project_name has been installed ($new_local_project_version)."
         fi
         ;;
     update)
@@ -418,7 +418,7 @@ POSSIBLE SOLUTIONS:
   * Use the 'install' action instead of the used 'update' action." >&2
             exit 1
         else
-            echo "$local_project_name ($local_project_version) was updated to $new_local_project_name ($new_local_project_version)."
+            echo "$local_project_name ($local_project_version) has been updated to $new_local_project_name ($new_local_project_version)."
         fi
         ;;
     uninstall)
@@ -429,7 +429,7 @@ POSSIBLE SOLUTIONS:
   * Uninstall the project again." >&2
             exit 1
         else
-            echo "$local_project_name was uninstalled."
+            echo "$local_project_name has been uninstalled."
         fi
         ;;
 esac
