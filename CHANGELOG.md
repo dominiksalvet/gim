@@ -36,7 +36,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Removed
 
-* Automatic configuration files copying has been removed as it is not always intended and soon it will be replaced by special gim scripts that could be used by developers.
+* Automatic configuration files copying has been removed as it is not always intended.
 
 ## 3.1.2 (2018-09-19)
 
