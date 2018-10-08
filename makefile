@@ -51,10 +51,10 @@ endef
 all: help
 
 install: # install the entire project automatically
-	./$(MAKE_DIR)/install '$(INSTALL_DIR)' '$(SRC_DIR)'
+	@./$(MAKE_DIR)/install '$(INSTALL_DIR)' '$(SRC_DIR)'
 
 uninstall: # uninstall the project
-	./$(MAKE_DIR)/uninstall '$(INSTALL_DIR)'
+	@./$(MAKE_DIR)/uninstall '$(INSTALL_DIR)'
 
 help: # default, show this help
 	$(call show_generated_help,makefile)
