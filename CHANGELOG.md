@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Added
+
+* Versions of a project that aren't supported by gim can be listed in the *gim/unsupported* file.
+
+### Fixed
+
+* Remove untracked files and directories before working with a cached git repository.
+
 ## 3.3.0 (2018-09-26)
 
 ### Added

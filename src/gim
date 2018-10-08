@@ -267,7 +267,9 @@ if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is em
     # clone the Git repository master branch to the this directory
     git clone -q --progress --branch master --single-branch "$repository_url" .
 else
-    # discard all changes done to the cached repositories (there should not be done some anyway)
+    # remove all untracked files and directories
+    git clean -q -f -d &&
+    # discard all changes done to the cached repositories
     git reset -q --hard &&
 
     # fetch changes to master branch together with all repository tags
@@ -293,12 +295,26 @@ POSSIBLE SOLUTIONS:
 }
 
 #-------------------------------------------------------------------------------
-# EXECUTE SELECTED ACTION
+# CHECK VERSION
 #-------------------------------------------------------------------------------
 
 # get information about the local project (if installed)
 local_project_name="$(get_local_project_name "$(get_repository_project_names "$repository_dir/")")"
 local_project_version="$(get_local_project_version "$local_project_name")"
+
+if [ -r "$repository_dir/gim/unsupported" ] && [ ! -z "$local_project_version" ]; then
+    if head -n 1 "$repository_dir/gim/unsupported" | grep -q -E -e "$local_project_version"; then
+        echo "$0: Installed version of the project is not gim compliant.
+POSSIBLE SOLUTION:
+  * Use delivered makefile to perform '$action' action.
+  * Visit a project website for more information." >&2
+        exit 1
+    fi
+fi
+
+#-------------------------------------------------------------------------------
+# EXECUTE SELECTED ACTION
+#-------------------------------------------------------------------------------
 
 case "$action" in
     install)
@@ -334,7 +350,7 @@ POSSIBLE SOLUTIONS:
                 exit 1
             fi
         else # the project is not installed
-            echo "$0: Nothing is installed from $repository_name repository.
+            echo "$0: There is nothing installed from $repository_name repository.
 POSSIBLE SOLUTIONS:
   * Use the 'install' action instead of the used 'update' action." >&2
             exit 1
@@ -348,7 +364,7 @@ POSSIBLE SOLUTIONS:
         ;;
     uninstall)
         if [ -z "$local_project_name" ]; then # if the project is not installed
-            echo "Nothing is installed from $repository_name repository."
+            echo "There is nothing installed from $repository_name repository."
             exit 0 # uninstallation exits with a success eventually
         elif [ -z "$local_project_version" ]; then
             echo "$0: $local_project_name is installed but no version information was provided.
@@ -362,7 +378,7 @@ POSSIBLE SOLUTIONS:
         ;;
     status)
         if [ -z "$local_project_name" ]; then # if the project is not installed
-            echo "Nothing is installed from $repository_name repository."
+            echo "There is nothing installed from $repository_name repository."
         else # project installed
             if [ "$local_project_version" = "$repository_project_version" ]; then # if the versions are the same
                 echo "$local_project_name is installed and updated ($local_project_version)."
