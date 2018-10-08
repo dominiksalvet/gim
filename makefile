@@ -18,7 +18,7 @@ COLUMN := column
 # directory definitions
 MAKE_DIR := make
 INSTALL_DIR := /usr/local/bin
-BUILD_DIR := build
+SRC_DIR := src
 
 #-------------------------------------------------------------------------------
 # HELP GENERATOR
@@ -51,7 +51,7 @@ endef
 all: help
 
 install: # install the entire project automatically
-	./$(MAKE_DIR)/install '$(INSTALL_DIR)' '$(BUILD_DIR)'
+	./$(MAKE_DIR)/install '$(INSTALL_DIR)' '$(SRC_DIR)'
 
 uninstall: # uninstall the project
 	./$(MAKE_DIR)/uninstall '$(INSTALL_DIR)'

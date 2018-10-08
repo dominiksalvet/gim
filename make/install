@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------
 # PARAMETERS:
 #   $1 - installation directory path
-#   $2 - build directory path
+#   $2 - source directory path
 #-------------------------------------------------------------------------------
 
 
@@ -35,7 +35,7 @@ done
 
 INSTALL_DIR="$1"
 
-BUILD_DIR="$2"
+SRC_DIR="$2"
 
 #-------------------------------------------------------------------------------
 # CHECK STATE
@@ -61,15 +61,15 @@ if [ -x "$INSTALL_DIR/gim" ]; then
     exit 0
 fi
 
-# check if the build directory argument passed
-if [ -z "$BUILD_DIR" ]; then
-    echo "$0: Please supply non-empty build directory argument." >&2
+# check if the source directory argument passed
+if [ -z "$SRC_DIR" ]; then
+    echo "$0: Please supply non-empty source directory argument." >&2
     exit 1
 fi
 
-# check if build directory exists and is not empty
-if [ ! -d "$BUILD_DIR/" ] || [ -z "$(ls -A "$BUILD_DIR/")" ]; then
-    echo "$0: Build directory '$BUILD_DIR/' must exist and must not be empty." >&2
+# check if source directory exists and is not empty
+if [ ! -d "$SRC_DIR/" ] || [ -z "$(ls -A "$SRC_DIR/")" ]; then
+    echo "$0: Source directory '$SRC_DIR/' must exist and must not be empty." >&2
     exit 1
 fi
 
@@ -84,7 +84,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # copy the program itself
-cp "$BUILD_DIR/gim" "$INSTALL_DIR/" &&
+cp "$SRC_DIR/gim" "$INSTALL_DIR/" &&
 chmod a+x "$INSTALL_DIR/gim" || {
     echo "$0: Can't finish the installation.
 POSSIBLE SOLUTIONS:
@@ -98,7 +98,7 @@ POSSIBLE SOLUTIONS:
 if grep -q -E -e '^/bin/bash$' /etc/shells; then
     # set up TAB completion for bash shell
     mkdir -p /etc/bash_completion.d/ &&
-    cp "$BUILD_DIR/gim_completion" /etc/bash_completion.d/ || {
+    cp "$SRC_DIR/gim_completion" /etc/bash_completion.d/ || {
         echo "$0: Can't set up TAB completion.
 POSSIBLE SOLUTIONS:
   * Uninstall gim and install it again.
