@@ -98,7 +98,7 @@ POSSIBLE SOLUTIONS:
 if grep -q -E -e '^/bin/bash$' /etc/shells; then
     # set up TAB completion for bash shell
     mkdir -p /etc/bash_completion.d/ &&
-    cp "$SRC_DIR/gim_completion" /etc/bash_completion.d/ || {
+    cp "$SRC_DIR/gim-completion" /etc/bash_completion.d/ || {
         echo "$0: Can't set up TAB completion.
 POSSIBLE SOLUTIONS:
   * Uninstall gim and install it again.
