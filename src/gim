@@ -304,10 +304,11 @@ local_project_version="$(get_local_project_version "$local_project_name")"
 
 if [ -r "$repository_dir/gim/unsupported" ] && [ ! -z "$local_project_version" ]; then
     if head -n 1 "$repository_dir/gim/unsupported" | grep -q -E -e "$local_project_version"; then
-        echo "$0: Installed version of the project is not gim compliant.
+        echo "$0: [$local_project_name $local_project_version] is not gim compliant.
 POSSIBLE SOLUTION:
   * Use delivered makefile to perform '$action' action.
-  * Visit a project website for more information." >&2
+  * Visit a project website for more information.
+  * Contact a $repository_name repository developer." >&2
         exit 1
     fi
 fi
@@ -320,15 +321,15 @@ case "$action" in
     install)
         if [ ! -z "$local_project_name" ]; then # check if the project already installed
             if [ "$local_project_version" = "$repository_project_version" ]; then # if the versions are the same
-                echo "$local_project_name is already installed and updated ($local_project_version)."
+                echo "[$local_project_name $local_project_version] is already installed and updated."
                 exit 0
             elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-                echo "$0: $local_project_name is already installed but no version information was provided.
+                echo "$0: [$local_project_name] is already installed but no version information was provided.
 POSSIBLE SOLUTIONS:
   * Contact a $local_project_name developer about gim compliance." >&2
                 exit 1
             else
-                echo "$0: $local_project_name is already installed ($local_project_version) but not updated ($repository_project_version).
+                echo "$0: [$local_project_name $local_project_version] is already installed but not updated ($repository_project_version).
 POSSIBLE SOLUTIONS:
   * Use the 'update' action instead of the used 'install' action." >&2
                 exit 1
@@ -341,10 +342,10 @@ POSSIBLE SOLUTIONS:
     update)
         if [ ! -z "$local_project_name" ]; then # check if the project installed
             if [ "$local_project_version" = "$repository_project_version" ]; then # if the versions are the same
-                echo "$local_project_name is already installed and updated ($local_project_version)."
+                echo "[$local_project_name $local_project_version] is already installed and updated."
                 exit 0
             elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-                echo "$0: $local_project_name is installed but no version information was provided.
+                echo "$0: [$local_project_name] is installed but no version information was provided.
 POSSIBLE SOLUTIONS:
   * Contact a $local_project_name developer about gim compliance." >&2
                 exit 1
@@ -367,7 +368,7 @@ POSSIBLE SOLUTIONS:
             echo "There is nothing installed from $repository_name repository."
             exit 0 # uninstallation exits with a success eventually
         elif [ -z "$local_project_version" ]; then
-            echo "$0: $local_project_name is installed but no version information was provided.
+            echo "$0: [$local_project_name] is installed but no version information was provided.
 POSSIBLE SOLUTIONS:
   * Contact a $local_project_name developer about gim compliance." >&2
             exit 1
@@ -381,11 +382,11 @@ POSSIBLE SOLUTIONS:
             echo "There is nothing installed from $repository_name repository."
         else # project installed
             if [ "$local_project_version" = "$repository_project_version" ]; then # if the versions are the same
-                echo "$local_project_name is installed and updated ($local_project_version)."
+                echo "[$local_project_name $local_project_version] is installed and updated."
             elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-                echo "$local_project_name is installed but no version information was provided."
+                echo "[$local_project_name] is installed but no version information was provided."
             else
-                echo "$local_project_name is installed ($local_project_version) but not updated ($repository_project_version)."
+                echo "[$local_project_name $local_project_version] is installed but not updated ($repository_project_version)."
             fi
         fi
 
@@ -417,35 +418,35 @@ new_local_project_version="$(get_local_project_version "$new_local_project_name"
 case "$action" in
     install)
         if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
-            echo "$0: The project from $repository_name repository should have been installed, but it is not.
+            echo "$0: A project from $repository_name repository should have been installed, but it is not.
 POSSIBLE SOLUTIONS:
   * Contact a $repository_name repository developer about gim compliance.
   * Install the project again." >&2
             exit 1
         else
-            echo "$new_local_project_name has been installed ($new_local_project_version)."
+            echo "[$new_local_project_name $new_local_project_version] has been installed."
         fi
         ;;
     update)
         if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
-            echo "$0: The project from $repository_name repository should have been installed, but it is not.
+            echo "$0: [$local_project_name $local_project_version] has been uninstalled but it couldn't have been updated ($repository_project_version).
 POSSIBLE SOLUTIONS:
   * Contact a $repository_name repository developer about gim compliance.
   * Use the 'install' action instead of the used 'update' action." >&2
             exit 1
         else
-            echo "$local_project_name ($local_project_version) has been updated to $new_local_project_name ($new_local_project_version)."
+            echo "[$local_project_name $local_project_version] has been updated to [$new_local_project_name $new_local_project_version]."
         fi
         ;;
     uninstall)
         if [ ! -z "$new_local_project_name" ]; then # if the project is installed (as it shouldn't be now)
-            echo "$0: The project from $repository_name repository should have been uninstalled, but it is not.
+            echo "$0: [$new_local_project_name $new_local_project_version] should have been uninstalled, but it is not.
 POSSIBLE SOLUTIONS:
   * Contact a $repository_name repository developer about gim compliance.
   * Uninstall the project again." >&2
             exit 1
         else
-            echo "$local_project_name has been uninstalled."
+            echo "[$local_project_name $local_project_version] has been uninstalled."
         fi
         ;;
 esac
