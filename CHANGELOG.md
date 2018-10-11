@@ -10,6 +10,10 @@ The changes not yet present in any release are listed in this section.
 
 * Versions of a project that aren't supported by gim can be listed in the *gim/unsupported* file.
 
+### Changed
+
+* Installation/uninstallation process no longer prints make recipes before executing them.
+
 ### Fixed
 
 * Remove untracked files and directories before working with a cached git repository.
