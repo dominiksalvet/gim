@@ -266,14 +266,18 @@ POSSIBLE SOLUTIONS:
 if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
     # clone the Git repository master branch to the this directory
     git clone -q --progress --branch master --single-branch "$repository_url" .
+    # disable push remote URL
+    git remote set-url --push origin ''
 else
     # remove all untracked files and directories
     git clean -q -f -d &&
     # discard all changes done to the cached repositories
     git reset -q --hard &&
 
+    # apply given fetch remote URL
+    git remote set-url origin "$repository_url"
     # fetch changes to master branch together with all repository tags
-    git fetch -q --progress --tags "$repository_url" master &&
+    git fetch -q --progress --tags origin master &&
     # merge all fetched remote master changes with local master branch
     git merge -q FETCH_HEAD
 fi || {
