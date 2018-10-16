@@ -13,6 +13,7 @@ The changes not yet present in any release are listed in this section.
 ### Changed
 
 * Installation/uninstallation process no longer prints make recipes before executing them.
+* Structure of gim cache now also consider given hostname when being built. In extreme cases, it may be required to use `-clean` flag before further gim use.
 
 ### Fixed
 

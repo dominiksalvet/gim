@@ -32,7 +32,7 @@ done
 # the current version of the program
 VERSION=3.3.0
 
-URL_FORMAT='[https://]<hostname>/<author>/<project>[.git]'
+URL_FORMAT='[https://]<hostname>/<maintainer>/<project>[.git]'
 
 HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION URL [MAKE_ARG]...
 
@@ -165,7 +165,7 @@ for i in "$@"; do
                 # check if running as root
                 root_check || exit
                 # go through all cached projects Git repositories
-                for j in "${CACHE_DIR:?}/"*/*; do
+                for j in "${CACHE_DIR:?}/"*/*/*; do
                     # expecting a Git repository, so check if it is a directory
                     if [ -d "$j" ]; then
                         # check if the project not installed
@@ -175,7 +175,11 @@ for i in "$@"; do
                         fi
                     fi
                 done
-                # remove author directories if they are empty
+                # remove maintainer directories if they are empty
+                for j in "${CACHE_DIR:?}/"*/*; do
+                    rmdir --ignore-fail-on-non-empty "$j/"
+                done
+                # remove hostname directories if they are empty
                 for j in "${CACHE_DIR:?}/"*; do
                     rmdir --ignore-fail-on-non-empty "$j/"
                 done
@@ -249,9 +253,10 @@ fi
 root_check || exit
 
 # extract required information from the given repository URL
-repository_author="$(echo "$repository_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
+repository_hostname="$(echo "$repository_url" | sed -E -e 's|^https://||; s|/.*$||')"
+repository_maintainer="$(echo "$repository_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
 repository_name="$(echo "$repository_url" | sed -E -e 's/.git$//; s|.*/||')"
-repository_dir="$CACHE_DIR/$repository_author/$repository_name"
+repository_dir="$CACHE_DIR/$repository_hostname/$repository_maintainer/$repository_name"
 
 # create a cache directory for the project
 mkdir -p "$repository_dir/" &&
