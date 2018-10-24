@@ -1,4 +1,4 @@
-# Contribution Guide
+# Contributing
 
 The development of this project is published on [this website](https://gitlab.com/dominiksalvet/gim) and **everyone is welcome to contribute**. Here is described how.
 
