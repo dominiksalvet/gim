@@ -99,7 +99,7 @@ autoclean() {
 #   Returns first found name of a locally installed project based on a given Git
 #   repository as a directory path.
 # PARAMETETRS:
-#   $1 - project repository directory
+#   $1 - repository directory
 get_local_project_name() {
     if [ -r "$1"/gim/names ]; then
         _repo_project_names="$(head -n 1 "$1"/gim/names)"
@@ -116,7 +116,7 @@ get_local_project_name() {
 }
 
 # DESCRIPTION:
-#   Returns the current version of a locally installed given project name.
+#   Returns the current version of a given project name.
 # PARAMETERS:
 #   $1 - local project name
 get_local_project_version() {
@@ -249,8 +249,8 @@ repo_name="$(echo "$repo_short_url" | sed -E -e 's|.*/||')"
 repo_dir="$CACHE_REPO_DIR/$repo_hostname/$repo_maintainer/$repo_name"
 
 # create a cache directory for the project
-mkdir -p "$repo_dir/" &&
-cd "$repo_dir/" &&
+mkdir -p "$repo_dir"/ &&
+cd "$repo_dir"/ &&
 
 if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
     # clone the Git repository master branch to the this directory
@@ -292,11 +292,11 @@ POSSIBLE SOLUTIONS:
 }
 
 # get information about the local project (if installed)
-local_project_name="$(get_local_project_name "$repo_dir/")"
+local_project_name="$(get_local_project_name "$repo_dir"/)"
 local_project_version="$(get_local_project_version "$local_project_name")"
 
-if [ -r "$repo_dir/gim/unsupported" ] && [ ! -z "$local_project_version" ]; then
-    if head -n 1 "$repo_dir/gim/unsupported" | grep -q -E -e "$local_project_version"; then
+if [ -r "$repo_dir"/gim/unsupported ] && [ ! -z "$local_project_version" ]; then
+    if head -n 1 "$repo_dir"/gim/unsupported | grep -q -E -e "$local_project_version"; then
         echo "$0: [$local_project_name $local_project_version] is not gim compliant.
 POSSIBLE SOLUTION:
   * Use delivered makefile to perform '$action' action.
