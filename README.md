@@ -26,9 +26,9 @@ This project is not a package manager, it is an installation manager. **It's mea
 If you haven't installed this project yet, to **automatically install the latest stable release** of it, open a terminal emulator and use the following commands:
 
 ```sh
-cd ~/Downloads/ && # change directory to the 'Downloads' directory
-git clone https://gitlab.com/dominiksalvet/gim.git && # clone gim repository
-cd gim/ && # change directory to the cloned repository
+mkdir -p ~/Downloads/gim/ && # create a directory for gim repository
+cd ~/Downloads/gim/ && # change directory to the created directory
+git clone https://gitlab.com/dominiksalvet/gim.git . && # clone gim repository
 git checkout -q "$(git describe --abbrev=0)" && # use the latest tag
 sudo make install && # install gim
 echo 'SUCCESS' # print a message if everything succeeded
