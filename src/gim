@@ -15,12 +15,12 @@
 SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id'
 
 # check if some software is missing
-for i in $SW_REQUIRED; do
+for sw in $SW_REQUIRED; do
     # software is missing if at least one piece of software is missing
-    if ! command -v "$i" > /dev/null; then
-        echo "$0: Required software $i is missing.
+    if ! command -v "$sw" > /dev/null; then
+        echo "$0: Required software $sw is missing.
 POSSIBLE SOLUTIONS:
-  * Install $i using an installed package manager." >&2
+  * Install $sw using an installed package manager." >&2
         exit 1
     fi
 done
@@ -32,28 +32,22 @@ done
 # the current version of the program
 VERSION=3.4.0
 
-URL_FORMAT='[https://]<hostname>/<maintainer>/<project>[.git]'
-
-HELP_MESSAGE="USAGE: $0 [OPTION]... ACTION URL [MAKE_ARG]...
+HELP_MESSAGE="USAGE:
+  $0 ACTION URL [MAKE_ARG...]
+  $0 COMMAND
 
 ACTION:
-  install    install a Git project in the latest version
-  update     update a Git project to the latest version
+  install    install a Git project
+  update     update a Git project
   uninstall  uninstall a Git project
   status     show a Git project status
 
-URL format:
-  $URL_FORMAT
-
-OPTION:
-  -autoclean  remove old cached Git repositories and exit
-  -clean      remove all cached Git repositories and exit
+COMMAND:
+  -autoclean  remove old cache and exit
+  -clean      remove all cache and exit
   -help       show this help and exit
   -about      show information and exit
-  -version    show version and exit
-
-MAKE_ARG:
-  Arguments for all make commands of a selected action in format <VAR>=<value>."
+  -version    show version and exit"
 
 ABOUT_MESSAGE="gim $VERSION
 Install, update or uninstall Git projects in an easy way with a single command.
@@ -66,7 +60,7 @@ HINT_MESSAGE="POSSIBLE SOLUTIONS:
   * Use the '$0 -help' command for getting help."
 
 # cache directory to store downloaded Git repositories
-CACHE_DIR=/etc/gim/cache
+CACHE_REPO_DIR=/etc/gim/cache
 
 # DESCRIPTION:
 #   Check if running as root.
@@ -78,42 +72,59 @@ root_check() {
 }
 
 # DESCRIPTION:
-#   Returns all names of a gim compliant project contained in a given Git
-#   repository as a directory path.
-# PARAMETETRS:
-#   $1 - project repository directory
-get_repository_project_names() {
-    if [ ! -r "$1/gim/names" ]; then
-        echo "$1" | sed -E -e 's|/*$||; s|^.*/||'
-    else
-        head -n 1 "$1/gim/names"
-    fi
+#   Perform autoclean of gim's cache.
+autoclean() {
+    # go through all cached projects Git repositories
+    for _repo_dir in "$CACHE_REPO_DIR"/*/*/*; do
+        # expecting a Git repository, so check if it is a directory
+        if [ -d "$_repo_dir" ]; then
+            # check if the project not installed
+            if [ -z "$(get_local_project_name "$_repo_dir")" ]; then
+                # remove the project's cached Git repository
+                rm -r -f "${_repo_dir:?}/"
+            fi
+        fi
+    done
+    # remove maintainer directories if they are empty
+    for _maintainer_dir in "${CACHE_REPO_DIR:?}/"*/*; do
+        rmdir --ignore-fail-on-non-empty "$_maintainer_dir/"
+    done
+    # remove hostname directories if they are empty
+    for _hostname_dir in "${CACHE_REPO_DIR:?}/"*; do
+        rmdir --ignore-fail-on-non-empty "$_hostname_dir/"
+    done
 }
 
 # DESCRIPTION:
-#   Returns name of locally installed project based on given repository project
-#   names if found.
+#   Returns first found name of a locally installed project based on a given Git
+#   repository as a directory path.
 # PARAMETETRS:
-#   $1 - repository project names
+#   $1 - project repository directory
 get_local_project_name() {
-    for LOCAL_name in $1; do
-        if [ -x "$(command -v "$LOCAL_name")" ]; then
-            echo "$LOCAL_name"
+    if [ -r "$1"/gim/names ]; then
+        _repo_project_names="$(head -n 1 "$1"/gim/names)"
+    else
+        _repo_project_names="$(echo "$1" | sed -E -e 's|/*$||; s|^.*/||')"
+    fi
+
+    for _repo_project_name in $_repo_project_names; do
+        if [ -x "$(command -v "$_repo_project_name")" ]; then
+            echo "$_repo_project_name"
             break
         fi
     done
 }
 
 # DESCRIPTION:
-#   Returns the current version of a locally installed given project.
+#   Returns the current version of a locally installed given project name.
 # PARAMETERS:
 #   $1 - local project name
 get_local_project_version() {
     # get the current version of the project
-    if ! LOCAL_version="$("$1" --version)" 2>/dev/null; then
-        LOCAL_version="$("$1" -version)" 2>/dev/null
-    fi || LOCAL_version=
-    echo "$LOCAL_version"
+    if ! _version="$("$1" --version)" 2>/dev/null; then
+        _version="$("$1" -version)" 2>/dev/null
+    fi || _version=
+    echo "$_version"
 }
 
 # DESCRIPTION:
@@ -121,7 +132,7 @@ get_local_project_version() {
 # PARAMETERS:
 #   $1 - make target
 #   $2 - make arguments
-make_call() {
+call_make() {
     if [ -z "$2" ]; then
         make "$1"
     else
@@ -130,25 +141,25 @@ make_call() {
 }
 
 #-------------------------------------------------------------------------------
-# PROCESSING PARAMETERS
+# PROCESSING ARGUMENTS
 #-------------------------------------------------------------------------------
 
 action=
-repository_url=
+repo_url=
 make_args=
-# processing each parameter separately
-for i in "$@"; do
+# process each argument individually
+for arg in "$@"; do
     if [ ! -z "$action" ]; then # if the action has been selected
-        if [ -z "$repository_url" ]; then # if the project repository URL is not set
-            repository_url="$i" # next up are only make arguments
+        if [ -z "$repo_url" ]; then # if the project repository URL is not set
+            repo_url="$arg" # next up are only make arguments
         # accept only make arguments
         elif [ -z "$make_args" ]; then
-            make_args="$i"
+            make_args="$arg"
         else
-            make_args="$make_args $i"
+            make_args="$make_args $arg"
         fi
     else
-        case "$i" in
+        case "$arg" in
             install)
                 action=install
                 ;;
@@ -164,31 +175,13 @@ for i in "$@"; do
             -autoclean)
                 # check if running as root
                 root_check || exit
-                # go through all cached projects Git repositories
-                for j in "${CACHE_DIR:?}/"*/*/*; do
-                    # expecting a Git repository, so check if it is a directory
-                    if [ -d "$j" ]; then
-                        # check if the project not installed
-                        if [ -z "$(get_local_project_name "$(get_repository_project_names "$j")")" ]; then
-                            # remove the project's cached Git repository
-                            rm -r -f "${j:?}/"
-                        fi
-                    fi
-                done
-                # remove maintainer directories if they are empty
-                for j in "${CACHE_DIR:?}/"*/*; do
-                    rmdir --ignore-fail-on-non-empty "$j/"
-                done
-                # remove hostname directories if they are empty
-                for j in "${CACHE_DIR:?}/"*; do
-                    rmdir --ignore-fail-on-non-empty "$j/"
-                done
+                autoclean
                 exit 0
                 ;;
             -clean)
                 # check if running as root
                 root_check || exit
-                rm -r -f "${CACHE_DIR:?}/"*
+                rm -r -f "${CACHE_REPO_DIR:?}/"*
                 exit 0
                 ;;
             -help)
@@ -204,7 +197,7 @@ for i in "$@"; do
                 exit 0
                 ;;
             *)
-                echo "$0: The option '$i' was not recognized.
+                echo "$0: The argument '$arg' was not recognized.
 $HINT_MESSAGE" >&2
                 exit 1
                 ;;
@@ -220,29 +213,29 @@ $HINT_MESSAGE" >&2
 fi
 
 # check if argument with repository URL provided
-if [ -z "$repository_url" ]; then
+if [ -z "$repo_url" ]; then
     echo "$0: No argument with repository URL provided.
 $HINT_MESSAGE" >&2
     exit 1
 fi
 
 # check the format of given repository URL
-if ! echo "$repository_url" | grep -q -E -e '^(|https://)[^/]+(/[^\.][^/]*){2}(|\.git)$'; then
+if ! echo "$repo_url" | grep -q -E -e '^(|https://)[^/]+(/[^\.][^/]*){2}(|\.git)$'; then
     echo "$0: Supplied repository URL is not valid.
 $HINT_MESSAGE" >&2
     exit 1
 fi
 
 # if the repository URL doesn't start with 'https://'
-if ! echo "$repository_url" | grep -q -E -e '^https://'; then
+if ! echo "$repo_url" | grep -q -E -e '^https://'; then
     # add 'https://'
-    repository_url="https://$repository_url"
+    repo_url="https://$repo_url"
 fi
 
 # if the repository URL doesn't end with '.git'
-if ! echo "$repository_url" | grep -q -E -e '\.git$'; then
+if ! echo "$repo_url" | grep -q -E -e '\.git$'; then
     # append '.git'
-    repository_url="${repository_url}.git"
+    repo_url="${repo_url}.git"
 fi
 
 #-------------------------------------------------------------------------------
@@ -253,10 +246,10 @@ fi
 root_check || exit
 
 # extract required information from the given repository URL
-repository_hostname="$(echo "$repository_url" | sed -E -e 's|^https://||; s|/.*$||')"
-repository_maintainer="$(echo "$repository_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
-repository_name="$(echo "$repository_url" | sed -E -e 's/.git$//; s|.*/||')"
-repository_dir="$CACHE_DIR/$repository_hostname/$repository_maintainer/$repository_name"
+repository_hostname="$(echo "$repo_url" | sed -E -e 's|^https://||; s|/.*$||')"
+repository_maintainer="$(echo "$repo_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
+repository_name="$(echo "$repo_url" | sed -E -e 's/.git$//; s|.*/||')"
+repository_dir="$CACHE_REPO_DIR/$repository_hostname/$repository_maintainer/$repository_name"
 
 # create a cache directory for the project
 mkdir -p "$repository_dir/" &&
@@ -270,7 +263,7 @@ POSSIBLE SOLUTIONS:
 
 if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
     # clone the Git repository master branch to the this directory
-    git clone -q --progress --branch master --single-branch "$repository_url" .
+    git clone -q --progress --branch master --single-branch "$repo_url" .
     # disable push remote URL
     git remote set-url --push origin ''
 else
@@ -280,7 +273,7 @@ else
     git reset -q --hard &&
 
     # apply given fetch remote URL
-    git remote set-url origin "$repository_url"
+    git remote set-url origin "$repo_url"
     # fetch changes to master branch together with all repository tags
     git fetch -q --progress --tags origin master &&
     # merge all fetched remote master changes with local master branch
@@ -308,7 +301,7 @@ POSSIBLE SOLUTIONS:
 #-------------------------------------------------------------------------------
 
 # get information about the local project (if installed)
-local_project_name="$(get_local_project_name "$(get_repository_project_names "$repository_dir/")")"
+local_project_name="$(get_local_project_name "$repository_dir/")"
 local_project_version="$(get_local_project_version "$local_project_name")"
 
 if [ -r "$repository_dir/gim/unsupported" ] && [ ! -z "$local_project_version" ]; then
@@ -346,7 +339,7 @@ POSSIBLE SOLUTIONS:
         fi
 
         git checkout -q "$repository_project_version" && # use the latest repository tag
-        make_call install "$make_args" # install the program
+        call_make install "$make_args" # install the program
         ;;
     update)
         if [ ! -z "$local_project_name" ]; then # check if the project installed
@@ -367,10 +360,10 @@ POSSIBLE SOLUTIONS:
         fi
 
         git checkout -q "$local_project_version" && # use the program version as a tag
-        make_call uninstall "$make_args" && # uninstall the program
+        call_make uninstall "$make_args" && # uninstall the program
 
         git checkout -q "$repository_project_version" && # use the latest repository tag
-        make_call install "$make_args" # install the program again
+        call_make install "$make_args" # install the program again
         ;;
     uninstall)
         if [ -z "$local_project_name" ]; then # if the project is not installed
@@ -384,7 +377,7 @@ POSSIBLE SOLUTIONS:
         fi
 
         git checkout -q "$local_project_version" && # use the program version as a tag
-        make_call uninstall "$make_args" # uninstall the program
+        call_make uninstall "$make_args" # uninstall the program
         ;;
     status)
         if [ -z "$local_project_name" ]; then # if the project is not installed
@@ -421,7 +414,7 @@ POSSIBLE SOLUTIONS:
 git checkout -q master
 
 # refresh information about the local project
-new_local_project_name="$(get_local_project_name "$(get_repository_project_names "$repository_dir/")")"
+new_local_project_name="$(get_local_project_name "$repository_dir/")"
 new_local_project_version="$(get_local_project_version "$new_local_project_name")"
 
 case "$action" in
