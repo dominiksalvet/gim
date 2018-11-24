@@ -62,6 +62,10 @@ HINT_MESSAGE="POSSIBLE SOLUTIONS:
 # cache directory to store downloaded Git repositories
 CACHE_REPO_DIR=/etc/gim/cache
 
+#-------------------------------------------------------------------------------
+# PROCESSING ARGUMENTS
+#-------------------------------------------------------------------------------
+
 # DESCRIPTION:
 #   Check if running as root.
 root_check() {
@@ -69,6 +73,26 @@ root_check() {
         echo "$0: Please run as root." >&2
         return 1
     fi
+}
+
+# DESCRIPTION:
+#   Returns first found name of a locally installed project based on a given Git
+#   repository as a directory path.
+# PARAMETETRS:
+#   $1 - repository directory
+get_local_project_name() {
+    if [ -r "$1"/gim/names ]; then
+        _repo_project_names="$(head -n 1 "$1"/gim/names)"
+    else
+        _repo_project_names="$(echo "$1" | sed -E -e 's|/*$||; s|^.*/||')"
+    fi
+
+    for _repo_project_name in $_repo_project_names; do
+        if [ -x "$(command -v "$_repo_project_name")" ]; then
+            echo "$_repo_project_name"
+            break
+        fi
+    done
 }
 
 # DESCRIPTION:
@@ -94,55 +118,6 @@ autoclean() {
         rmdir --ignore-fail-on-non-empty "$_hostname_dir"/
     done
 }
-
-# DESCRIPTION:
-#   Returns first found name of a locally installed project based on a given Git
-#   repository as a directory path.
-# PARAMETETRS:
-#   $1 - repository directory
-get_local_project_name() {
-    if [ -r "$1"/gim/names ]; then
-        _repo_project_names="$(head -n 1 "$1"/gim/names)"
-    else
-        _repo_project_names="$(echo "$1" | sed -E -e 's|/*$||; s|^.*/||')"
-    fi
-
-    for _repo_project_name in $_repo_project_names; do
-        if [ -x "$(command -v "$_repo_project_name")" ]; then
-            echo "$_repo_project_name"
-            break
-        fi
-    done
-}
-
-# DESCRIPTION:
-#   Returns the current version of a given project name.
-# PARAMETERS:
-#   $1 - local project name
-get_local_project_version() {
-    # get the current version of the project
-    if ! _version="$("$1" --version)" 2>/dev/null; then
-        _version="$("$1" -version)" 2>/dev/null
-    fi || _version=
-    echo "$_version"
-}
-
-# DESCRIPTION:
-#   Perform a make target call with given arguments.
-# PARAMETERS:
-#   $1 - make target
-#   $2 - make arguments
-call_make() {
-    if [ -z "$2" ]; then
-        make "$1"
-    else
-        make "$1" "$2"
-    fi
-}
-
-#-------------------------------------------------------------------------------
-# PROCESSING ARGUMENTS
-#-------------------------------------------------------------------------------
 
 action=
 repo_long_url=
@@ -283,11 +258,21 @@ POSSIBLE SOLUTIONS:
 # CHECK VERSIONS
 #-------------------------------------------------------------------------------
 
+# DESCRIPTION:
+#   Returns the current version of a given project name.
+# PARAMETERS:
+#   $1 - local project name
+get_local_project_version() {
+    # get the current version of the project
+    if ! _version="$("$1" --version)" 2>/dev/null; then
+        _version="$("$1" -version)" 2>/dev/null
+    fi || _version=
+    echo "$_version"
+}
+
 # get version of the most recent annotated tag of the obtained Git project
-repo_project_version="$(git describe --abbrev=0)" || {
-    echo "$0: Repository $repo_name has no annotated tag.
-POSSIBLE SOLUTIONS:
-  * Contact a $repo_name repository developer about gim compliance." >&2
+repo_project_version="$(git describe --abbrev=0 2>/dev/null)" || {
+    echo "[incompatible] $repo_short_url" >&2
     exit 1
 }
 
@@ -297,11 +282,7 @@ local_project_version="$(get_local_project_version "$local_project_name")"
 
 if [ -r "$repo_dir"/gim/unsupported ] && [ ! -z "$local_project_version" ]; then
     if head -n 1 "$repo_dir"/gim/unsupported | grep -q -E -e "$local_project_version"; then
-        echo "$0: [$local_project_name $local_project_version] is not gim compliant.
-POSSIBLE SOLUTION:
-  * Use delivered makefile to perform '$action' action.
-  * Visit a project website for more information.
-  * Contact a $repo_name repository developer." >&2
+        echo "[incompatible] $local_project_name $local_project_version from $repo_short_url" >&2
         exit 1
     fi
 fi
@@ -310,19 +291,30 @@ fi
 # EXECUTE SELECTED ACTION
 #-------------------------------------------------------------------------------
 
+# DESCRIPTION:
+#   Perform a make target call with given arguments.
+# PARAMETERS:
+#   $1 - make target
+#   $2 - make arguments
+call_make() {
+    if [ -z "$2" ]; then
+        make "$1"
+    else
+        make "$1" "$2"
+    fi
+}
+
 case "$action" in
     install)
         if [ ! -z "$local_project_name" ]; then # check if the project already installed
             if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-                echo "[$local_project_name $local_project_version] is already installed and updated."
+                echo "[current] $local_project_name $local_project_version from $repo_short_url"
                 exit 0
             elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-                echo "$0: [$local_project_name] is already installed but no version information was provided.
-POSSIBLE SOLUTIONS:
-  * Contact a $local_project_name developer about gim compliance." >&2
+                echo "[incompatible] $local_project_name from $repo_short_url" >&2
                 exit 1
             else
-                echo "$0: [$local_project_name $local_project_version] is already installed but not updated ($repo_project_version).
+                echo "[old] $local_project_name $local_project_version -> $repo_project_version from $repo_short_url
 POSSIBLE SOLUTIONS:
   * Use the 'update' action instead of the used 'install' action." >&2
                 exit 1
@@ -335,16 +327,14 @@ POSSIBLE SOLUTIONS:
     update)
         if [ ! -z "$local_project_name" ]; then # check if the project installed
             if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-                echo "[$local_project_name $local_project_version] is already installed and updated."
+                echo "[current] $local_project_name $local_project_version from $repo_short_url"
                 exit 0
             elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-                echo "$0: [$local_project_name] is installed but no version information was provided.
-POSSIBLE SOLUTIONS:
-  * Contact a $local_project_name developer about gim compliance." >&2
+                echo "[incompatible] $local_project_name from $repo_short_url" >&2
                 exit 1
             fi
         else # the project is not installed
-            echo "$0: There is nothing installed from $repo_name repository.
+            echo "[nothing] from $repo_short_url
 POSSIBLE SOLUTIONS:
   * Use the 'install' action instead of the used 'update' action." >&2
             exit 1
@@ -358,12 +348,10 @@ POSSIBLE SOLUTIONS:
         ;;
     uninstall)
         if [ -z "$local_project_name" ]; then # if the project is not installed
-            echo "There is nothing installed from $repo_name repository."
+            echo "[nothing] from $repo_short_url"
             exit 0 # uninstallation exits with a success eventually
         elif [ -z "$local_project_version" ]; then
-            echo "$0: [$local_project_name] is installed but no version information was provided.
-POSSIBLE SOLUTIONS:
-  * Contact a $local_project_name developer about gim compliance." >&2
+            echo "[incompatible] $local_project_name from $repo_short_url" >&2
             exit 1
         fi
 
@@ -372,14 +360,14 @@ POSSIBLE SOLUTIONS:
         ;;
     status)
         if [ -z "$local_project_name" ]; then # if the project is not installed
-            echo "There is nothing installed from $repo_name repository."
+            echo "[nothing] from $repo_short_url"
         else # project installed
             if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-                echo "[$local_project_name $local_project_version] is installed and updated."
+                echo "[recent] $local_project_name $local_project_version from $repo_short_url"
             elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-                echo "[$local_project_name] is installed but no version information was provided."
+                echo "[incompatible] $local_project_name from $repo_short_url"
             else
-                echo "[$local_project_name $local_project_version] is installed but not updated ($repo_project_version)."
+                echo "[old] $local_project_name $local_project_version -> $repo_project_version from $repo_short_url"
             fi
         fi
 
