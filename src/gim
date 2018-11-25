@@ -41,11 +41,11 @@ ACTION:
   status     show status of a Git project
 
 COMMAND:
-  -autoclean  remove old cache and exit
-  -clean      remove all cache and exit
-  -help       show this help and exit
-  -about      show information and exit
-  -version    show version and exit"
+  -autoclean  remove old cache
+  -clean      remove all cache
+  -help       show this help
+  -about      show information
+  -version    show version"
 
 ABOUT_MESSAGE="gim $VERSION
 Install, update or uninstall Git projects in an easy way with a single command.
@@ -410,7 +410,7 @@ POSSIBLE SOLUTIONS:
   * Install the project again." >&2
             exit 1
         else
-            echo "[$new_local_project_name $new_local_project_version] has been installed."
+            echo "[install] $new_local_project_name $new_local_project_version from $repo_short_url"
         fi
         ;;
     update)
@@ -420,8 +420,10 @@ POSSIBLE SOLUTIONS:
   * Contact a $repo_name repository developer about gim compliance.
   * Use the 'install' action instead of the used 'update' action." >&2
             exit 1
+        elif [ "$new_local_project_name" = "$local_project_name" ]; then
+            echo "[update] $new_local_project_name $new_local_project_version <- $local_project_version from $repo_short_url"
         else
-            echo "[$local_project_name $local_project_version] has been updated to [$new_local_project_name $new_local_project_version]."
+            echo "[update] $new_local_project_name $new_local_project_version <- $local_project_name $local_project_version from $repo_short_url"
         fi
         ;;
     uninstall)
@@ -432,7 +434,7 @@ POSSIBLE SOLUTIONS:
   * Uninstall the project again." >&2
             exit 1
         else
-            echo "[$local_project_name $local_project_version] has been uninstalled."
+            echo "[uninstall] $local_project_name $local_project_version from $repo_short_url"
         fi
         ;;
 esac
