@@ -10,6 +10,10 @@ The changes not yet present in any release are listed in this section.
 
 * Fixed error reporting during cloning or fetching Git repository.
 
+### Removed
+
+* Action `update` has been removed, action `install` can be used for installation as well as for update.
+
 ## 3.4.0 (2018-11-08)
 
 ### Added

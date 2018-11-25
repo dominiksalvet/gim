@@ -35,8 +35,7 @@ HELP_MESSAGE="USAGE:
   $0 COMMAND
 
 ACTION:
-  install    install a Git project
-  update     update a Git project
+  install    install/update a Git project
   uninstall  uninstall a Git project
   status     show status of a Git project
 
@@ -135,9 +134,6 @@ for arg in "$@"; do
         case "$arg" in
             install)
                 action=install
-                ;;
-            update)
-                action=update
                 ;;
             uninstall)
                 action=uninstall
@@ -295,66 +291,19 @@ call_make() {
     fi
 }
 
-_install_check() {
-    if [ ! -z "$local_project_name" ]; then # check if the project already installed
-        if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-            echo "[latest] $local_project_name $local_project_version from $repo_short_url"
-            exit 0
-        elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-            echo "[incompatible] $local_project_name from $repo_short_url" >&2
-            exit 1
-        else
-            echo "[old] $local_project_name $local_project_version -> $repo_project_version from $repo_short_url
-POSSIBLE SOLUTIONS:
-  * Use the 'update' action instead of the used 'install' action." >&2
-            exit 1
-        fi
-    fi
-}
-
 _install() {
     git checkout -q "$repo_project_version" && # use the latest repository tag
     call_make install "$make_args" # install the program
 }
 
-_update_check() {
-    if [ ! -z "$local_project_name" ]; then # check if the project installed
-        if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-            echo "[latest] $local_project_name $local_project_version from $repo_short_url"
-            exit 0
-        elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-            echo "[incompatible] $local_project_name from $repo_short_url" >&2
-            exit 1
-        fi
-    else # the project is not installed
-        echo "[nothing] from $repo_short_url
-POSSIBLE SOLUTIONS:
-  * Use the 'install' action instead of the used 'update' action." >&2
-        exit 1
-    fi
-}
-
-_update() {
-    git checkout -q "$local_project_version" && # use the program version as a tag
-    call_make uninstall "$make_args" && # uninstall the program
-
-    git checkout -q "$repo_project_version" && # use the latest repository tag
-    call_make install "$make_args" # install the program again
-}
-
-_uninstall_check() {
-    if [ -z "$local_project_name" ]; then # if the project is not installed
-        echo "[nothing] from $repo_short_url"
-        exit 0 # uninstallation exits with a success eventually
-    elif [ -z "$local_project_version" ]; then
-        echo "[incompatible] $local_project_name from $repo_short_url" >&2
-        exit 1
-    fi
-}
-
 _uninstall() {
     git checkout -q "$local_project_version" && # use the program version as a tag
     call_make uninstall "$make_args" # uninstall the program
+}
+
+_update() {
+    _uninstall &&
+    _install
 }
 
 _status() {
@@ -373,15 +322,28 @@ _status() {
 
 case "$action" in
     install)
-        _install_check
-        _install
-        ;;
-    update)
-        _update_check
-        _update
+        if [ ! -z "$local_project_name" ]; then # check if the project already installed
+            if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
+                echo "[latest] $local_project_name $local_project_version from $repo_short_url"
+                exit 0
+            elif [ -z "$local_project_version" ]; then # if not and version flags not supported
+                echo "[incompatible] $local_project_name from $repo_short_url" >&2
+                exit 1
+            else
+                _update
+            fi
+        else
+            _install
+        fi
         ;;
     uninstall)
-        _uninstall_check
+        if [ -z "$local_project_name" ]; then # if the project is not installed
+            echo "[nothing] from $repo_short_url"
+            exit 0 # uninstallation exits with a success eventually
+        elif [ -z "$local_project_version" ]; then
+            echo "[incompatible] $local_project_name from $repo_short_url" >&2
+            exit 1
+        fi
         _uninstall
         ;;
     status)
@@ -403,27 +365,28 @@ new_local_project_version="$(get_local_project_version "$new_local_project_name"
 
 case "$action" in
     install)
-        if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
-            echo "$0: A project from $repo_name repository should have been installed, but it is not.
+        if [ -z "$local_project_name" ]; then # install
+            if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
+                echo "$0: A project from $repo_name repository should have been installed, but it is not.
 POSSIBLE SOLUTIONS:
   * Contact a $repo_name repository developer about gim compliance.
   * Install the project again." >&2
-            exit 1
-        else
-            echo "[install] $new_local_project_name $new_local_project_version from $repo_short_url"
-        fi
-        ;;
-    update)
-        if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
-            echo "$0: [$local_project_name $local_project_version] has been uninstalled but it couldn't have been updated ($repo_project_version).
+                exit 1
+            else
+                echo "[install] $new_local_project_name $new_local_project_version from $repo_short_url"
+            fi
+        else # update
+            if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
+                echo "$0: [$local_project_name $local_project_version] has been uninstalled but it couldn't have been updated ($repo_project_version).
 POSSIBLE SOLUTIONS:
   * Contact a $repo_name repository developer about gim compliance.
   * Use the 'install' action instead of the used 'update' action." >&2
-            exit 1
-        elif [ "$new_local_project_name" = "$local_project_name" ]; then
-            echo "[update] $new_local_project_name $new_local_project_version <- $local_project_version from $repo_short_url"
-        else
-            echo "[update] $new_local_project_name $new_local_project_version <- $local_project_name $local_project_version from $repo_short_url"
+                exit 1
+            elif [ "$new_local_project_name" = "$local_project_name" ]; then
+                echo "[update] $new_local_project_name $new_local_project_version <- $local_project_version from $repo_short_url"
+            else
+                echo "[update] $new_local_project_name $new_local_project_version <- $local_project_name $local_project_version from $repo_short_url"
+            fi
         fi
         ;;
     uninstall)
