@@ -18,15 +18,13 @@ SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id'
 for sw in $SW_REQUIRED; do
     # software is missing if at least one piece of software is missing
     if ! command -v "$sw" > /dev/null; then
-        echo "$0: Required software $sw is missing.
-POSSIBLE SOLUTIONS:
-  * Install $sw using an installed package manager." >&2
+        echo "$0: missing $sw software" >&2
         exit 1
     fi
 done
 
 #-------------------------------------------------------------------------------
-# DEFINITIONS
+# CONSTANTS
 #-------------------------------------------------------------------------------
 
 # the current version of the program
@@ -56,8 +54,7 @@ Copy"'right 2018 Dominik Salvet
 SPDX License Identifier: MIT
 https://gitlab.com/dominiksalvet/gim'
 
-HINT_MESSAGE="POSSIBLE SOLUTIONS:
-  * Use the '$0 -help' command for getting help."
+HINT_MESSAGE="Try '$0 -help' for getting help."
 
 # cache directory to store downloaded Git repositories
 CACHE_REPO_DIR=/etc/gim/cache
@@ -70,7 +67,7 @@ CACHE_REPO_DIR=/etc/gim/cache
 #   Check if running as root.
 root_check() {
     if [ "$(id -u)" -ne 0 ]; then
-        echo "$0: Please run as root." >&2
+        echo "$0: root privileges required" >&2
         return 1
     fi
 }
@@ -120,16 +117,14 @@ autoclean() {
 }
 
 action=
-repo_long_url=
-repo_short_url=
+repo_url=
 make_args=
 # process each argument individually
 for arg in "$@"; do
     if [ ! -z "$action" ]; then # if the action has been selected
-        if [ -z "$repo_long_url" ]; then # if the project repository URL is not set
-            # set up both URL variables for later processing
-            repo_long_url="$arg"
-            repo_short_url="$arg"
+        if [ -z "$repo_url" ]; then # if the project repository URL is not set
+            # set up URL variable for later processing
+            repo_url="$arg"
         # accept only make arguments
         elif [ -z "$make_args" ]; then
             make_args="$arg"
@@ -175,7 +170,7 @@ for arg in "$@"; do
                 exit 0
                 ;;
             *)
-                echo "$0: The argument '$arg' was not recognized.
+                echo "$0: unrecognized argument '$arg'
 $HINT_MESSAGE" >&2
                 exit 1
                 ;;
@@ -184,30 +179,34 @@ $HINT_MESSAGE" >&2
 done
 
 # check if arguments provided
-if [ -z "$action" ] || [ -z "$repo_long_url" ]; then
-    echo "$0: Required arguments not provided.
+if [ -z "$action" ] || [ -z "$repo_url" ]; then
+    echo "$0: missing required arguments
 $HINT_MESSAGE" >&2
     exit 1
 fi
 
 # check the format of given repository URL
-if ! echo "$repo_long_url" | grep -q -E -e '^(|https://)[^/]+(/[^\.][^/]*){2}(|\.git)$'; then
-    echo "$0: Supplied repository URL is not valid." >&2
+if ! echo "$repo_url" | grep -q -E -e '^(|https://)[^/\.][^/]*(/[^\.][^/]*){2}(|\.git)$'; then
+    echo "$0: unsupported URL delivered" >&2
     exit 1
 fi
 
-# if the repository URL doesn't start with 'https://'
-if ! echo "$repo_long_url" | grep -q -E -e '^https://'; then
-    repo_long_url=https://"$repo_long_url"
-else
+# create two individual instances of given URL
+repo_long_url="$repo_url"
+repo_short_url="$repo_url"
+
+# if the repository URL starts with 'https://'
+if echo "$repo_url" | grep -q -E -e '^https://'; then
     repo_short_url="$(echo "$repo_short_url" | sed -E -e 's|^https://||')"
+else
+    repo_long_url=https://"$repo_long_url"
 fi
 
-# if the repository URL doesn't end with '.git'
-if ! echo "$repo_long_url" | grep -q -E -e '\.git$'; then
-    repo_long_url="$repo_long_url".git
-else
+# if the repository URL ends with '.git'
+if echo "$repo_url" | grep -q -E -e '\.git$'; then
     repo_short_url="$(echo "$repo_short_url" | sed -E -e 's/\.git$//')"
+else
+    repo_long_url="$repo_long_url".git
 fi
 
 #-------------------------------------------------------------------------------
@@ -244,15 +243,7 @@ else
     git fetch -q --progress --tags origin master &&
     # merge all fetched remote master changes with local master branch
     git merge -q FETCH_HEAD
-fi || {
-    echo "$0: Can't obtain $repo_name repository in the most recent state.
-POSSIBLE SOLUTIONS:
-  * Connect your device to the Internet.
-  * Make sure that $repo_name repository exists on the given URL.
-  * Remove all cache using the 'sudo $0 -clean' command.
-  * Free up some storage space." >&2
-    exit 1
-}
+fi || exit 1
 
 #-------------------------------------------------------------------------------
 # CHECK VERSIONS
@@ -308,7 +299,7 @@ case "$action" in
     install)
         if [ ! -z "$local_project_name" ]; then # check if the project already installed
             if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-                echo "[current] $local_project_name $local_project_version from $repo_short_url"
+                echo "[latest] $local_project_name $local_project_version from $repo_short_url"
                 exit 0
             elif [ -z "$local_project_version" ]; then # if not and version flags not supported
                 echo "[incompatible] $local_project_name from $repo_short_url" >&2
@@ -327,7 +318,7 @@ POSSIBLE SOLUTIONS:
     update)
         if [ ! -z "$local_project_name" ]; then # check if the project installed
             if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-                echo "[current] $local_project_name $local_project_version from $repo_short_url"
+                echo "[latest] $local_project_name $local_project_version from $repo_short_url"
                 exit 0
             elif [ -z "$local_project_version" ]; then # if not and version flags not supported
                 echo "[incompatible] $local_project_name from $repo_short_url" >&2
