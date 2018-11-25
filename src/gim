@@ -213,11 +213,8 @@ fi
 # check if running as root
 root_check || exit
 
-# extract required information from the given repository URL
-repo_hostname="$(echo "$repo_short_url" | sed -E -e 's|/.*$||')"
-repo_maintainer="$(echo "$repo_short_url" | sed -E -e 's|/[^/]*$||; s|.*/||')"
-repo_name="$(echo "$repo_short_url" | sed -E -e 's|.*/||')"
-repo_dir="$CACHE_REPO_DIR/$repo_hostname/$repo_maintainer/$repo_name"
+# repository directory in cache
+repo_dir="$CACHE_REPO_DIR/$repo_short_url"
 
 # create a cache directory for the project
 mkdir -p "$repo_dir"/ &&
@@ -368,9 +365,8 @@ case "$action" in
     install)
         if [ -z "$local_project_name" ]; then # install
             if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
-                echo "$0: A project from $repo_name repository should have been installed, but it is not.
+                echo "$0: A project from the repository should have been installed, but it is not.
 POSSIBLE SOLUTIONS:
-  * Contact a $repo_name repository developer about gim compliance.
   * Install the project again." >&2
                 exit 1
             else
@@ -380,7 +376,6 @@ POSSIBLE SOLUTIONS:
             if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
                 echo "$0: [$local_project_name $local_project_version] has been uninstalled but it couldn't have been updated ($repo_project_version).
 POSSIBLE SOLUTIONS:
-  * Contact a $repo_name repository developer about gim compliance.
   * Use the 'install' action instead of the used 'update' action." >&2
                 exit 1
             elif [ "$new_local_project_name" = "$local_project_name" ]; then
@@ -394,7 +389,6 @@ POSSIBLE SOLUTIONS:
         if [ ! -z "$new_local_project_name" ]; then # if the project is installed (as it shouldn't be now)
             echo "$0: [$new_local_project_name $new_local_project_version] should have been uninstalled, but it is not.
 POSSIBLE SOLUTIONS:
-  * Contact a $repo_name repository developer about gim compliance.
   * Uninstall the project again." >&2
             exit 1
         else
