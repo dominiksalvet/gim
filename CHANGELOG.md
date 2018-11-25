@@ -14,6 +14,10 @@ The changes not yet present in any release are listed in this section.
 
 * Action `update` has been removed, action `install` can be used for installation as well as for update.
 
+### Security
+
+* All Git URL parts are allowed to start with an alphanumeric character or `_`. Then they can be followed by alphanumeric characters, `_`, `-` or `.`. The parts are split by `/`.
+
 ## 3.4.0 (2018-11-08)
 
 ### Added

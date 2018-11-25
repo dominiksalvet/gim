@@ -181,8 +181,9 @@ $HINT_MESSAGE" >&2
     exit 1
 fi
 
+URL_REGEX='^(|https://)[[:alnum:]_][[:alnum:]_\.-]*(/[[:alnum:]_][[:alnum:]_\.-]*){2}(|.git)$'
 # check the format of given repository URL
-if ! echo "$repo_url" | grep -q -E -e '^(|https://)[^/\.][^/]*(/[^\.][^/]*){2}(|\.git)$'; then
+if ! echo "$repo_url" | grep -q -E -e "$URL_REGEX"; then
     echo "$0: unsupported URL delivered" >&2
     exit 1
 fi
