@@ -278,10 +278,6 @@ get_local_project_version() {
 #   $1 - repository directory
 #   $2 - version
 is_supported() {
-    if [ -z "$(git tag -l "$2")" ]; then
-        return 1
-    fi
-
     if [ -r "$1"/gim/unsupported ]; then
         for _version in $(head -n 1 "$1"/gim/unsupported); do
             if [ "$_version" = "$2" ]; then
@@ -289,7 +285,6 @@ is_supported() {
             fi
         done
     fi
-    
     return 1
 }
 
@@ -306,7 +301,7 @@ STATUS_OLD=4
 #   $2 - project version
 _get_status() {
     if [ ! -z "$1" ]; then # if the project is installed
-        if [ -z "$2" ]; then
+        if [ -z "$(git tag -l "$2")" ]; then
             echo "$STATUS_INCOMPATIBLE"
         elif [ "$2" = "$repo_project_version" ]; then
             echo "$STATUS_LATEST"
