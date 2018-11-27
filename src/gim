@@ -273,12 +273,15 @@ get_local_project_version() {
 }
 
 # DESCRIPTION:
-#   Decides whether the given project version of given repository is explicitly
-#   listed as unsupported version.
+#   Decides whether the given project version of given repository is supported.
 # PARAMETERS:
 #   $1 - repository directory
 #   $2 - version
-is_unsupported() {
+is_supported() {
+    if [ -z "$(git tag -l "$2")" ]; then
+        return 1
+    fi
+
     if [ -r "$1"/gim/unsupported ]; then
         for _version in $(head -n 1 "$1"/gim/unsupported); do
             if [ "$_version" = "$2" ]; then
@@ -286,6 +289,7 @@ is_unsupported() {
             fi
         done
     fi
+    
     return 1
 }
 
@@ -304,10 +308,10 @@ _get_status() {
     if [ ! -z "$1" ]; then # if the project is installed
         if [ -z "$2" ]; then
             echo "$STATUS_INCOMPATIBLE"
-        elif is_unsupported "$repo_dir" "$2"; then
-            echo "$STATUS_UNSUPPORTED"
         elif [ "$2" = "$repo_project_version" ]; then
             echo "$STATUS_LATEST"
+        elif ! is_supported "$repo_dir" "$2"; then
+            echo "$STATUS_UNSUPPORTED"
         else
             echo "$STATUS_OLD"
         fi
@@ -426,12 +430,12 @@ case "$action" in
         ;;
 esac || exit
 
+# checkout the master branch back
+git checkout -q master
+
 #-------------------------------------------------------------------------------
 # VERIFY THE STATUS
 #-------------------------------------------------------------------------------
-
-# checkout the master branch for current information about project names from the repository
-git checkout -q master
 
 # refresh information about the local project
 new_local_project_name="$(get_local_project_name "$repo_dir")"
