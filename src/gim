@@ -31,13 +31,16 @@ done
 VERSION=3.4.0
 
 HELP_MESSAGE="USAGE:
-  $0 ACTION URL [MAKE_ARG...]
+  $0 ACTION [OPTION...] URL [MAKE_ARG...]
   $0 COMMAND
 
 ACTION:
   install    install/update a Git project
   uninstall  uninstall a Git project
   status     show status of a Git project
+
+OPTION:
+  -fail-on-prompt  fail when user input is required
 
 COMMAND:
   -autoclean  remove old cache
@@ -127,10 +130,21 @@ make_args=
 for arg in "$@"; do
     if [ ! -z "$action" ]; then # if the action has been selected
         if [ -z "$repo_url" ]; then # if the project repository URL is not set
-            # set up URL variable for later processing
-            repo_url="$arg"
-        # accept only make arguments
-        elif [ -z "$make_args" ]; then
+            case "$arg" in
+                -fail-on-prompt)
+                    export GIT_TERMINAL_PROMPT=0
+                    ;;
+                -*)
+                    echo "$0: unrecognized argument '$arg'
+$HINT_MESSAGE" >&2
+                    exit 1
+                    ;;
+                *)
+                    # set up URL variable for later processing
+                    repo_url="$arg"
+                    ;;
+            esac
+        elif [ -z "$make_args" ]; then # accept only make arguments
             make_args="$arg"
         else
             make_args="$make_args $arg"
