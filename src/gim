@@ -100,9 +100,14 @@ autoclean() {
         if [ -d "$_repo_dir" ]; then
             # check if the project not installed
             if [ -z "$(get_local_project_name "$_repo_dir")" ]; then
-                # remove the project's cached Git repository
-                rm -r -f "${_repo_dir:?}"/
+                # remove all files in the repository
+                (
+                    cd "${_repo_dir:?}"/ &&
+                    rm -r -f ..?* .[!.]* ./* # match all except for '.' and '..' files
+                )
             fi
+            # remove repository directories if they are empty
+            rmdir --ignore-fail-on-non-empty "$_repo_dir"/
         fi
     done
     # remove maintainer directories if they are empty
