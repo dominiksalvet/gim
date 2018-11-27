@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Changed
+
+* The format of status reports is unified. It includes `latest`, `old`, `nothing`, `install`, `update`, `uninstall`, `incompatible`, `fail-install`, `fail-update` and `fail-uninstall` indicators.
+
 ### Fixed
 
 * Fixed error reporting during cloning or fetching Git repository.
@@ -16,7 +20,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Security
 
-* All Git URL parts are allowed to start with an alphanumeric character or `_`. Then they can be followed by alphanumeric characters, `_`, `-` or `.`. The parts are split by `/`.
+* All Git URL parts are now allowed to start only with an alphanumeric character or `_`. Then they can be followed only by alphanumeric characters, `_`, `-` or `.`. The parts are split by `/`.
 
 ## 3.4.0 (2018-11-08)
 

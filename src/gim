@@ -24,7 +24,7 @@ for sw in $SW_REQUIRED; do
 done
 
 #-------------------------------------------------------------------------------
-# CONSTANTS
+# DEFINITIONS
 #-------------------------------------------------------------------------------
 
 # the current version of the program
@@ -101,7 +101,7 @@ autoclean() {
             # check if the project not installed
             if [ -z "$(get_local_project_name "$_repo_dir")" ]; then
                 # remove the project's cached Git repository
-                rm -r -f "${_repo_dir:?}/"
+                rm -r -f "${_repo_dir:?}"/
             fi
         fi
     done
@@ -237,10 +237,27 @@ else
     git fetch -q --progress --tags origin master &&
     # merge all fetched remote master changes with local master branch
     git merge -q FETCH_HEAD
-fi || exit 1
+fi || exit
+
+STRING_NOTHING=nothing
+STRING_LATEST=latest
+STRING_INCOMPATIBLE=incompatible
+STRING_OLD=old
+STRING_FAIL_INSTALL=fail-install
+STRING_INSTALL=install
+STRING_FAIL_UPDATE=fail-update
+STRING_UPDATE=update
+STRING_FAIL_UNINSTALL=fail-uninstall
+STRING_UNINSTALL=uninstall
+
+# get version of the most recent annotated tag of the obtained Git project if there is any
+repo_project_version="$(git describe --abbrev=0)" 2>/dev/null || {
+    echo "[$STRING_INCOMPATIBLE] $repo_short_url" >&2
+    exit 1
+}
 
 #-------------------------------------------------------------------------------
-# CHECK VERSIONS
+# EXECUTE SELECTED ACTION
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
@@ -255,26 +272,54 @@ get_local_project_version() {
     echo "$_version"
 }
 
-# get version of the most recent annotated tag of the obtained Git project
-repo_project_version="$(git describe --abbrev=0)" 2>/dev/null || {
-    echo "[incompatible] $repo_short_url" >&2
-    exit 1
+# DESCRIPTION:
+#   Decides whether the given project version of given repository is explicitly
+#   listed as unsupported version.
+# PARAMETERS:
+#   $1 - repository directory
+#   $2 - version
+is_unsupported() {
+    if [ -r "$1"/gim/unsupported ]; then
+        for _version in $(head -n 1 "$1"/gim/unsupported); do
+            if [ "$_version" = "$2" ]; then
+                return 0
+            fi
+        done
+    fi
+    return 1
+}
+
+STATUS_NOTHING=0
+STATUS_LATEST=1
+STATUS_INCOMPATIBLE=2
+STATUS_UNSUPPORTED=3
+STATUS_OLD=4
+
+# DESCRIPTION:
+#   Returns status of the given Git project.
+# PARAMETERS:
+#   $1 - project name
+#   $2 - project version
+_get_status() {
+    if [ ! -z "$1" ]; then # if the project is installed
+        if [ -z "$2" ]; then
+            echo "$STATUS_INCOMPATIBLE"
+        elif is_unsupported "$repo_dir" "$2"; then
+            echo "$STATUS_UNSUPPORTED"
+        elif [ "$2" = "$repo_project_version" ]; then
+            echo "$STATUS_LATEST"
+        else
+            echo "$STATUS_OLD"
+        fi
+    else # if the project is not installed
+        echo "$STATUS_NOTHING"
+    fi
 }
 
 # get information about the local project (if installed)
-local_project_name="$(get_local_project_name "$repo_dir"/)"
+local_project_name="$(get_local_project_name "$repo_dir")"
 local_project_version="$(get_local_project_version "$local_project_name")"
-
-if [ -r "$repo_dir"/gim/unsupported ] && [ ! -z "$local_project_version" ]; then
-    if head -n 1 "$repo_dir"/gim/unsupported | grep -q -E -e "$local_project_version"; then
-        echo "[incompatible] $local_project_name $local_project_version from $repo_short_url" >&2
-        exit 1
-    fi
-fi
-
-#-------------------------------------------------------------------------------
-# EXECUTE SELECTED ACTION
-#-------------------------------------------------------------------------------
+local_project_status="$(_get_status "$local_project_name" "$local_project_version")"
 
 # DESCRIPTION:
 #   Perform a make target call with given arguments.
@@ -289,66 +334,97 @@ call_make() {
     fi
 }
 
+# DESCRIPTION:
+#   Installs the project of the given version.
+# PARAMETERS:
+#   $1 - version
 _install() {
-    git checkout -q "$repo_project_version" && # use the latest repository tag
+    git checkout -q "$1" && # use the given version as a tag
     call_make install "$make_args" # install the program
 }
 
+# DESCRIPTION:
+#   Uninstalls the project of the given version.
+# PARAMETERS:
+#   $1 - version
 _uninstall() {
-    git checkout -q "$local_project_version" && # use the program version as a tag
+    git checkout -q "$1" && # use the program version as a tag
     call_make uninstall "$make_args" # uninstall the program
 }
 
+# DESCRIPTION:
+#   Updates the project from the given version to another.
+# PARAMETERS:
+#   $1 - source version
+#   $2 - target version
 _update() {
-    _uninstall &&
-    _install
+    _uninstall "$1" &&
+    _install "$2"
 }
 
-_status() {
-    if [ -z "$local_project_name" ]; then # if the project is not installed
-        echo "[nothing] from $repo_short_url"
-    else # project installed
-        if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-            echo "[latest] $local_project_name $local_project_version from $repo_short_url"
-        elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-            echo "[incompatible] $local_project_name from $repo_short_url"
-        else
-            echo "[old] $local_project_name $local_project_version -> $repo_project_version from $repo_short_url"
-        fi
-    fi
+# DESCRIPTION:
+#   Prints status of a Git project, reading all required variables.
+# PARAMETERS:
+#   $1 - project status
+_print_status() {
+    case "$1" in
+        "$STATUS_NOTHING")
+            echo "[$STRING_NOTHING] from $repo_short_url"
+            ;;
+        "$STATUS_LATEST")
+            echo "[$STRING_LATEST] $local_project_name $local_project_version from $repo_short_url"
+            ;;
+        "$STATUS_INCOMPATIBLE")
+            echo "[$STRING_INCOMPATIBLE] $local_project_name from $repo_short_url"
+            ;;
+        "$STATUS_UNSUPPORTED")
+            echo "[$STRING_INCOMPATIBLE] $local_project_name $local_project_version from $repo_short_url"
+            ;;
+        "$STATUS_OLD")
+            echo "[$STRING_OLD] $local_project_name $local_project_version -> $repo_project_version from $repo_short_url"
+            ;;
+    esac
 }
 
 case "$action" in
     install)
-        if [ ! -z "$local_project_name" ]; then # check if the project already installed
-            if [ "$local_project_version" = "$repo_project_version" ]; then # if the versions are the same
-                echo "[latest] $local_project_name $local_project_version from $repo_short_url"
+        case "$local_project_status" in
+            "$STATUS_NOTHING")
+                _install "$repo_project_version"
+                ;;
+            "$STATUS_LATEST")
+                _print_status "$local_project_status"
                 exit 0
-            elif [ -z "$local_project_version" ]; then # if not and version flags not supported
-                echo "[incompatible] $local_project_name from $repo_short_url" >&2
+                ;;
+            "$STATUS_INCOMPATIBLE" | "$STATUS_UNSUPPORTED")
+                _print_status "$local_project_status" >&2
                 exit 1
-            else
-                _update
-            fi
-        else
-            _install
-        fi
+                ;;
+            "$STATUS_OLD")
+                _update "$local_project_version" "$repo_project_version"
+                ;;
+        esac
         ;;
     uninstall)
-        if [ -z "$local_project_name" ]; then # if the project is not installed
-            echo "[nothing] from $repo_short_url"
-            exit 0 # uninstallation exits with a success eventually
-        elif [ -z "$local_project_version" ]; then
-            echo "[incompatible] $local_project_name from $repo_short_url" >&2
-            exit 1
-        fi
-        _uninstall
+        case "$local_project_status" in
+            "$STATUS_NOTHING")
+                _print_status "$local_project_status"
+                exit 0
+                ;;
+            "$STATUS_LATEST" | "$STATUS_OLD")
+                _uninstall "$local_project_version"
+                ;;
+            "$STATUS_INCOMPATIBLE" | "$STATUS_UNSUPPORTED")
+                _print_status "$local_project_status" >&2
+                exit 1
+                ;;
+        esac
         ;;
     status)
-        _status
+        _print_status "$local_project_status"
         exit 0
         ;;
-esac || exit 1
+esac || exit
 
 #-------------------------------------------------------------------------------
 # VERIFY THE STATUS
@@ -358,41 +434,42 @@ esac || exit 1
 git checkout -q master
 
 # refresh information about the local project
-new_local_project_name="$(get_local_project_name "$repo_dir/")"
+new_local_project_name="$(get_local_project_name "$repo_dir")"
 new_local_project_version="$(get_local_project_version "$new_local_project_name")"
+new_local_project_status="$(_get_status "$new_local_project_name" "$new_local_project_version")"
 
 case "$action" in
     install)
-        if [ -z "$local_project_name" ]; then # install
-            if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
-                echo "$0: A project from the repository should have been installed, but it is not.
-POSSIBLE SOLUTIONS:
-  * Install the project again." >&2
-                exit 1
-            else
-                echo "[install] $new_local_project_name $new_local_project_version from $repo_short_url"
-            fi
-        else # update
-            if [ -z "$new_local_project_name" ]; then # if the project is not installed (as it should be now)
-                echo "$0: [$local_project_name $local_project_version] has been uninstalled but it couldn't have been updated ($repo_project_version).
-POSSIBLE SOLUTIONS:
-  * Use the 'install' action instead of the used 'update' action." >&2
-                exit 1
-            elif [ "$new_local_project_name" = "$local_project_name" ]; then
-                echo "[update] $new_local_project_name $new_local_project_version <- $local_project_version from $repo_short_url"
-            else
-                echo "[update] $new_local_project_name $new_local_project_version <- $local_project_name $local_project_version from $repo_short_url"
-            fi
-        fi
+        case "$local_project_status" in
+            "$STATUS_NOTHING")
+                if [ "$new_local_project_status" != "$STATUS_LATEST" ]; then
+                    echo "[$STRING_FAIL_INSTALL] $repo_project_version from $repo_short_url" >&2
+                    exit 1
+                fi
+                echo "[$STRING_INSTALL] $new_local_project_name $new_local_project_version from $repo_short_url"
+                ;;
+            "$STATUS_OLD")
+                if [ "$new_local_project_status" != "$STATUS_LATEST" ]; then
+                    echo "[$STRING_FAIL_UPDATE] $repo_project_version <- $local_project_name $local_project_version from $repo_short_url" >&2
+                    exit 1
+                fi
+                if [ "$new_local_project_name" = "$local_project_name" ]; then
+                    echo "[$STRING_UPDATE] $new_local_project_name $new_local_project_version <- $local_project_version from $repo_short_url"
+                else
+                    echo "[$STRING_UPDATE] $new_local_project_name $new_local_project_version <- $local_project_name $local_project_version from $repo_short_url"
+                fi
+                ;;
+        esac
         ;;
     uninstall)
-        if [ ! -z "$new_local_project_name" ]; then # if the project is installed (as it shouldn't be now)
-            echo "$0: [$new_local_project_name $new_local_project_version] should have been uninstalled, but it is not.
-POSSIBLE SOLUTIONS:
-  * Uninstall the project again." >&2
-            exit 1
-        else
-            echo "[uninstall] $local_project_name $local_project_version from $repo_short_url"
-        fi
+        case "$local_project_status" in
+            "$STATUS_LATEST" | "$STATUS_OLD")
+                if [ "$new_local_project_status" != "$STATUS_NOTHING" ]; then
+                    echo "[$STRING_FAIL_UNINSTALL] $local_project_name $local_project_version from $repo_short_url" >&2
+                    exit 1
+                fi
+                echo "[$STRING_UNINSTALL] $local_project_name $local_project_version from $repo_short_url"
+                ;;
+        esac
         ;;
 esac
