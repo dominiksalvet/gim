@@ -102,7 +102,7 @@ autoclean() {
         # expecting a Git repository, so check if it is a directory
         if [ -d "$_repo_dir" ]; then
             # check if the project not installed
-            if [ -z "$(get_local_project_name "$_repo_dir")" ]; then
+            if [ ! "$(get_local_project_name "$_repo_dir")" ]; then
                 # remove all files in the repository
                 (
                     cd "${_repo_dir:?}"/ &&
@@ -128,8 +128,8 @@ repo_url=
 make_args=
 # process each argument individually
 for arg in "$@"; do
-    if [ ! -z "$action" ]; then # if the action has been selected
-        if [ -z "$repo_url" ]; then # if the project repository URL is not set
+    if [ "$action" ]; then # if the action has been selected
+        if [ ! "$repo_url" ]; then # if the project repository URL is not set
             case "$arg" in
                 -fail-on-prompt)
                     export GIT_TERMINAL_PROMPT=0
@@ -144,7 +144,7 @@ $HINT_MESSAGE" >&2
                     repo_url="$arg"
                     ;;
             esac
-        elif [ -z "$make_args" ]; then # accept only make arguments
+        elif [ ! "$make_args" ]; then # accept only make arguments
             make_args="$arg"
         else
             make_args="$make_args $arg"
@@ -194,7 +194,7 @@ $HINT_MESSAGE" >&2
 done
 
 # check if arguments provided
-if [ -z "$action" ] || [ -z "$repo_url" ]; then
+if [ ! "$action" ] || [ ! "$repo_url" ]; then
     echo "$0: missing required arguments
 $HINT_MESSAGE" >&2
     exit 1
@@ -239,7 +239,7 @@ repo_dir="$CACHE_REPO_DIR/$repo_short_url"
 mkdir -p "$repo_dir"/ &&
 cd "$repo_dir"/ &&
 
-if [ -z "$(ls -A)" ]; then # if the cache directory for the target project is empty
+if [ ! "$(ls -A)" ]; then # if the cache directory for the target project is empty
     # clone the Git repository master branch to the this directory
     git clone -q --progress --branch master --single-branch "$repo_long_url" . &&
     # disable push remote URL
@@ -319,8 +319,8 @@ STATUS_OLD=4
 #   $1 - project name
 #   $2 - project version
 _get_status() {
-    if [ ! -z "$1" ]; then # if the project is installed
-        if [ -z "$(git tag -l "$2")" ]; then
+    if [ "$1" ]; then # if the project is installed
+        if [ ! "$(git tag -l "$2")" ]; then
             echo "$STATUS_INCOMPATIBLE"
         elif [ "$2" = "$repo_project_version" ]; then
             echo "$STATUS_LATEST"
@@ -345,7 +345,7 @@ local_project_status="$(_get_status "$local_project_name" "$local_project_versio
 #   $1 - make target
 #   $2 - make arguments
 call_make() {
-    if [ -z "$2" ]; then
+    if [ ! "$2" ]; then
         make "$1"
     else
         make "$1" "$2"
