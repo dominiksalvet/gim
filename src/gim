@@ -50,7 +50,7 @@ COMMAND:
   -version    show version"
 
 ABOUT_MESSAGE="gim $VERSION
-Install, update or uninstall Git projects in an easy way with a single command.
+Install, update or uninstall Git projects easily with a single command.
 
 Copy"'right 2018 Dominik Salvet
 SPDX License Identifier: MIT
