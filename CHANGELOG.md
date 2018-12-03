@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+## 4.0.0 (2018-12-03)
+
 ### Added
 
 * The result of gim internal callings of `<program> --version` or `<program> -version` (used to detect program's version) is being checked against available tags of the source Git repository during early checks to provide appropriate report.

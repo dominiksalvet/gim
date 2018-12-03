@@ -28,7 +28,7 @@ done
 #-------------------------------------------------------------------------------
 
 # the current version of the program
-VERSION=3.4.0
+VERSION=4.0.0
 
 HELP_MESSAGE="USAGE:
   $0 ACTION [OPTION...] URL [MAKE_ARG...]
