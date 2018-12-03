@@ -18,6 +18,7 @@ The changes not yet present in any release are listed in this section.
 ### Fixed
 
 * Fixed error reporting during cloning or fetching Git repository.
+* Fixed possible way of getting gim cache into inconsistent state while not git-checking master branch before fetching updates.
 
 ### Removed
 

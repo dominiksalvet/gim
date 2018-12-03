@@ -249,9 +249,11 @@ else
     git clean -q -f -d &&
     # discard all changes done to the cached repositories
     git reset -q --hard &&
-
+    # checkout the master branch
+    git checkout -q master &&
     # apply given fetch remote URL
     git remote set-url origin "$repo_long_url" &&
+
     # fetch changes to master branch together with all repository tags
     git fetch -q --progress --tags origin master &&
     # merge all fetched remote master changes with local master branch
@@ -444,7 +446,7 @@ case "$action" in
         ;;
 esac || exit
 
-# checkout the master branch back
+# checkout the master branch
 git checkout -q master
 
 #-------------------------------------------------------------------------------
