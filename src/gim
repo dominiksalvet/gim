@@ -40,7 +40,8 @@ ACTION:
   status     show status of a Git project
 
 OPTION:
-  -fail-on-prompt  fail when user input is required
+  -fail-on-prompt      fail when user input is required
+  -ignore-unsupported  force to operate with unsupported versions
 
 COMMAND:
   -autoclean  remove old cache
@@ -123,6 +124,8 @@ autoclean() {
     done
 }
 
+ignore_unsupported=false
+
 action=
 repo_url=
 make_args=
@@ -133,6 +136,9 @@ for arg in "$@"; do
             case "$arg" in
                 -fail-on-prompt)
                     export GIT_TERMINAL_PROMPT=0
+                    ;;
+                -ignore-unsupported)
+                    ignore_unsupported=true
                     ;;
                 -*)
                     echo "$0: unrecognized argument '$arg'
@@ -326,7 +332,7 @@ _get_status() {
             echo "$STATUS_INCOMPATIBLE"
         elif [ "$2" = "$repo_project_version" ]; then
             echo "$STATUS_LATEST"
-        elif ! is_supported "$repo_dir" "$2"; then
+        elif ! "$ignore_unsupported" && ! is_supported "$repo_dir" "$2"; then
             echo "$STATUS_UNSUPPORTED"
         else
             echo "$STATUS_OLD"
