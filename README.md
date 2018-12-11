@@ -2,13 +2,13 @@
 
 > Install, update or uninstall Git projects easily with a single command.
 
-What about to **install and update** Git projects like this?
+What about to **install and update Git projects** like this?
 
 ```sh
 sudo gim install <url>
 ```
 
-And **uninstall** them like this?
+And **uninstall them** like this?
 
 ```sh
 sudo gim uninstall <url>
