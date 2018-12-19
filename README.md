@@ -27,7 +27,7 @@ That is exactly what gim allows you to do with Git projects marked as gim compli
 * [Install](#install)
 * [Usage](#usage)
 * [Badge](#badge)
-* [Contribute](#contribute)
+* [Contributing](#contributing)
 * [License](#license)
 
 ## Install
