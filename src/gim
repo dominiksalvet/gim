@@ -353,7 +353,7 @@ extract_url_() {
 obtain_repo() {
     if [ ! "$(ls -A)" ]; then # if the cache directory for the target project is empty
         # clone the Git repository master branch to the this directory
-        git clone -q --branch master --single-branch "$1" . &&
+        git clone -q --progress --branch master --single-branch "$1" . &&
         # disable push remote URL
         git remote set-url --push origin ''
     else
