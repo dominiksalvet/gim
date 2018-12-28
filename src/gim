@@ -66,7 +66,7 @@ check_deps() {
 #   Loads gim constant data.
 load_const_data() {
     # the current version of gim
-    _VERSION=4.0.0
+    _VERSION=5.0.0
 
     _HELP_MESSAGE="USAGE:
   $0 ACTION [OPTION...] URL...
