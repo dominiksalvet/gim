@@ -10,6 +10,10 @@ The changes not yet present in any release are listed in this section.
 
 * Option `-ignore-unsupported` has been added. It provides a way how to ignore the fact that a version of a gim compliant project is listed in *gim/unsupported* and so it allows gim to operate with those versions.
 
+### Changed
+
+* Gim no longer accepts arguments for make command. Instead, it supports multiple URL processing with a common action.
+
 ## 4.0.0 (2018-12-03)
 
 ### Added
