@@ -101,11 +101,13 @@ https://gitlab.com/dominiksalvet/gim'
     _LABEL_INSTALL=install
     _LABEL_UPDATE=update
     _LABEL_UNINSTALL=uninstall
+
     _LABEL_LATEST=latest
     _LABEL_OLD=old
     _LABEL_NOTHING=nothing
     _LABEL_UNSUPPORTED=unsupported
     _LABEL_INCOMPATIBLE=incompatible
+    
     _LABEL_FAIL_INSTALL=fail-install
     _LABEL_FAIL_UPDATE=fail-update
     _LABEL_FAIL_UNINSTALL=fail-uninstall
@@ -353,7 +355,7 @@ extract_url_() {
 obtain_repo() {
     if [ ! "$(ls -A)" ]; then # if the cache directory for the target project is empty
         # clone the Git repository master branch to the this directory
-        git clone -q --progress --branch master --single-branch "$1" . &&
+        git clone -q --branch master --single-branch "$1" . &&
         # disable push remote URL
         git remote set-url --push origin ''
     else
@@ -363,8 +365,6 @@ obtain_repo() {
         git reset -q --hard &&
         # checkout the master branch
         git checkout -q master &&
-        # apply given fetch remote URL
-        git remote set-url origin "$1" &&
 
         # fetch changes to master branch together with all repository tags
         git fetch -q --tags origin master &&
