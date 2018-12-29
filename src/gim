@@ -34,7 +34,7 @@
 #   $@ - gim parameters
 main() {
     check_deps &&
-    load_const_data &&
+    load_const &&
     load_cfg &&
     process_args "$@" || return
 }
@@ -64,7 +64,7 @@ check_deps() {
 
 # DESCRIPTION:
 #   Loads gim constant data.
-load_const_data() {
+load_const() {
     # the current version of gim
     _VERSION=5.0.0
 
@@ -101,16 +101,16 @@ https://gitlab.com/dominiksalvet/gim'
     _LABEL_INSTALL=install
     _LABEL_UPDATE=update
     _LABEL_UNINSTALL=uninstall
+    
+    _LABEL_FAIL_INSTALL=fail-install
+    _LABEL_FAIL_UPDATE=fail-update
+    _LABEL_FAIL_UNINSTALL=fail-uninstall
 
     _LABEL_LATEST=latest
     _LABEL_OLD=old
     _LABEL_NOTHING=nothing
     _LABEL_UNSUPPORTED=unsupported
     _LABEL_INCOMPATIBLE=incompatible
-    
-    _LABEL_FAIL_INSTALL=fail-install
-    _LABEL_FAIL_UPDATE=fail-update
-    _LABEL_FAIL_UNINSTALL=fail-uninstall
 
     # gim report statuses
     _STATUS_LATEST=0
@@ -124,7 +124,7 @@ https://gitlab.com/dominiksalvet/gim'
 #   Loads gim configuration.
 load_cfg() {
     # cache directory to store downloaded Git repositories
-    _CACHE_REPO_DIR=/etc/gim/cache
+    _CACHE_REPO_DIR=/etc/gim/cache/repo
 
     # global variables
     _root_checked=false
