@@ -6,9 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Added
+
+* The support for gim *status* file has been added. This file represents a list of locally installed projects.
+
 ### Changed
 
 * Gim's cache directory for downloaded Git repositories has been changed from */etc/gim/cache* to */etc/gim/cache/repo*.
+* Option `-ignore-unsupported` has been renamed to `-force`.
+* The format of status reports has been changed. A label concept has been established, which significantly distinguishes errors from normal status reports.
+* Gim works with the *status* file rather than using executable files in a directory defined in `$PATH` variable of the root user. Before updating to this version, it is required to uninstall all projects installed by gim and install them back once gim is updated to register them in the *status* file.
 
 ## 5.0.0 (2018-12-28)
 

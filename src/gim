@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #-------------------------------------------------------------------------------
-# Copyright 2018 Dominik Salvet
+# Copyright 2018-2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
@@ -10,16 +10,10 @@
 # CODE STYLE
 #-------------------------------------------------------------------------------
 # VARIABLES:
-#    name   function local variable
-#    NAME   function local constant
-#   _name   global variable
-#   _NAME   global constant
-#   _name_  shared variable
-#-------------------------------------------------------------------------------
-# FUNCTIONS:
-#    name   uses only local shared variables
-#   _name   has access to shared variables of calling functions (import)
-#    name_  grants calling functions access to shared variables (export)
+#    name  function local variable
+#    NAME  function local constant
+#   _name  global variable
+#   _NAME  global constant
 #-------------------------------------------------------------------------------
 
 
@@ -46,8 +40,8 @@ main() {
 # DESCRIPTION:
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
-    # list of required software
-    SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id realpath true false'
+    # a list of required software
+    SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id true false dirname'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -68,18 +62,35 @@ load_const() {
     # the current version of gim
     _VERSION=5.0.0
 
+    # gim actions
+    _ACTION_INSTALL=install
+    _ACTION_UNINSTALL=uninstall
+    _ACTION_STATUS=status
+    _ACTION_UPDATE=update # impossible to be directly invoked by a user
+
+    # version comparison statuses
+    _VSTATUS_NO_SRC_VER=nothing
+    _VSTATUS_DIFF=old
+    _VSTATUS_MATCH=latest
+
+    # error statuses
+    _ESTATUS_NO_TAR_VER=NO-REPO-ATAG
+    _ESTATUS_UNSUP_SRC_VER=UNSUP-LOC-VER
+    _ESTATUS_MAKE_FAIL=MAKE-FAIL
+
+    # constant string data
     _HELP_MESSAGE="USAGE:
   $0 ACTION [OPTION...] URL...
   $0 COMMAND
 
 ACTION:
-  install    install/update Git projects
-  uninstall  uninstall Git projects
-  status     show status of Git projects
+  $_ACTION_INSTALL    install/update Git projects
+  $_ACTION_UNINSTALL  uninstall Git projects
+  $_ACTION_STATUS     show status of Git projects
 
 OPTION:
-  -fail-on-prompt      fail when user input is required
-  -ignore-unsupported  force to work even with unsupported versions
+  -fail-on-prompt  fail when user input is required
+  -force           force to work when technically possible
 
 COMMAND:
   -autoclean  remove old cache
@@ -91,44 +102,28 @@ COMMAND:
     _ABOUT_MESSAGE="gim $_VERSION
 Install, update or uninstall Git projects easily with a single command.
 
-Copy"'right 2018 Dominik Salvet
+Copy"'right 2018-2019 Dominik Salvet
 SPDX License Identifier: MIT
 https://gitlab.com/dominiksalvet/gim'
 
     _HINT_MESSAGE="Try '$0 -help' for getting help."
-
-    # gim report labels
-    _LABEL_INSTALL=install
-    _LABEL_UPDATE=update
-    _LABEL_UNINSTALL=uninstall
-    
-    _LABEL_FAIL_INSTALL=fail-install
-    _LABEL_FAIL_UPDATE=fail-update
-    _LABEL_FAIL_UNINSTALL=fail-uninstall
-
-    _LABEL_LATEST=latest
-    _LABEL_OLD=old
-    _LABEL_NOTHING=nothing
-    _LABEL_UNSUPPORTED=unsupported
-    _LABEL_INCOMPATIBLE=incompatible
-
-    # gim report statuses
-    _STATUS_LATEST=0
-    _STATUS_OLD=1
-    _STATUS_NOTHING=2
-    _STATUS_UNSUPPORTED=3
-    _STATUS_INCOMPATIBLE=4
 }
 
 # DESCRIPTION:
 #   Loads gim configuration.
 load_cfg() {
-    # cache directory to store downloaded Git repositories
-    _CACHE_REPO_DIR=/etc/gim/cache/repo
+    # the gim root directory
+    _GIM_ROOT_DIR=/etc/gim
+
+    # the file representing a list of locally installed projects
+    _GIM_STATUS_PATH="$_GIM_ROOT_DIR"/status
+
+    # cache directory where downloaded Git repositories are stored
+    _GIM_CACHE_REPO_DIR="$_GIM_ROOT_DIR"/cache/repo
 
     # global variables
-    _root_checked=false
-    _ignore_unsupported=false
+    _root_init_done=false
+    _use_force=false
 }
 
 #-------------------------------------------------------------------------------
@@ -138,20 +133,20 @@ load_cfg() {
 # DESCRIPTION:
 #   Processes given gim parameters and performs all associated operations.
 # PARAMETERS:
-#   $@ - parameters to process
+#   $@ - gim parameters
 process_args() {
     action=
     accept_options=true
-    # process each argument individually
-    for arg in "$@"; do
-        if [ "$action" ]; then # if an action has been selected
+    
+    for arg in "$@"; do # process each argument individually
+        if [ "$action" ]; then
             if "$accept_options"; then
                 case "$arg" in
                     -fail-on-prompt)
                         export GIT_TERMINAL_PROMPT=0
                         ;;
-                    -ignore-unsupported)
-                        _ignore_unsupported=true
+                    -force)
+                        _use_force=true
                         ;;
                     -*)
                         echo "$0: unrecognized argument '$arg'
@@ -159,8 +154,7 @@ $_HINT_MESSAGE" >&2
                         return 1
                         ;;
                     *)
-                        # expecting first URL
-                        accept_options=false
+                        accept_options=false # expecting first URL
                         process_action "$action" "$arg" || return
                         ;;
                 esac
@@ -169,17 +163,17 @@ $_HINT_MESSAGE" >&2
             fi
         else
             case "$arg" in
-                install | uninstall | status)
-                    action="$arg"
+                "$_ACTION_INSTALL" | "$_ACTION_UNINSTALL" | "$_ACTION_STATUS")
+                    action="$arg" # use the given action
                     ;;
                 -autoclean)
-                    check_root || return
+                    root_init || return
                     autoclean
                     return 0
                     ;;
                 -clean)
-                    check_root || return
-                    rm -r -f "${_CACHE_REPO_DIR:?}"/*
+                    root_init || return
+                    rm -r -f "${_GIM_CACHE_REPO_DIR:?}"/*
                     return 0
                     ;;
                 -help)
@@ -203,7 +197,6 @@ $_HINT_MESSAGE" >&2
         fi
     done
 
-    # check if required arguments provided
     if [ ! "$action" ] || "$accept_options"; then
         echo "$0: missing required arguments
 $_HINT_MESSAGE" >&2
@@ -212,48 +205,84 @@ $_HINT_MESSAGE" >&2
 }
 
 # DESCRIPTION:
-#   Checks whether running as root.
-check_root() {
-    if "$_root_checked"; then
+#   Performs essential checks associated with root permissions. This function
+#   should be called before executing the first command, which may require root
+#   permissions.
+root_init() {
+    if "$_root_init_done"; then
         return 0
     fi
 
+    # root permissions
     if [ "$(id -u)" -ne 0 ]; then
         echo "$0: root privileges required" >&2
         return 1
     fi
 
-    _root_checked=true
+    # initializing a status file
+    {
+        mkdir -p "$(dirname "$_GIM_STATUS_PATH")" &&
+        if [ ! -f "$_GIM_STATUS_PATH" ]; then
+            echo > "$_GIM_STATUS_PATH"
+        fi
+    } 2>/dev/null || {
+        echo "$0: unable to initialize a status file" >&2
+        return 1
+    }
+
+    _root_init_done=true
 }
 
+#-------------------------------------------------------------------------------
+# AUTOCLEAN
+#-------------------------------------------------------------------------------
+
 # DESCRIPTION:
-#   Performs autoclean of gim's cache.
-autoclean() {
-    # go through all cached Git repositories
-    for repo_dir in "$_CACHE_REPO_DIR"/*/*/*; do
-        # expecting a Git repository, so check if it is a directory
-        if [ -d "$repo_dir"/ ]; then
-            # if the directory is empty, try to remove it as a directory
-            if ! rmdir "$repo_dir"/ 2>/dev/null; then
-                # if the project is not installed
-                if [ ! "$(get_local_project_name "$repo_dir")" ]; then
-                    # remove the project's cached Git repository
-                    rm -r -f "${repo_dir:?}"/
-                fi
+#   Performs automatic clean of gim's cache. It removes cached repositories of
+#   projects that are not currently installed and active in the gim status file.
+autoclean() { (
+    # go to gim cache
+    cd "$_GIM_CACHE_REPO_DIR"/ || return 0
+
+    # go through all Git repositories
+    for repo_short_url in */*/*; do
+        if [ -d "$repo_short_url"/ ]; then
+            # if the repository is not in the status list, it can be removed
+            if ! has_exact_install_record "$repo_short_url"; then
+                # remove the project's cached Git repository
+                rm -r -f "${repo_short_url:?}"/
             fi
         fi
     done
 
     # remove maintainer directories if they are empty
-    rm_empty_dirs "$_CACHE_REPO_DIR"/*/*
+    rm_empty_dirs "$_GIM_CACHE_REPO_DIR"/*/*
 
     # remove hostname directories if they are empty
-    rm_empty_dirs "$_CACHE_REPO_DIR"/*
+    rm_empty_dirs "$_GIM_CACHE_REPO_DIR"/*
+) }
+
+# DESCRIPTION:
+#   Decides whether a project from a given repository URL has a record in gim
+#   status list with the given URL.
+# PARAMETERS:
+#   $1 - short repository URL
+has_exact_install_record() {
+    get_exact_install_record "$1" > /dev/null
 }
 
 # DESCRIPTION:
-#   Try to remove each of given directories. It will succeed only in cases when
-#   the directory is empty.
+#   Returns a record corresponding to project from a given URL repository.
+#   Otherwise, it returns an empty string and ends with fail. It also fails if
+#   the project is installed under a different URL.
+# PARAMETERS:
+#   $1 - short repository URL
+get_exact_install_record() {
+    grep -m 1 -E -e '^'"$1"' .+$' "$_GIM_STATUS_PATH"
+}
+
+# DESCRIPTION:
+#   Removes given directories that are empty.
 # PARAMETERS:
 #   $@ - directories paths
 rm_empty_dirs() {
@@ -264,83 +293,48 @@ rm_empty_dirs() {
     done
 }
 
-# DESCRIPTION:
-#   Returns first found name of a locally installed project based on a given Git
-#   repository as a directory path.
-# PARAMETETRS:
-#   $1 - repository directory
-get_local_project_name() {
-    if [ -r "$1"/gim/names ]; then
-        repo_project_names="$(head -n 1 -- "$1"/gim/names)"
-    else
-        repo_project_names="$(realpath -m -- "$1" | sed -E -e 's|/*$||; s|^.*/||')"
-    fi
-
-    for repo_project_name in $repo_project_names; do
-        if [ -x "$(command -v -- "$repo_project_name")" ]; then
-            echo "$repo_project_name"
-            break
-        fi
-    done
-}
-
 #-------------------------------------------------------------------------------
 # ACTION PROCESSING
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Processes a given action on a given Git project.
+#   Performs checks, prepares target Git repository and executes the action
+#   itself.
 # PARAMETERS:
 #   $1 - action
 #   $2 - repository URL
 process_action() {
-    # prepare Git URLs and check root user
-    extract_url_ "$2" &&
-    check_root &&
+    # prepare Git URLs and check root permissions
+    check_url "$2" &&
+    repo_short_url="$(url_to_short_url "$2")" &&
+    root_init &&
 
     # prepare Git repository
-    repo_dir="$_CACHE_REPO_DIR"/"$_repo_short_url_" &&
-    mkdir -p "$repo_dir"/ &&
-    cd "$repo_dir"/ &&
-    obtain_repo "$_repo_long_url_" &&
-    repo_project_version="$(get_repo_project_version)" &&
+    touch_repo "$repo_short_url" &&
 
     # execute the action itself
-    execute_action_ "$1" "$repo_project_version" "$_repo_short_url_" &&
-    if ! "$_action_verified_"; then
-        _verify_action "$1" "$repo_project_version" "$_repo_short_url_"
-    fi || return
+    execute_action "$1" "$repo_short_url" || return
 }
 
 # DESCRIPTION:
-#   Parses given repository URL and creates short and long variants.
+#   Check whether given URL is supported.
 # PARAMETERS:
 #   $1 - repository URL
-extract_url_() {
+check_url() {
     URL_REGEX='^(|https://)[[:alnum:]_][[:alnum:]_\.-]*(/[[:alnum:]_][[:alnum:]_\.-]*){2}(|.git)$'
     # check the format of given repository URL
     if ! echo "$1" | grep -q -E -e "$URL_REGEX"; then
         echo "$0: unsupported URL delivered" >&2
         return 1
     fi
+}
 
-    # create two individual instances of given URL
-    _repo_long_url_="$1"
-    _repo_short_url_="$1"
-
-    # if the repository URL starts with 'https://'
-    if echo "$1" | grep -q -E -e '^https://'; then
-        _repo_short_url_="$(echo "$_repo_short_url_" | sed -E -e 's|^https://||')"
-    else
-        _repo_long_url_=https://"$_repo_long_url_"
-    fi
-
-    # if the repository URL ends with '.git'
-    if echo "$1" | grep -q -E -e '\.git$'; then
-        _repo_short_url_="$(echo "$_repo_short_url_" | sed -E -e 's/\.git$//')"
-    else
-        _repo_long_url_="$_repo_long_url_".git
-    fi
+# DESCRIPTION:
+#   Transform a given repository URL into its short variant.
+# PARAMETERS:
+#   $1 - repository URL
+url_to_short_url() {
+    echo "$1" | sed -E -e 's|^https://||; s/\.git$//'
 }
 
 #-------------------------------------------------------------------------------
@@ -348,14 +342,19 @@ extract_url_() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Obtains a Git repository from given URL to current directory and get it into
-#   a consistent state.
+#   Refreshes a Git repository from given URL. In case an associated directory
+#   does not exist, it is created and the repository is cloned, otherwise, the
+#   repository is refreshed by fetching and merging changes.
 # PARAMETERS:
-#   $1 - long repository URL
-obtain_repo() {
+#   $1 - short repository URL
+touch_repo() { (
+    repo_dir="$_GIM_CACHE_REPO_DIR"/"$1" &&
+    mkdir -p "$repo_dir"/ &&
+    cd "$repo_dir"/ &&
+
     if [ ! "$(ls -A)" ]; then # if the cache directory for the target project is empty
-        # clone the Git repository master branch to the this directory
-        git clone -q --branch master --single-branch "$1" . &&
+        # clone the Git repository master branch to this directory, it can ask user for a password
+        git clone -q --branch master --single-branch "$(short_url_to_long_url "$1")" . &&
         # disable push remote URL
         git remote set-url --push origin ''
     else
@@ -366,18 +365,19 @@ obtain_repo() {
         # checkout the master branch
         git checkout -q master &&
 
-        # fetch changes to master branch together with all repository tags
+        # fetch changes to master branch together with all tags, it can ask user for a password
         git fetch -q --tags origin master &&
         # merge all fetched remote master changes with local master branch
         git merge -q FETCH_HEAD
     fi || return
-}
+) }
 
 # DESCRIPTION:
-#   Returns current repository project version. If no version found, empty
-#   string is returned.
-get_repo_project_version() {
-    git describe --abbrev=0 2>/dev/null || true
+#   Transforms short repository URL into long repository URL.
+# PARAMETERS:
+#   $1 - short repository URL
+short_url_to_long_url() {
+    echo https://"$1".git
 }
 
 #-------------------------------------------------------------------------------
@@ -385,225 +385,286 @@ get_repo_project_version() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Executes given action with all dependencies prepared.
+#   Executes given action with an associated local Git repository prepared. Also
+#   prints the status after executing the action.
 # PARAMETERS:
 #   $1 - action
-#   $2 - repository project version
-#   $3 - short repository URL
-execute_action_() {
-    # get information about the local project
-    _local_project_name_="$(get_local_project_name .)"
-    _local_project_version_="$(get_local_project_version "$_local_project_name_")"
-    _local_project_status_="$(get_status "$_local_project_name_" "$_local_project_version_" "$2")"
+#   $2 - short repository URL
+execute_action() {
+    # getting project information
+    install_record="$(get_any_install_record "$2")"
+    local_version="$(echo "$install_record" | sed -E -e 's/^[^ ]*(| )//')"
+    repo_version="$(get_repo_version "$2")"
 
-    # set up shared variable, expected to be used by a calling function later
-    _action_verified_=false
+    # getting project status
+    version_status="$(get_version_status "$local_version" "$repo_version")"
+    error_statuses="$(get_error_statuses "$2" "$local_version" "$repo_version")"
+    report_status="$version_status"
+    
+    if [ ! "$error_statuses" ]; then
+        case "$1" in
+            "$_ACTION_INSTALL")
+                case "$version_status" in
+                    "$_VSTATUS_NO_SRC_VER")
+                        report_status="$1"
+                        install "$2" "$repo_version"
+                        ;;
+                    "$_VSTATUS_DIFF")
+                        report_status="$_ACTION_UPDATE" # update, not an installation
+                        update "$2" "$local_version" "$install_record" "$repo_version"
+                        ;;
+                esac
+                ;;
+            "$_ACTION_UNINSTALL")
+                case "$version_status" in
+                    "$_VSTATUS_MATCH" | "$_VSTATUS_DIFF")
+                        report_status="$1"
+                        uninstall "$2" "$local_version" "$install_record"
+                        ;;
+                esac
+                ;;
+        esac
+    fi || error_statuses="$error_statuses""$_ESTATUS_MAKE_FAIL "
 
-    case "$1" in
-        install)
-            case "$_local_project_status_" in
-                "$_STATUS_NOTHING")
-                    install "$2"
-                    ;;
-                "$_STATUS_OLD")
-                    update "$_local_project_version_" "$2"
-                    ;;
-                "$_STATUS_LATEST")
-                    _print_status "$_local_project_status_" "$2" "$3"
-                    _action_verified_=true
-                    ;;
-                "$_STATUS_UNSUPPORTED" | "$_STATUS_INCOMPATIBLE")
-                    _print_status "$_local_project_status_" "$2" "$3" >&2
-                    return 1
-                    ;;
-            esac
-            ;;
-        uninstall)
-            case "$_local_project_status_" in
-                "$_STATUS_LATEST" | "$_STATUS_OLD")
-                    uninstall "$_local_project_version_"
-                    ;;
-                "$_STATUS_NOTHING")
-                    _print_status "$_local_project_status_" "$2" "$3"
-                    _action_verified_=true
-                    ;;
-                "$_STATUS_UNSUPPORTED" | "$_STATUS_INCOMPATIBLE")
-                    _print_status "$_local_project_status_" "$2" "$3" >&2
-                    return 1
-                    ;;
-            esac
-            ;;
-        status)
-            _print_status "$_local_project_status_" "$2" "$3"
-            _action_verified_=true
-            ;;
-    esac || return
+    if [ ! "$error_statuses" ] || [ "$1" = "$_ACTION_STATUS" ]; then
+        print_status "$error_statuses" "$report_status" "$2" "$local_version" "$repo_version"
+    else
+        print_status "$error_statuses" "$report_status" "$2" "$local_version" "$repo_version" >&2
+        return 1
+    fi
 }
 
-# DESCRIPTION:
-#   Returns the current version of a given project name.
-# PARAMETERS:
-#   $1 - local project name
-get_local_project_version() {
-    # get the current version of the project
-    if ! version="$("$1" --version)" 2>/dev/null; then
-        version="$("$1" -version)" 2>/dev/null
-    fi || version=
-    echo "$version"
-}
+#-------------------------------------------------------------------------------
+# PROJECT INFORMATION
+#-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Returns status of the given Git project.
+#   Returns first record, which represents an installation of the project from
+#   the given URL. It also matches a different URLs. If nothing found, it
+#   returns an empty string.
 # PARAMETERS:
-#   $1 - local project name
-#   $2 - local project version
-#   $3 - repository project version
-get_status() {
-    if [ ! "$3" ]; then
-        echo "$_STATUS_INCOMPATIBLE"
-    elif [ "$1" ]; then # if the project is installed
-        if [ ! "$(git tag -l -- "$2")" ]; then
-            echo "$_STATUS_INCOMPATIBLE"
-        elif [ "$2" = "$3" ]; then
-            echo "$_STATUS_LATEST"
-        elif ! "$_ignore_unsupported" && ! is_supported "$2" .; then
-            echo "$_STATUS_UNSUPPORTED"
-        else
-            echo "$_STATUS_OLD"
+#   $1 - short repository URL
+get_any_install_record() {
+    repo_url_prefix="$(get_repo_url_prefix "$1")"
+    repo_url_names="$(get_repo_url_names "$1")"
+
+    for repo_url_name in $repo_url_names; do
+        if install_record="$(get_exact_install_record "$repo_url_prefix"/"$repo_url_name")"; then
+            echo "$install_record"
+            break
         fi
-    else # if the project is not installed
-        echo "$_STATUS_NOTHING"
+    done
+}
+
+# DESCRIPTION:
+#   Returns the prefix part of the given URL.
+# PARAMETERS:
+#   $1 - short repository URL
+get_repo_url_prefix() {
+    echo "$1" | sed -E -e 's|/[^/]*$||'
+}
+
+# DESCRIPTION:
+#   Returns all names that can represent the same repository of given URL.
+# PARAMETERS:
+#   $1 - short repository URL
+get_repo_url_names() {
+    repo_url_names="$(echo "$1" | sed -E -e 's|^.*/||')"
+    
+    gim_names_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/names
+    if [ -r "$gim_names_path" ]; then
+        repo_url_names="$repo_url_names $(head -n 1 "$gim_names_path")"
+    fi
+
+    echo "$repo_url_names"
+}
+
+# DESCRIPTION:
+#   Returns repository project version from the given URL. If no version or
+#   repository found, empty string is returned.
+# PARAMETERS:
+#   $1 - short repository URL
+get_repo_version() {
+    git -C "$_GIM_CACHE_REPO_DIR"/"$1"/ describe --abbrev=0 2>/dev/null
+    true
+}
+
+#-------------------------------------------------------------------------------
+# PROJECT STATUS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Returns a status for two given versions.
+# PARAMETERS:
+#   $1 - source project version
+#   $2 - target project version
+get_version_status() {
+    if [ ! "$1" ]; then
+        echo "$_VSTATUS_NO_SRC_VER"
+    elif [ "$1" = "$2" ]; then
+        echo "$_VSTATUS_MATCH"
+    else
+        echo "$_VSTATUS_DIFF"
     fi
 }
 
 # DESCRIPTION:
-#   Decides whether the given project version of given repository is supported.
+#   Returns error statuses of the given Git project and versions considering the
+#   '-force' flag if delivered. If there is at least one error status, a
+#   trailing space will be appended. Otherwise, returns an empty string.
 # PARAMETERS:
-#   $1 - version
-#   $2 - repository directory
-is_supported() {
-    if [ -r "$2"/gim/unsupported ]; then
-        for version in $(head -n 1 -- "$2"/gim/unsupported); do
-            if [ "$version" = "$1" ]; then
+#   $1 - short repository URL
+#   $2 - source project version
+#   $3 - target project version
+get_error_statuses() {
+    error_statuses=
+
+    if [ ! "$3" ]; then
+        error_statuses="$error_statuses""$_ESTATUS_NO_TAR_VER "
+    fi
+    
+    if ! "$_use_force" && ! is_supported_version "$1" "$2"; then
+        error_statuses="$error_statuses""$_ESTATUS_UNSUP_SRC_VER "
+    fi
+
+    echo "$error_statuses"
+}
+
+# DESCRIPTION:
+#   Decides whether a given version is supported within the project of given
+#   repository URL.
+# PARAMETERS:
+#   $1 - short repository URL
+#   $2 - version
+is_supported_version() {
+    gim_unsupported_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/unsupported
+    if [ -r "$gim_unsupported_path" ]; then
+        for unsupported_version in $(head -n 1 "$gim_unsupported_path"); do
+            if [ "$2" = "$unsupported_version" ]; then
                 return 1
             fi
         done
     fi
 }
 
+#-------------------------------------------------------------------------------
+# INSTALLATION AND UNINSTALLATION
+#-------------------------------------------------------------------------------
+
 # DESCRIPTION:
-#   Installs the project of the given version.
+#   Installs a given project to a given version.
 # PARAMETERS:
-#   $1 - version
+#   $1 - short repository URL
+#   $2 - target project version
 install() {
-    git checkout -q "$1" && # use the given version as a tag
-    make install && # install the program
-    git checkout -q master # checkout the master branch
+    repo_make install "$1" "$2" &&
+    insert_install_record "$1 $2"
 }
 
 # DESCRIPTION:
-#   Uninstalls the project of the given version.
+#   Uninstalls a given project of a given version. Also erases a given
+#   installation record from gim status file.
 # PARAMETERS:
-#   $1 - version
+#   $1 - short repository URL
+#   $2 - source project version
+#   $3 - installation record to erase
 uninstall() {
-    git checkout -q "$1" && # use the program version as a tag
-    make uninstall && # uninstall the program
-    git checkout -q master # checkout the master branch
+    repo_make uninstall "$1" "$2" &&
+    erase_install_record "$3"
 }
 
 # DESCRIPTION:
-#   Updates the project from the given version to another.
+#   Update a given project from a given version to another. Also erases a given
+#   installation record from gim status file and creates a inserts a new one.
 # PARAMETERS:
-#   $1 - source version
-#   $2 - target version
+#   $1 - short repository URL
+#   $2 - source project version
+#   $3 - installation record to erase
+#   $4 - target project version
 update() {
-    uninstall "$1" &&
-    install "$2"
+    uninstall "$1" "$2" "$3" &&
+    install "$1" "$4"
 }
 
 # DESCRIPTION:
-#   Prints status of a Git project with regards to shared variables.
+#   Execute a make target in a repository directory over a given version of the
+#   repository.
 # PARAMETERS:
-#   $1 - project status
-#   $2 - repository project version
+#   $1 - make target
+#   $2 - short repository URL
+#   $3 - version
+repo_make() { (
+    cd "$_GIM_CACHE_REPO_DIR"/"$2"/ && # go to the repository
+    git checkout -q "$3" && # use the given version as a tag
+    if [ "$1" ]; then
+        make "$1" # execute a make target
+    else
+        make # execute the default make target
+    fi &&
+    git checkout -q master # checkout the master branch
+) }
+
+# DESCRIPTION:
+#   Insert a given installation record before the first line of the gim status
+#   list, performing no checks.
+# PARAMETERS:
+#   $1 - installation record
+insert_install_record() {
+    sed -i -E -e '1i '"$1" "$_GIM_STATUS_PATH"
+}
+
+# DESCRIPTION:
+#   Removes a given installation record from the gim status list, performing no
+#   checks.
+# PARAMETERS:
+#   $1 - installation record
+erase_install_record() {
+    sed -i -E -e '\|'"$1"'|d' "$_GIM_STATUS_PATH"
+}
+
+#-------------------------------------------------------------------------------
+# PRINT PROJECT STATUS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Prints status of the given Git project and all associated parameters.
+# PARAMETERS:
+#   $1 - project statuses
+#   $2 - report status
 #   $3 - short repository URL
-_print_status() {
-    case "$1" in
-        "$_STATUS_LATEST")
-            echo "[$_LABEL_LATEST] $_local_project_name_ $_local_project_version_ from $3"
-            ;;
-        "$_STATUS_OLD")
-            echo "[$_LABEL_OLD] $_local_project_name_ $_local_project_version_ -> $2 from $3"
-            ;;
-        "$_STATUS_NOTHING")
-            echo "[$_LABEL_NOTHING] from $3"
-            ;;
-        "$_STATUS_UNSUPPORTED")
-            echo "[$_LABEL_UNSUPPORTED] $_local_project_name_ $_local_project_version_ from $3"
-            ;;
-        "$_STATUS_INCOMPATIBLE")
-            if [ "$_local_project_name_" ]; then
-                echo "[$_LABEL_INCOMPATIBLE] $_local_project_name_ from $3"
+#   $4 - source project version
+#   $5 - target project version
+print_status() {
+    common_prefix="$(create_labels "$1" '<' '>')""[$2] $3"
+    case "$2" in
+        "$_ACTION_INSTALL") echo "$common_prefix $5" ;;
+        "$_ACTION_UPDATE") echo "$common_prefix $5 <- $4" ;;
+        "$_ACTION_UNINSTALL" | "$_VSTATUS_MATCH") echo "$common_prefix $4" ;;
+        "$_VSTATUS_DIFF") echo "$common_prefix $4 -> $5" ;;
+        "$_VSTATUS_NO_SRC_VER")
+            if [ "$5" ]; then
+                echo "$common_prefix -> $5"
             else
-                echo "[$_LABEL_INCOMPATIBLE] $3"
+                echo "$common_prefix"
             fi
             ;;
     esac
 }
 
-#-------------------------------------------------------------------------------
-# VERIFY THE STATUS
-#-------------------------------------------------------------------------------
-
 # DESCRIPTION:
-#   Verifies the result of the given action.
+#   Create status labels from given string list and pattern. Uses IFS value to
+#   separate label texts. If at least one label is created, a trailing space
+#   will be appended.
 # PARAMETERS:
-#   $1 - action
-#   $2 - repository project version
-#   $3 - short repository URL
-_verify_action() {
-    # get current information about the local project
-    new_local_project_name="$(get_local_project_name .)"
-    new_local_project_version="$(get_local_project_version "$new_local_project_name")"
-    new_local_project_status="$(get_status "$new_local_project_name" "$new_local_project_version" "$2")"
-
-    case "$1" in
-        install)
-            case "$_local_project_status_" in
-                "$_STATUS_NOTHING")
-                    if [ "$new_local_project_status" != "$_STATUS_LATEST" ]; then
-                        echo "[$_LABEL_FAIL_INSTALL] $2 from $3" >&2
-                        return 1
-                    fi
-                    echo "[$_LABEL_INSTALL] $new_local_project_name $new_local_project_version from $3"
-                    ;;
-                "$_STATUS_OLD")
-                    if [ "$new_local_project_status" != "$_STATUS_LATEST" ]; then
-                        echo "[$_LABEL_FAIL_UPDATE] $2 <- $_local_project_name_ $_local_project_version_ from $3" >&2
-                        return 1
-                    fi
-                    if [ "$new_local_project_name" = "$_local_project_name_" ]; then
-                        echo "[$_LABEL_UPDATE] $new_local_project_name $new_local_project_version <- \
-$_local_project_version_ from $3"
-                    else
-                        echo "[$_LABEL_UPDATE] $new_local_project_name $new_local_project_version <- \
-$_local_project_name_ $_local_project_version_ from $3"
-                    fi
-                    ;;
-            esac
-            ;;
-        uninstall)
-            case "$_local_project_status_" in
-                "$_STATUS_LATEST" | "$_STATUS_OLD")
-                    if [ "$new_local_project_status" != "$_STATUS_NOTHING" ]; then
-                        echo "[$_LABEL_FAIL_UNINSTALL] $_local_project_name_ $_local_project_version_ from $3" >&2
-                        return 1
-                    fi
-                    echo "[$_LABEL_UNINSTALL] $_local_project_name_ $_local_project_version_ from $3"
-                    ;;
-            esac
-            ;;
-    esac
+#   $1 - string list
+#   $2 - label leading string
+#   $3 - label trailing string
+create_labels() {
+    labels=
+    for label_text in $1; do
+        labels="$labels""$2""$label_text""$3 "
+    done
+    echo "$labels"
 }
 
 #-------------------------------------------------------------------------------
