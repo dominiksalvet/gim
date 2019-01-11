@@ -74,8 +74,8 @@ load_const() {
     _VSTATUS_MATCH=latest
 
     # error statuses
-    _ESTATUS_NO_TAR_VER=NO-REPO-ATAG
-    _ESTATUS_UNSUP_SRC_VER=UNSUP-LOC-VER
+    _ESTATUS_NO_TAR_VER=NO-TAR-VER
+    _ESTATUS_UNSUP_SRC_VER=UNSUP-SRC-VER
     _ESTATUS_MAKE_FAIL=MAKE-FAIL
 
     # constant string data
