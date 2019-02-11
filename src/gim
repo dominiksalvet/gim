@@ -518,13 +518,14 @@ get_error_statuses() {
 #   $1 - short repository URL
 #   $2 - version
 is_supported_version() {
-    gim_unsupported_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/unsupported
-    if [ -r "$gim_unsupported_path" ]; then
-        for unsupported_version in $(head -n 1 "$gim_unsupported_path"); do
+    gim_unsupported_versions_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/unsupported-versions
+
+    if [ -r "$gim_unsupported_versions_path" ]; then
+        while read -r unsupported_version; do
             if [ "$2" = "$unsupported_version" ]; then
                 return 1
             fi
-        done
+        done < "$gim_unsupported_versions_path"
     fi
 }
 
