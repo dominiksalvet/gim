@@ -41,7 +41,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id true false dirname'
+    SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id true false dirname wc'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -136,11 +136,11 @@ load_cfg() {
 #   $@ - gim parameters
 process_args() {
     action=
-    accept_options=true
+    accept_action_options=true
     
     for arg in "$@"; do # process each argument individually
         if [ "$action" ]; then
-            if "$accept_options"; then
+            if "$accept_action_options"; then
                 case "$arg" in
                     -fail-on-prompt)
                         export GIT_TERMINAL_PROMPT=0
@@ -154,7 +154,7 @@ $_HINT_MESSAGE" >&2
                         return 1
                         ;;
                     *)
-                        accept_options=false # expecting first URL
+                        accept_action_options=false # expecting first URL
                         process_action "$action" "$arg" || return
                         ;;
                 esac
@@ -197,7 +197,7 @@ $_HINT_MESSAGE" >&2
         fi
     done
 
-    if [ ! "$action" ] || "$accept_options"; then
+    if [ ! "$action" ] || "$accept_action_options"; then
         echo "$0: missing required arguments
 $_HINT_MESSAGE" >&2
         return 1
@@ -219,14 +219,18 @@ root_init() {
         return 1
     fi
 
-    # initializing a status file
+    # check gim status file
     {
-        mkdir -p "$(dirname "$_GIM_STATUS_PATH")" &&
         if [ ! -f "$_GIM_STATUS_PATH" ]; then
+            mkdir -p "$(dirname "$_GIM_STATUS_PATH")" &&
             echo > "$_GIM_STATUS_PATH"
+        else
+            if [ "$(wc -l < "$_GIM_STATUS_PATH")" -eq 0 ]; then
+                echo >> "$_GIM_STATUS_PATH"
+            fi
         fi
     } 2>/dev/null || {
-        echo "$0: unable to initialize a status file" >&2
+        echo "$0: unable to validate a status file" >&2
         return 1
     }
 
