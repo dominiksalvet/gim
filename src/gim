@@ -66,7 +66,7 @@ load_const() {
     _ACTION_INSTALL=install
     _ACTION_UNINSTALL=uninstall
     _ACTION_STATUS=status
-    _ACTION_UPDATE=update # impossible to be directly invoked by a user
+    _ACTION_UPDATE=update # can't be directly invoked by a user
 
     # version comparison statuses
     _VSTATUS_NO_SRC_VER=nothing
@@ -93,11 +93,11 @@ OPTION:
   -force           force to work when technically possible
 
 COMMAND:
-  -autoclean  remove old cache
-  -clean      remove all cache
-  -help       show this help
-  -about      show information
-  -version    show version"
+  autoclean  remove old cache
+  clean      remove all cache
+  help       show this help
+  about      show information
+  version    show version"
 
     _ABOUT_MESSAGE="gim $_VERSION
 Install, update or uninstall Git projects easily with a single command.
@@ -106,7 +106,7 @@ Copy"'right 2018-2019 Dominik Salvet
 SPDX License Identifier: MIT
 https://gitlab.com/dominiksalvet/gim'
 
-    _HINT_MESSAGE="Try '$0 -help' for getting help."
+    _HINT_MESSAGE="Try '$0 help' for getting help."
 }
 
 # DESCRIPTION:
@@ -118,7 +118,7 @@ load_cfg() {
     # the file representing a list of locally installed projects
     _GIM_STATUS_PATH="$_GIM_ROOT_DIR"/status
 
-    # cache directory where downloaded Git repositories are stored
+    # downloaded Git repositories cache
     _GIM_CACHE_REPO_DIR="$_GIM_ROOT_DIR"/cache/repo
 
     # global variables
@@ -166,25 +166,25 @@ $_HINT_MESSAGE" >&2
                 "$_ACTION_INSTALL" | "$_ACTION_UNINSTALL" | "$_ACTION_STATUS")
                     action="$arg" # use the given action
                     ;;
-                -autoclean)
+                autoclean)
                     root_init || return
                     autoclean
                     return 0
                     ;;
-                -clean)
+                clean)
                     root_init || return
                     rm -r -f "${_GIM_CACHE_REPO_DIR:?}"/*
                     return 0
                     ;;
-                -help)
+                help)
                     echo "$_HELP_MESSAGE"
                     return 0
                     ;;
-                -about)
+                about)
                     echo "$_ABOUT_MESSAGE"
                     return 0
                     ;;
-                -version)
+                version)
                     echo "$_VERSION"
                     return 0
                     ;;
