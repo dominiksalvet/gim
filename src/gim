@@ -41,7 +41,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id true false dirname wc'
+    SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id true false dirname wc read'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -220,19 +220,14 @@ root_init() {
     fi
 
     # check gim status file
-    {
-        if [ ! -f "$_GIM_STATUS_PATH" ]; then
-            mkdir -p "$(dirname "$_GIM_STATUS_PATH")" &&
-            echo > "$_GIM_STATUS_PATH"
-        else
-            if [ "$(wc -l < "$_GIM_STATUS_PATH")" -eq 0 ]; then
-                echo >> "$_GIM_STATUS_PATH"
-            fi
-        fi
-    } 2>/dev/null || {
-        echo "$0: unable to validate a status file" >&2
-        return 1
-    }
+    if [ ! -f "$_GIM_STATUS_PATH" ]; then
+        mkdir -p "$(dirname "$_GIM_STATUS_PATH")" &&
+        echo > "$_GIM_STATUS_PATH"
+    # check if the status file has at least one newline character
+    elif [ "$(wc -l < "$_GIM_STATUS_PATH")" -eq 0 ]; then
+        # append a newline character
+        echo >> "$_GIM_STATUS_PATH"
+    fi || return
 
     _root_init_done=true
 }
@@ -242,8 +237,9 @@ root_init() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Performs automatic clean of gim's cache. It removes cached repositories of
-#   projects that are not currently installed and active in the gim status file.
+#   Performs an automatic cleaning of gim's cache. It removes the cached
+#   repositories of projects that are not currently installed and active in the
+#   gim status file.
 autoclean() { (
     # go to gim cache
     cd "$_GIM_CACHE_REPO_DIR"/ || return 0
@@ -267,8 +263,8 @@ autoclean() { (
 ) }
 
 # DESCRIPTION:
-#   Decides whether a project from a given repository URL has a record in gim
-#   status list with the given URL.
+#   Decides whether a project from a given repository URL has an exact record in
+#   gim status list with the given URL.
 # PARAMETERS:
 #   $1 - short repository URL
 has_exact_install_record() {
@@ -286,7 +282,7 @@ get_exact_install_record() {
 }
 
 # DESCRIPTION:
-#   Removes given directories that are empty.
+#   Removes given directories if they are empty.
 # PARAMETERS:
 #   $@ - directories paths
 rm_empty_dirs() {
@@ -302,8 +298,8 @@ rm_empty_dirs() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Performs checks, prepares target Git repository and executes the action
-#   itself.
+#   Performs several checks, prepares target Git repository and executes the
+#   given action itself.
 # PARAMETERS:
 #   $1 - action
 #   $2 - repository URL
@@ -321,7 +317,7 @@ process_action() {
 }
 
 # DESCRIPTION:
-#   Check whether given URL is supported.
+#   Checks whether given URL is supported.
 # PARAMETERS:
 #   $1 - repository URL
 check_url() {
@@ -334,7 +330,7 @@ check_url() {
 }
 
 # DESCRIPTION:
-#   Transform a given repository URL into its short variant.
+#   Transforms a given repository URL into its short variant.
 # PARAMETERS:
 #   $1 - repository URL
 url_to_short_url() {
@@ -347,7 +343,7 @@ url_to_short_url() {
 
 # DESCRIPTION:
 #   Refreshes a Git repository from given URL. In case an associated directory
-#   does not exist, it is created and the repository is cloned, otherwise, the
+#   does not exist, it is created and the repository is cloned. Otherwise, the
 #   repository is refreshed by fetching and merging changes.
 # PARAMETERS:
 #   $1 - short repository URL
@@ -357,7 +353,7 @@ touch_repo() { (
     cd "$repo_dir"/ &&
 
     if [ ! "$(ls -A)" ]; then # if the cache directory for the target project is empty
-        # clone the Git repository master branch to this directory, it can ask user for a password
+        # clone the Git repository master branch to this directory, it can ask a user for a password
         git clone -q --branch master --single-branch "$(short_url_to_long_url "$1")" . &&
         # disable push remote URL
         git remote set-url --push origin ''
@@ -369,7 +365,7 @@ touch_repo() { (
         # checkout the master branch
         git checkout -q master &&
 
-        # fetch changes to master branch together with all tags, it can ask user for a password
+        # fetch changes to master branch together with all tags, it can ask a user for a password
         git fetch -q --tags origin master &&
         # merge all fetched remote master changes with local master branch
         git merge -q FETCH_HEAD
@@ -377,7 +373,7 @@ touch_repo() { (
 ) }
 
 # DESCRIPTION:
-#   Transforms short repository URL into long repository URL.
+#   Transforms a short repository URL into its long equivalent.
 # PARAMETERS:
 #   $1 - short repository URL
 short_url_to_long_url() {
@@ -389,8 +385,8 @@ short_url_to_long_url() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Executes given action with an associated local Git repository prepared. Also
-#   prints the status after executing the action.
+#   Executes a given action with an associated local Git repository prepared.
+#   Also prints the status after executing the action.
 # PARAMETERS:
 #   $1 - action
 #   $2 - short repository URL
@@ -449,42 +445,23 @@ execute_action() {
 # PARAMETERS:
 #   $1 - short repository URL
 get_any_install_record() {
-    repo_url_prefix="$(get_repo_url_prefix "$1")"
-    repo_url_names="$(get_repo_url_names "$1")"
+    gim_mirrors_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/mirrors
 
-    for repo_url_name in $repo_url_names; do
-        if install_record="$(get_exact_install_record "$repo_url_prefix"/"$repo_url_name")"; then
-            echo "$install_record"
-            break
-        fi
-    done
-}
-
-# DESCRIPTION:
-#   Returns the prefix part of the given URL.
-# PARAMETERS:
-#   $1 - short repository URL
-get_repo_url_prefix() {
-    echo "$1" | sed -E -e 's|/[^/]*$||'
-}
-
-# DESCRIPTION:
-#   Returns all names that can represent the same repository of given URL.
-# PARAMETERS:
-#   $1 - short repository URL
-get_repo_url_names() {
-    repo_url_names="$(echo "$1" | sed -E -e 's|^.*/||')"
-    
-    gim_names_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/names
-    if [ -r "$gim_names_path" ]; then
-        repo_url_names="$repo_url_names $(head -n 1 "$gim_names_path")"
+    if [ -r "$gim_mirrors_path" ]; then
+        while read -r repo_mirror_url; do
+            repo_mirror_url="$(url_to_short_url "$repo_mirror_url")"
+            if install_record="$(get_exact_install_record "$repo_mirror_url")"; then
+                echo "$install_record"
+                break
+            fi
+        done < "$gim_mirrors_path"
+    elif install_record="$(get_exact_install_record "$1")"; then
+        echo "$install_record"
     fi
-
-    echo "$repo_url_names"
 }
 
 # DESCRIPTION:
-#   Returns repository project version from the given URL. If no version or
+#   Returns the repository project version from the given URL. If no version or
 #   repository found, empty string is returned.
 # PARAMETERS:
 #   $1 - short repository URL
@@ -631,7 +608,7 @@ erase_install_record() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Prints status of the given Git project and all associated parameters.
+#   Prints the status of a given Git project and all associated parameters.
 # PARAMETERS:
 #   $1 - project statuses
 #   $2 - report status
