@@ -11,7 +11,7 @@
 #-------------------------------------------------------------------------------
 # VARIABLES:
 #    name  function local variable
-#    NAME  function local constant
+#    NAME  function local constant / environment variable
 #   _name  global variable
 #   _NAME  global constant
 #-------------------------------------------------------------------------------
@@ -112,6 +112,9 @@ https://gitlab.com/dominiksalvet/gim'
 # DESCRIPTION:
 #   Loads gim configuration.
 load_cfg() {
+    # export environment variables
+    export INSTALLER=gim
+
     # the gim root directory
     _GIM_ROOT_DIR=/etc/gim
 

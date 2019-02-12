@@ -9,6 +9,7 @@ The changes not yet present in any release are listed in this section.
 ### Added
 
 * The support for gim *status* file has been added. This file represents a list of locally installed projects.
+* Gim now exports environment variable `INSTALLER` equal to `gim` to indicate used installation manager.
 
 ### Changed
 
