@@ -1,4 +1,4 @@
-# Git Installation Manager *(gim)*
+# gim
 
 > Install, update or uninstall Git projects easily with a single command.
 
@@ -77,10 +77,10 @@ sudo gim status <url>
 For example, if you want to get installation status about gim, you can do it using the following command:
 
 ```sh
-sudo gim status https://gitlab.com/dominiksalvet/gim.git
+sudo gim status gitlab.com/dominiksalvet/gim
 ```
 
-Also, you can omit leading `https://`, trailing `.git` or both from the URL. All those formats work equally.
+Also, if there is leading `https://` or trailing `.git` in the URL, it is not a problem. All those formats work equally.
 
 ## Badge
 
