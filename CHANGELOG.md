@@ -17,7 +17,7 @@ The changes not yet present in any release are listed in this section.
 * The format of status reports has been changed. A label concept has been established, which significantly distinguishes errors from normal status reports.
 * Gim works with the *status* file rather than using executable files in a directory defined in `$PATH` variable of the root user. Before updating to this version, it is required to uninstall all projects installed by gim and install them back once gim is updated to register them in the *status* file.
 * Commands `-autoclean`, `-clean`, `-help`, `-about` and `-version` have been renamed to `autoclean`, `clean`, `help`, `about` and `version`.
-* Gim projects file *gim/names* is expected to be named *gim/mirrors* now, stores full mirror URLs rather than just names and the its content is separated by newlines rather than spaces.
+* Gim projects file *gim/names* is expected to be named *gim/mirror-urls* now, stores mirror URLs rather than just names and its content is separated by newlines rather than spaces.
 * Gim projects file *gim/unsupported* is expected to be named *gim/unsupported-versions*. Also, its content is separated by newlines rather than spaces.
 
 ## 5.0.0 (2018-12-28)

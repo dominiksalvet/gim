@@ -445,16 +445,16 @@ execute_action() {
 # PARAMETERS:
 #   $1 - short repository URL
 get_any_install_record() {
-    gim_mirrors_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/mirrors
+    gim_mirror_urls_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/mirror-urls
 
-    if [ -r "$gim_mirrors_path" ]; then
+    if [ -r "$gim_mirror_urls_path" ]; then
         while read -r repo_mirror_url; do
             repo_mirror_url="$(url_to_short_url "$repo_mirror_url")"
             if install_record="$(get_exact_install_record "$repo_mirror_url")"; then
                 echo "$install_record"
                 break
             fi
-        done < "$gim_mirrors_path"
+        done < "$gim_mirror_urls_path"
     elif install_record="$(get_exact_install_record "$1")"; then
         echo "$install_record"
     fi
