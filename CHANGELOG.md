@@ -8,18 +8,16 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
-* The support for gim *status* file has been added. This file represents a list of locally installed projects.
-* Gim now exports environment variable `INSTALLER` equal to `gim` to indicate used installation manager.
+* Gim now exports environment variable `INSTALLER` equal to `gim` for invoked makefile targets or scripts to indicate used installation manager.
+* Support for RC files that set up gim's directory definitions. And so they are no longer hard-coded.
 
 ### Changed
 
-* Gim's cache directory for downloaded Git repositories has been changed from */etc/gim/cache* to */etc/gim/cache/repo*.
 * Option `-ignore-unsupported` has been renamed to `-force`.
 * The format of status reports has been changed. A label concept has been established, which significantly distinguishes errors from normal status reports.
-* Gim works with the *status* file rather than using executable files in a directory defined in `$PATH` variable of the root user. Before updating to this version, it is required to uninstall all projects installed by gim and install them back once gim is updated to register them in the *status* file.
+* Gim now manages its own database of installed programs, *status* file, and no longer uses `$PATH` root's variable. Due this change, it is required to uninstall all projects installed by gim and install them back after update to this version.
 * Commands `-autoclean`, `-clean`, `-help`, `-about` and `-version` have been renamed to `autoclean`, `clean`, `help`, `about` and `version`.
-* Gim projects file *gim/names* is expected to be named *gim/mirror-urls* now, stores mirror URLs rather than just names and its content is separated by newlines rather than spaces.
-* Gim projects file *gim/unsupported* is expected to be named *gim/unsupported-versions*. Also, its content is separated by newlines rather than spaces.
+* Gim project control files have been renamed; *gim/unsupported* -> *gim/unsupported-versions*, *gim/names* -> *gim/mirror-urls* (now stores mirror URLs instead of just names). The content of both files is separated by newlines rather than spaces.
 
 ## 5.0.0 (2018-12-28)
 
