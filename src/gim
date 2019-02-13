@@ -6,16 +6,6 @@
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-# CODE STYLE
-#-------------------------------------------------------------------------------
-# VARIABLES:
-#    name  function local variable
-#    NAME  function local constant / environment variable
-#   _name  global variable
-#   _NAME  global constant
-#-------------------------------------------------------------------------------
-
 
 #-------------------------------------------------------------------------------
 # ENTRY POINT
@@ -41,7 +31,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id true false dirname wc read'
+    readonly SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id true false dirname wc read'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -60,33 +50,33 @@ check_deps() {
 #   Loads gim constant data.
 load_const() {
     # the current version of gim
-    _VERSION=5.0.0
+    readonly VERSION=5.0.0
 
     # gim actions
-    _ACTION_INSTALL=install
-    _ACTION_UNINSTALL=uninstall
-    _ACTION_STATUS=status
-    _ACTION_UPDATE=update # can't be directly invoked by a user
+    readonly ACTION_INSTALL=install
+    readonly ACTION_UNINSTALL=uninstall
+    readonly ACTION_STATUS=status
+    readonly ACTION_UPDATE=update # can't be directly invoked by a user
 
     # version comparison statuses
-    _VSTATUS_NO_SRC_VER=nothing
-    _VSTATUS_DIFF=old
-    _VSTATUS_MATCH=latest
+    readonly VSTATUS_NO_SRC_VER=nothing
+    readonly VSTATUS_DIFF=old
+    readonly VSTATUS_MATCH=latest
 
     # error statuses
-    _ESTATUS_NO_TAR_VER=NO-TAR-VER
-    _ESTATUS_UNSUP_SRC_VER=UNSUP-SRC-VER
-    _ESTATUS_MAKE_FAIL=MAKE-FAIL
+    readonly ESTATUS_NO_TAR_VER=NO-TAR-VER
+    readonly ESTATUS_UNSUP_SRC_VER=UNSUP-SRC-VER
+    readonly ESTATUS_MAKE_FAIL=MAKE-FAIL
 
     # constant string data
-    _HELP_MESSAGE="USAGE:
+    readonly HELP_MESSAGE="USAGE:
   $0 ACTION [OPTION...] URL...
   $0 COMMAND
 
 ACTION:
-  $_ACTION_INSTALL    install/update Git projects
-  $_ACTION_UNINSTALL  uninstall Git projects
-  $_ACTION_STATUS     show status of Git projects
+  $ACTION_INSTALL    install/update Git projects
+  $ACTION_UNINSTALL  uninstall Git projects
+  $ACTION_STATUS     show status of Git projects
 
 OPTION:
   -fail-on-prompt  fail when user input is required
@@ -99,14 +89,14 @@ COMMAND:
   about      show information
   version    show version"
 
-    _ABOUT_MESSAGE="gim $_VERSION
+    readonly ABOUT_MESSAGE="gim $VERSION
 Install, update or uninstall Git projects easily with a single command.
 
 Copy"'right 2018-2019 Dominik Salvet
 SPDX License Identifier: MIT
 https://gitlab.com/dominiksalvet/gim'
 
-    _HINT_MESSAGE="Try '$0 help' for getting help."
+    readonly HINT_MESSAGE="Try '$0 help' for getting help."
 }
 
 # DESCRIPTION:
@@ -116,17 +106,17 @@ load_cfg() {
     export INSTALLER=gim
 
     # the gim root directory
-    _GIM_ROOT_DIR=/etc/gim
+    readonly GIM_ROOT_DIR=/etc/gim
 
     # the file representing a list of locally installed projects
-    _GIM_STATUS_PATH="$_GIM_ROOT_DIR"/status
+    readonly GIM_STATUS_PATH="$GIM_ROOT_DIR"/status
 
     # downloaded Git repositories cache
-    _GIM_CACHE_REPO_DIR="$_GIM_ROOT_DIR"/cache/repo
+    readonly GIM_CACHE_REPO_DIR="$GIM_ROOT_DIR"/cache/repo
 
     # global variables
-    _root_init_done=false
-    _use_force=false
+    root_init_done=false
+    use_force=false
 }
 
 #-------------------------------------------------------------------------------
@@ -149,11 +139,11 @@ process_args() {
                         export GIT_TERMINAL_PROMPT=0
                         ;;
                     -force)
-                        _use_force=true
+                        use_force=true
                         ;;
                     -*)
                         echo "$0: unrecognized argument '$arg'
-$_HINT_MESSAGE" >&2
+$HINT_MESSAGE" >&2
                         return 1
                         ;;
                     *)
@@ -166,7 +156,7 @@ $_HINT_MESSAGE" >&2
             fi
         else
             case "$arg" in
-                "$_ACTION_INSTALL" | "$_ACTION_UNINSTALL" | "$_ACTION_STATUS")
+                "$ACTION_INSTALL" | "$ACTION_UNINSTALL" | "$ACTION_STATUS")
                     action="$arg" # use the given action
                     ;;
                 autoclean)
@@ -176,24 +166,24 @@ $_HINT_MESSAGE" >&2
                     ;;
                 clean)
                     root_init || return
-                    rm -r -f "${_GIM_CACHE_REPO_DIR:?}"/*
+                    rm -r -f "${GIM_CACHE_REPO_DIR:?}"/*
                     return 0
                     ;;
                 help)
-                    echo "$_HELP_MESSAGE"
+                    echo "$HELP_MESSAGE"
                     return 0
                     ;;
                 about)
-                    echo "$_ABOUT_MESSAGE"
+                    echo "$ABOUT_MESSAGE"
                     return 0
                     ;;
                 version)
-                    echo "$_VERSION"
+                    echo "$VERSION"
                     return 0
                     ;;
                 *)
                     echo "$0: unrecognized argument '$arg'
-$_HINT_MESSAGE" >&2
+$HINT_MESSAGE" >&2
                     return 1
                     ;;
             esac
@@ -202,7 +192,7 @@ $_HINT_MESSAGE" >&2
 
     if [ ! "$action" ] || "$accept_action_options"; then
         echo "$0: missing required arguments
-$_HINT_MESSAGE" >&2
+$HINT_MESSAGE" >&2
         return 1
     fi
 }
@@ -212,7 +202,7 @@ $_HINT_MESSAGE" >&2
 #   should be called before executing the first command, which may require root
 #   permissions.
 root_init() {
-    if "$_root_init_done"; then
+    if "$root_init_done"; then
         return 0
     fi
 
@@ -223,16 +213,16 @@ root_init() {
     fi
 
     # check gim status file
-    if [ ! -f "$_GIM_STATUS_PATH" ]; then
-        mkdir -p "$(dirname "$_GIM_STATUS_PATH")" &&
-        echo > "$_GIM_STATUS_PATH"
+    if [ ! -f "$GIM_STATUS_PATH" ]; then
+        mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
+        echo > "$GIM_STATUS_PATH"
     # check if the status file has at least one newline character
-    elif [ "$(wc -l < "$_GIM_STATUS_PATH")" -eq 0 ]; then
+    elif [ "$(wc -l < "$GIM_STATUS_PATH")" -eq 0 ]; then
         # append a newline character
-        echo >> "$_GIM_STATUS_PATH"
+        echo >> "$GIM_STATUS_PATH"
     fi || return
 
-    _root_init_done=true
+    root_init_done=true
 }
 
 #-------------------------------------------------------------------------------
@@ -245,7 +235,7 @@ root_init() {
 #   gim status file.
 autoclean() { (
     # go to gim cache
-    cd "$_GIM_CACHE_REPO_DIR"/ || return 0
+    cd "$GIM_CACHE_REPO_DIR"/ || return 0
 
     # go through all Git repositories
     for repo_short_url in */*/*; do
@@ -259,10 +249,10 @@ autoclean() { (
     done
 
     # remove maintainer directories if they are empty
-    rm_empty_dirs "$_GIM_CACHE_REPO_DIR"/*/*
+    rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*/*
 
     # remove hostname directories if they are empty
-    rm_empty_dirs "$_GIM_CACHE_REPO_DIR"/*
+    rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*
 ) }
 
 # DESCRIPTION:
@@ -281,7 +271,7 @@ has_exact_install_record() {
 # PARAMETERS:
 #   $1 - short repository URL
 get_exact_install_record() {
-    grep -m 1 -E -e '^'"$1"' .+$' "$_GIM_STATUS_PATH"
+    grep -m 1 -E -e '^'"$1"' .+$' "$GIM_STATUS_PATH"
 }
 
 # DESCRIPTION:
@@ -324,7 +314,7 @@ process_action() {
 # PARAMETERS:
 #   $1 - repository URL
 check_url() {
-    URL_REGEX='^(|https://)[[:alnum:]_][[:alnum:]_\.-]*(/[[:alnum:]_][[:alnum:]_\.-]*){2}(|.git)$'
+    readonly URL_REGEX='^(|https://)[[:alnum:]_][[:alnum:]_\.-]*(/[[:alnum:]_][[:alnum:]_\.-]*){2}(|.git)$'
     # check the format of given repository URL
     if ! echo "$1" | grep -q -E -e "$URL_REGEX"; then
         echo "$0: unsupported URL delivered" >&2
@@ -351,7 +341,7 @@ url_to_short_url() {
 # PARAMETERS:
 #   $1 - short repository URL
 touch_repo() { (
-    repo_dir="$_GIM_CACHE_REPO_DIR"/"$1" &&
+    repo_dir="$GIM_CACHE_REPO_DIR"/"$1" &&
     mkdir -p "$repo_dir"/ &&
     cd "$repo_dir"/ &&
 
@@ -406,30 +396,30 @@ execute_action() {
     
     if [ ! "$error_statuses" ]; then
         case "$1" in
-            "$_ACTION_INSTALL")
+            "$ACTION_INSTALL")
                 case "$version_status" in
-                    "$_VSTATUS_NO_SRC_VER")
+                    "$VSTATUS_NO_SRC_VER")
                         report_status="$1"
                         install "$2" "$repo_version"
                         ;;
-                    "$_VSTATUS_DIFF")
-                        report_status="$_ACTION_UPDATE" # update, not an installation
+                    "$VSTATUS_DIFF")
+                        report_status="$ACTION_UPDATE" # update, not an installation
                         update "$2" "$local_version" "$install_record" "$repo_version"
                         ;;
                 esac
                 ;;
-            "$_ACTION_UNINSTALL")
+            "$ACTION_UNINSTALL")
                 case "$version_status" in
-                    "$_VSTATUS_MATCH" | "$_VSTATUS_DIFF")
+                    "$VSTATUS_MATCH" | "$VSTATUS_DIFF")
                         report_status="$1"
                         uninstall "$2" "$local_version" "$install_record"
                         ;;
                 esac
                 ;;
         esac
-    fi || error_statuses="$error_statuses""$_ESTATUS_MAKE_FAIL "
+    fi || error_statuses="$error_statuses""$ESTATUS_MAKE_FAIL "
 
-    if [ ! "$error_statuses" ] || [ "$1" = "$_ACTION_STATUS" ]; then
+    if [ ! "$error_statuses" ] || [ "$1" = "$ACTION_STATUS" ]; then
         print_status "$error_statuses" "$report_status" "$2" "$local_version" "$repo_version"
     else
         print_status "$error_statuses" "$report_status" "$2" "$local_version" "$repo_version" >&2
@@ -448,7 +438,7 @@ execute_action() {
 # PARAMETERS:
 #   $1 - short repository URL
 get_any_install_record() {
-    gim_mirror_urls_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/mirror-urls
+    gim_mirror_urls_path="$GIM_CACHE_REPO_DIR"/"$1"/gim/mirror-urls
 
     if [ -r "$gim_mirror_urls_path" ]; then
         while read -r repo_mirror_url; do
@@ -469,7 +459,7 @@ get_any_install_record() {
 # PARAMETERS:
 #   $1 - short repository URL
 get_repo_version() {
-    git -C "$_GIM_CACHE_REPO_DIR"/"$1"/ describe --abbrev=0 2>/dev/null
+    git -C "$GIM_CACHE_REPO_DIR"/"$1"/ describe --abbrev=0 2>/dev/null
     true
 }
 
@@ -484,11 +474,11 @@ get_repo_version() {
 #   $2 - target project version
 get_version_status() {
     if [ ! "$1" ]; then
-        echo "$_VSTATUS_NO_SRC_VER"
+        echo "$VSTATUS_NO_SRC_VER"
     elif [ "$1" = "$2" ]; then
-        echo "$_VSTATUS_MATCH"
+        echo "$VSTATUS_MATCH"
     else
-        echo "$_VSTATUS_DIFF"
+        echo "$VSTATUS_DIFF"
     fi
 }
 
@@ -504,11 +494,11 @@ get_error_statuses() {
     error_statuses=
 
     if [ ! "$3" ]; then
-        error_statuses="$error_statuses""$_ESTATUS_NO_TAR_VER "
+        error_statuses="$error_statuses""$ESTATUS_NO_TAR_VER "
     fi
     
-    if ! "$_use_force" && ! is_supported_version "$1" "$2"; then
-        error_statuses="$error_statuses""$_ESTATUS_UNSUP_SRC_VER "
+    if ! "$use_force" && ! is_supported_version "$1" "$2"; then
+        error_statuses="$error_statuses""$ESTATUS_UNSUP_SRC_VER "
     fi
 
     echo "$error_statuses"
@@ -521,7 +511,7 @@ get_error_statuses() {
 #   $1 - short repository URL
 #   $2 - version
 is_supported_version() {
-    gim_unsupported_versions_path="$_GIM_CACHE_REPO_DIR"/"$1"/gim/unsupported-versions
+    gim_unsupported_versions_path="$GIM_CACHE_REPO_DIR"/"$1"/gim/unsupported-versions
 
     if [ -r "$gim_unsupported_versions_path" ]; then
         while read -r unsupported_version; do
@@ -579,7 +569,7 @@ update() {
 #   $2 - short repository URL
 #   $3 - version
 repo_make() { (
-    cd "$_GIM_CACHE_REPO_DIR"/"$2"/ && # go to the repository
+    cd "$GIM_CACHE_REPO_DIR"/"$2"/ && # go to the repository
     git checkout -q "$3" && # use the given version as a tag
     if [ "$1" ]; then
         make "$1" # execute a make target
@@ -595,7 +585,7 @@ repo_make() { (
 # PARAMETERS:
 #   $1 - installation record
 insert_install_record() {
-    sed -i -E -e '1i '"$1" "$_GIM_STATUS_PATH"
+    sed -i -E -e '1i '"$1" "$GIM_STATUS_PATH"
 }
 
 # DESCRIPTION:
@@ -604,7 +594,7 @@ insert_install_record() {
 # PARAMETERS:
 #   $1 - installation record
 erase_install_record() {
-    sed -i -E -e '\|'"$1"'|d' "$_GIM_STATUS_PATH"
+    sed -i -E -e '\|'"$1"'|d' "$GIM_STATUS_PATH"
 }
 
 #-------------------------------------------------------------------------------
@@ -622,11 +612,11 @@ erase_install_record() {
 print_status() {
     common_prefix="$(create_labels "$1" '<' '>')""[$2] $3"
     case "$2" in
-        "$_ACTION_INSTALL") echo "$common_prefix $5" ;;
-        "$_ACTION_UPDATE") echo "$common_prefix $5 <- $4" ;;
-        "$_ACTION_UNINSTALL" | "$_VSTATUS_MATCH") echo "$common_prefix $4" ;;
-        "$_VSTATUS_DIFF") echo "$common_prefix $4 -> $5" ;;
-        "$_VSTATUS_NO_SRC_VER")
+        "$ACTION_INSTALL") echo "$common_prefix $5" ;;
+        "$ACTION_UPDATE") echo "$common_prefix $5 <- $4" ;;
+        "$ACTION_UNINSTALL" | "$VSTATUS_MATCH") echo "$common_prefix $4" ;;
+        "$VSTATUS_DIFF") echo "$common_prefix $4 -> $5" ;;
+        "$VSTATUS_NO_SRC_VER")
             if [ "$5" ]; then
                 echo "$common_prefix -> $5"
             else
