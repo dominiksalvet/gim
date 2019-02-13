@@ -1,0 +1,29 @@
+#-------------------------------------------------------------------------------
+# Copyright 2019 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# DESCRIPTION
+#-------------------------------------------------------------------------------
+# This file is expected to be sourced. It represents a global RC initialization
+# file for gim. And so it should be stored as '/etc/gimrc' file. Gim reads it
+# when running with root permissions.
+# 
+# The text after '#' character represents a comment.
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# DEFINITIONS
+#-------------------------------------------------------------------------------
+
+# gim database directory
+GIM_DB_DIR=/var/lib/gim
+
+# gim binary directory
+GIM_BIN_DIR=/usr/local/bin
+
+# gim cache directory
+GIM_CACHE_DIR=/var/cache/gim
