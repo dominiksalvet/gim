@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright 2018 Dominik Salvet
+# Copyright 2018-2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
@@ -14,6 +14,7 @@ SHELL := /bin/sh
 ECHO := echo
 SED := sed
 COLUMN := column
+TRUE := true
 
 # directory definitions
 MAKE_DIR := make
@@ -35,7 +36,8 @@ export GET_TARGET_DESCRIPTIONS
 
 # shows generated help of a given makefile from it's comments
 define show_generated_help
-	@$(ECHO) 'USAGE: make [TARGET]...'
+	@$(ECHO) 'USAGE:'
+	@$(ECHO) '  make [TARGET...]'
 	@$(ECHO)
 	@$(ECHO) 'TARGET:'
 	@$(SED) -E -e "$$GET_TARGET_DESCRIPTIONS" $(1) | $(COLUMN) -t -s '#'
@@ -47,8 +49,9 @@ endef
 
 .PHONY: all install uninstall help
 
-# there is no building required, so the default target references to the help target
-all: help
+# there is no building required
+all: # default, does nothing
+	@$(TRUE)
 
 install: # install the entire project automatically
 	@./$(MAKE_DIR)/install '$(INSTALL_DIR)' '$(SRC_DIR)'
@@ -56,5 +59,5 @@ install: # install the entire project automatically
 uninstall: # uninstall the project
 	@./$(MAKE_DIR)/uninstall '$(INSTALL_DIR)'
 
-help: # default, show this help
+help: # show this help
 	$(call show_generated_help,makefile)
