@@ -19,7 +19,7 @@
 main() {
     check_deps &&
     load_const &&
-    load_cfg &&
+    init &&
     process_args "$@" || return
 }
 
@@ -31,7 +31,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    readonly SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir head id true false dirname wc read'
+    readonly SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir id true false dirname wc read'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -99,24 +99,51 @@ https://gitlab.com/dominiksalvet/gim'
     readonly HINT_MESSAGE="Try '$0 help' for getting help."
 }
 
+#-------------------------------------------------------------------------------
+# INITIALIZATION
+#-------------------------------------------------------------------------------
+
 # DESCRIPTION:
-#   Loads gim configuration.
-load_cfg() {
+#   Initialize gim runtime configuration using one of gim's RC files.
+init() {
+    # source an appropriate RC file, it must load GIM_DB_DIR and GIM_CACHE_DIR variables
+    if [ "$(id -u)" -eq 0 ]; then
+        . /etc/gimrc &&
+        INSTALL_TYPE=global
+    else
+        . ~/.gimrc &&
+        INSTALL_TYPE=local
+    fi || return
+
     # export environment variables
     export INSTALLER=gim
+    export INSTALL_TYPE
 
-    # the gim root directory
-    readonly GIM_ROOT_DIR=/etc/gim
+    # the file representing a database of locally installed projects
+    readonly GIM_STATUS_PATH="${GIM_DB_DIR:?}"/status
 
-    # the file representing a list of locally installed projects
-    readonly GIM_STATUS_PATH="$GIM_ROOT_DIR"/status
-
-    # downloaded Git repositories cache
-    readonly GIM_CACHE_REPO_DIR="$GIM_ROOT_DIR"/cache/repo
+    # gim cache for downloaded Git repositories and associated files
+    readonly GIM_CACHE_REPO_DIR="${GIM_CACHE_DIR:?}"/repo
 
     # global variables
-    root_init_done=false
     use_force=false
+
+    # check gim's database
+    check_db || return
+}
+
+# DESCRIPTION:
+#   Ensures that gim database is in consistent state.
+check_db() {
+    # check if gim status file exists
+    if [ ! -f "$GIM_STATUS_PATH" ]; then
+        mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
+        echo > "$GIM_STATUS_PATH"
+    # check if the status file has at least one newline character
+    elif [ "$(wc -l < "$GIM_STATUS_PATH")" -eq 0 ]; then
+        # append a newline character
+        echo >> "$GIM_STATUS_PATH"
+    fi || return
 }
 
 #-------------------------------------------------------------------------------
@@ -148,10 +175,11 @@ $HINT_MESSAGE" >&2
                         ;;
                     *)
                         accept_action_options=false # expecting first URL
-                        process_action "$action" "$arg" || return
                         ;;
                 esac
-            else
+            fi
+
+            if ! "$accept_action_options"; then
                 process_action "$action" "$arg" || return
             fi
         else
@@ -160,12 +188,10 @@ $HINT_MESSAGE" >&2
                     action="$arg" # use the given action
                     ;;
                 autoclean)
-                    root_init || return
                     autoclean
                     return 0
                     ;;
                 clean)
-                    root_init || return
                     rm -r -f "${GIM_CACHE_REPO_DIR:?}"/*
                     return 0
                     ;;
@@ -195,34 +221,6 @@ $HINT_MESSAGE" >&2
 $HINT_MESSAGE" >&2
         return 1
     fi
-}
-
-# DESCRIPTION:
-#   Performs essential checks associated with root permissions. This function
-#   should be called before executing the first command, which may require root
-#   permissions.
-root_init() {
-    if "$root_init_done"; then
-        return 0
-    fi
-
-    # root permissions
-    if [ "$(id -u)" -ne 0 ]; then
-        echo "$0: root privileges required" >&2
-        return 1
-    fi
-
-    # check gim status file
-    if [ ! -f "$GIM_STATUS_PATH" ]; then
-        mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
-        echo > "$GIM_STATUS_PATH"
-    # check if the status file has at least one newline character
-    elif [ "$(wc -l < "$GIM_STATUS_PATH")" -eq 0 ]; then
-        # append a newline character
-        echo >> "$GIM_STATUS_PATH"
-    fi || return
-
-    root_init_done=true
 }
 
 #-------------------------------------------------------------------------------
@@ -300,7 +298,6 @@ process_action() {
     # prepare Git URLs and check root permissions
     check_url "$2" &&
     repo_short_url="$(url_to_short_url "$2")" &&
-    root_init &&
 
     # prepare Git repository
     touch_repo "$repo_short_url" &&
@@ -438,16 +435,16 @@ execute_action() {
 # PARAMETERS:
 #   $1 - short repository URL
 get_any_install_record() {
-    gim_mirror_urls_path="$GIM_CACHE_REPO_DIR"/"$1"/gim/mirror-urls
+    mirror_urls_path="$GIM_CACHE_REPO_DIR"/"$1"/gim/mirror-urls
 
-    if [ -r "$gim_mirror_urls_path" ]; then
+    if [ -r "$mirror_urls_path" ]; then
         while read -r repo_mirror_url; do
             repo_mirror_url="$(url_to_short_url "$repo_mirror_url")"
             if install_record="$(get_exact_install_record "$repo_mirror_url")"; then
                 echo "$install_record"
                 break
             fi
-        done < "$gim_mirror_urls_path"
+        done < "$mirror_urls_path"
     elif install_record="$(get_exact_install_record "$1")"; then
         echo "$install_record"
     fi
@@ -511,14 +508,14 @@ get_error_statuses() {
 #   $1 - short repository URL
 #   $2 - version
 is_supported_version() {
-    gim_unsupported_versions_path="$GIM_CACHE_REPO_DIR"/"$1"/gim/unsupported-versions
+    unsupported_versions_path="$GIM_CACHE_REPO_DIR"/"$1"/gim/unsupported-versions
 
-    if [ -r "$gim_unsupported_versions_path" ]; then
+    if [ -r "$unsupported_versions_path" ]; then
         while read -r unsupported_version; do
             if [ "$2" = "$unsupported_version" ]; then
                 return 1
             fi
-        done < "$gim_unsupported_versions_path"
+        done < "$unsupported_versions_path"
     fi
 }
 
