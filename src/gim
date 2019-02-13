@@ -195,18 +195,9 @@ $HINT_MESSAGE" >&2
                     rm -r -f "${GIM_CACHE_REPO_DIR:?}"/*
                     return 0
                     ;;
-                help)
-                    echo "$HELP_MESSAGE"
-                    return 0
-                    ;;
-                about)
-                    echo "$ABOUT_MESSAGE"
-                    return 0
-                    ;;
-                version)
-                    echo "$VERSION"
-                    return 0
-                    ;;
+                help) echo "$HELP_MESSAGE"; return 0 ;;
+                about) echo "$ABOUT_MESSAGE"; return 0 ;;
+                version) echo "$VERSION"; return 0 ;;
                 *)
                     echo "$0: unrecognized argument '$arg'
 $HINT_MESSAGE" >&2
