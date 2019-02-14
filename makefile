@@ -18,7 +18,6 @@ TRUE := true
 
 # directory definitions
 MAKE_DIR := make
-INSTALL_DIR := /usr/local/bin
 SRC_DIR := src
 
 #-------------------------------------------------------------------------------
@@ -54,10 +53,10 @@ all: # default, does nothing
 	@$(TRUE)
 
 install: # install the entire project automatically
-	@./$(MAKE_DIR)/install '$(INSTALL_DIR)' '$(SRC_DIR)'
+	@./$(MAKE_DIR)/install '$(SRC_DIR)'
 
 uninstall: # uninstall the project
-	@./$(MAKE_DIR)/uninstall '$(INSTALL_DIR)'
+	@./$(MAKE_DIR)/uninstall '$(SRC_DIR)'
 
 help: # show this help
 	$(call show_generated_help,makefile)

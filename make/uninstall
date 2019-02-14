@@ -1,12 +1,12 @@
 #!/bin/sh
 
 #-------------------------------------------------------------------------------
-# Copyright 2018 Dominik Salvet
+# Copyright 2018-2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
 # PARAMETERS:
-#   $1 - installation directory path
+#   $1 - source directory path
 #-------------------------------------------------------------------------------
 
 
@@ -14,59 +14,83 @@
 # SOFTWARE DEPENDENCIES
 #-------------------------------------------------------------------------------
 
-# list of required software
-SW_REQUIRED='command echo [ rm'
+# a list of required software
+readonly SW_REQUIRED='command echo [ id : sed git rm'
 
-# check if some software is missing
-for i in $SW_REQUIRED; do
-    # software is missing if at least one piece of software is missing
-    if ! command -v "$i" > /dev/null; then
-        echo "$0: Required software '$i' is missing.
-POSSIBLE SOLUTIONS:
-  * Install $i using an installed package manager." >&2
+# check if any piece of software is missing
+for sw in $SW_REQUIRED; do
+    if ! command -v -- "$sw" > /dev/null; then
+        echo "$0: missing $sw software" >&2
         exit 1
     fi
 done
 
 #-------------------------------------------------------------------------------
-# DEFINITIONS
+# CHECK ARGUMENTS
 #-------------------------------------------------------------------------------
 
-INSTALL_DIR="$1"
-
-#-------------------------------------------------------------------------------
-# CHECK STATE
-#-------------------------------------------------------------------------------
-
-# check if the installation directory argument passed
-if [ -z "$INSTALL_DIR" ]; then
-    echo "$0: Please supply non-empty installation directory argument." >&2
+# check if the source directory argument is correct
+if [ ! "$1" ] || [ ! -d "$1"/ ]; then
+    echo "$0: first argument must be an existing directory's path" >&2
     exit 1
 fi
 
-# check if not installed
-if [ ! -x "$INSTALL_DIR/gim" ]; then
-    echo 'The program is not installed in the given installation directory.'
-    exit 0
+#-------------------------------------------------------------------------------
+# INITIALIZATION
+#-------------------------------------------------------------------------------
+
+# load environment variables
+if [ "$(id -u)" -eq 0 ]; then
+    if [ -r "/etc/gimrc" ]; then
+        . /etc/gimrc
+    else
+        . "$1"/rc/global
+    fi &&
+    INSTALL_TYPE="${INSTALL_TYPE:-global}"
+else
+    if [ -r "/etc/gimrc" ]; then
+        . ~/.gimrc
+    else
+        . "$1"/rc/local
+    fi &&
+    INSTALL_TYPE="${INSTALL_TYPE:-local}"
+fi || exit
+
+# verify that required variables were loaded
+: "${GIM_DB_DIR:?}"
+: "${GIM_BIN_DIR:?}"
+
+# verify that this script can access to the directories
+if [ ! -w "$GIM_DB_DIR" ]; then
+    echo "$0: can't write to $GIM_DB_DIR" >&2
+    exit 1
 fi
+if [ ! -w "$GIM_BIN_DIR" ]; then
+    echo "$0: can't write to $GIM_BIN_DIR" >&2
+    exit 1
+fi
+
+# create additional constants
+readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status
 
 #-------------------------------------------------------------------------------
 # UNINSTALLATION
 #-------------------------------------------------------------------------------
 
-# check if running as root
-if [ "$(id -u)" -ne 0 ]; then
-    echo "$0: Please run as root." >&2
-    exit 1
-fi
-
-# remove bash TAB completion if used
+# remove program files
 rm -f /etc/bash_completion.d/gim-completion &&
-# remove the program itself
-rm -f "$INSTALL_DIR/gim" || {
-    echo "$0: Can't finish the uninstallation.
-POSSIBLE SOLUTIONS:
-  * Try uninstall gim again.
-  * Contact a gim developer." >&2
-    exit 1
-}
+rm -f "$GIM_BIN_DIR"/gim &&
+
+# if INSTALLER is gim, it is possible that gim is calling this script
+# if INSTALLER is not gim, erase record of installation from gim's database manually
+if [ "$INSTALLER" != gim ]; then
+    if [ -f "$GIM_STATUS_PATH" ]; then
+        # get short hash of the current git commit
+        readonly COMMIT_SHORT_HASH="$(git rev-parse --short HEAD)" &&
+        # use tag name pointing to the commit as gim version if any
+        commit_gim_version="$(git tag -l --points-at "$COMMIT_SHORT_HASH")" &&
+        # if no tags found, use short commit hash as gim version
+        commit_gim_version="${commit_gim_version:-"$commit_short_hash"}" &&
+        sed -i -E -e '\|'"gitlab.com/dominiksalvet/gim $commit_gim_version"'|d' "$GIM_STATUS_PATH"
+    fi
+fi || exit
