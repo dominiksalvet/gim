@@ -39,19 +39,26 @@ fi
 # INITIALIZATION
 #-------------------------------------------------------------------------------
 
+# check installation type
+if [ ! "$INSTALL_TYPE" ]; then
+    if [ "$(id -u)" -eq 0 ]; then
+        INSTALL_TYPE=global
+    else
+        INSTALL_TYPE=local
+    fi
+fi
+
 # load environment variables
-if [ "$(id -u)" -eq 0 ]; then
+if [ "$INSTALL_TYPE" = global ]; then
     if [ ! -r /etc/gimrc ]; then
         cp "$1"/rc/global /etc/gimrc
     fi &&
-    . /etc/gimrc &&
-    INSTALL_TYPE="${INSTALL_TYPE:-global}"
+    . /etc/gimrc
 else
     if [ ! -r ~/.gimrc ]; then
         cp "$1"/rc/local ~/.gimrc
     fi &&
-    . ~/.gimrc &&
-    INSTALL_TYPE="${INSTALL_TYPE:-local}"
+    . ~/.gimrc
 fi || exit
 
 # verify that required variables were loaded
