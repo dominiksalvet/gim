@@ -41,14 +41,14 @@ fi
 
 # load environment variables
 if [ "$(id -u)" -eq 0 ]; then
-    if [ -r "/etc/gimrc" ]; then
+    if [ -r /etc/gimrc ]; then
         . /etc/gimrc
     else
         . "$1"/rc/global
     fi &&
     INSTALL_TYPE="${INSTALL_TYPE:-global}"
 else
-    if [ -r "/etc/gimrc" ]; then
+    if [ -r ~/.gimrc ]; then
         . ~/.gimrc
     else
         . "$1"/rc/local
