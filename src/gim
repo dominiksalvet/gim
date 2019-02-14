@@ -604,13 +604,7 @@ print_status() {
         "$ACTION_UPDATE") echo "$common_prefix $5 <- $4" ;;
         "$ACTION_UNINSTALL" | "$VSTATUS_MATCH") echo "$common_prefix $4" ;;
         "$VSTATUS_DIFF") echo "$common_prefix $4 -> $5" ;;
-        "$VSTATUS_NO_SRC_VER")
-            if [ "$5" ]; then
-                echo "$common_prefix -> $5"
-            else
-                echo "$common_prefix"
-            fi
-            ;;
+        "$VSTATUS_NO_SRC_VER") echo "$common_prefix${5:+" -> $5"}" ;;
     esac
 }
 
