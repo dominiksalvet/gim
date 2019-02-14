@@ -104,8 +104,27 @@ https://gitlab.com/dominiksalvet/gim'
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Initialize gim runtime configuration using one of gim's RC files.
+#   Initializes gim runtime configuration.
 init() {
+    # load RC configuration
+    load_rc || return
+
+    # export environment variables
+    export INSTALLER=gim
+    export INSTALL_TYPE
+
+    # the file representing a database of locally installed projects
+    readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status
+    # gim cache for downloaded Git repositories and associated files
+    readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo
+
+    # global variables
+    use_force=false
+}
+
+# DESCRIPTION:
+#   Loads one of gim's RC files depending on current access level.
+load_rc() {
     # source an appropriate RC file, it must load GIM_DB_DIR and GIM_CACHE_DIR variables
     if [ "$(id -u)" -eq 0 ]; then
         . /etc/gimrc &&
@@ -115,35 +134,19 @@ init() {
         INSTALL_TYPE=local
     fi || return
 
-    # export environment variables
-    export INSTALLER=gim
-    export INSTALL_TYPE
+    # verify that required variables were loaded
+    : "${GIM_DB_DIR:?}"
+    : "${GIM_CACHE_DIR:?}"
 
-    # the file representing a database of locally installed projects
-    readonly GIM_STATUS_PATH="${GIM_DB_DIR:?}"/status
-
-    # gim cache for downloaded Git repositories and associated files
-    readonly GIM_CACHE_REPO_DIR="${GIM_CACHE_DIR:?}"/repo
-
-    # global variables
-    use_force=false
-
-    # check gim's database
-    check_db || return
-}
-
-# DESCRIPTION:
-#   Ensures that gim database is in consistent state.
-check_db() {
-    # check if gim status file exists
-    if [ ! -f "$GIM_STATUS_PATH" ]; then
-        mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
-        echo > "$GIM_STATUS_PATH"
-    # check if the status file has at least one newline character
-    elif [ "$(wc -l < "$GIM_STATUS_PATH")" -eq 0 ]; then
-        # append a newline character
-        echo >> "$GIM_STATUS_PATH"
-    fi || return
+    # verify that gim has access to the directories
+    if [ ! -w "$GIM_DB_DIR" ]; then
+        echo "$0: can't write to $GIM_DB_DIR" >&2
+        return 1
+    fi
+    if [ ! -w "$GIM_CACHE_DIR" ]; then
+        echo "$0: can't write to $GIM_CACHE_DIR" >&2
+        return 1
+    fi
 }
 
 #-------------------------------------------------------------------------------
@@ -174,6 +177,7 @@ $HINT_MESSAGE" >&2
                         return 1
                         ;;
                     *)
+                        touch_db "$GIM_STATUS_PATH" || return
                         accept_action_options=false # expecting first URL
                         ;;
                 esac
@@ -188,6 +192,7 @@ $HINT_MESSAGE" >&2
                     action="$arg" # use the given action
                     ;;
                 autoclean)
+                    touch_db "$GIM_STATUS_PATH" || return
                     autoclean
                     return 0
                     ;;
@@ -212,6 +217,22 @@ $HINT_MESSAGE" >&2
 $HINT_MESSAGE" >&2
         return 1
     fi
+}
+
+# DESCRIPTION:
+#   Ensures that gim database is in consistent state.
+# PARAMETERS:
+#   $1 - gim status file path
+touch_db() {
+    # check if gim status file exists
+    if [ ! -f "$1" ]; then
+        mkdir -p "$(dirname "$1")" &&
+        echo > "$1"
+    # check if the status file has at least one newline character
+    elif [ "$(wc -l < "$1")" -eq 0 ]; then
+        # append a newline character
+        echo >> "$1"
+    fi || return
 }
 
 #-------------------------------------------------------------------------------
