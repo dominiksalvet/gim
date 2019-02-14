@@ -17,7 +17,6 @@ Furthermore, gim exports some environment variables to your makefile targets and
 * `INSTALLER`
   * Equal to `gim` and represents the used installer.
   * Useful when a different behavior is required when running makefile under gim and when running manually.
-
 * `INSTALL_TYPE`
   * Equal either `global` or `local` and represents the installation type.
   * Global installation needs root permissions and local installation is going to be located somewhere in the user's home folder.
