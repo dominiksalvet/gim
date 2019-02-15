@@ -214,6 +214,7 @@ init_runtime() {
 # PARAMETERS:
 #   $1 - global configuration directory path
 #   $2 - local configuration directory path
+# shellcheck disable=1090
 load_cfg() {
     if [ "$(id -u)" -eq 0 ]; then # global configuration will be used
         . "$1"/gimrc-global &&

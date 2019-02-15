@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #-------------------------------------------------------------------------------
 # Copyright 2018-2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
@@ -9,8 +11,6 @@
 #-------------------------------------------------------------------------------
 # This file is expected to be sourced. It implements a TAB completion for Bash
 # terminal environments.
-# 
-# The text after '#' character represents a comment.
 #-------------------------------------------------------------------------------
 
 
