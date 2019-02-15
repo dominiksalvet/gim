@@ -229,7 +229,7 @@ load_cfg() {
             gimrc_local_path="$2"/gimrc-local
         fi &&
         . "$gimrc_local_path" &&
-        cp -n "$gimrc_local_path" "$2"/gimrc &&
+        cp -n "$gimrc_local_path" "$2"/gimrc && # copy without overwrite
         . "$2"/gimrc && # custom user-defined RC file
         INSTALL_TYPE=local
     fi || return
