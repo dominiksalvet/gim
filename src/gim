@@ -32,7 +32,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    readonly SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir id true false dirname wc read'
+    readonly SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir id true false dirname wc read cp'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -218,20 +218,19 @@ init_runtime() {
 load_cfg() {
     if [ "$(id -u)" -eq 0 ]; then # global configuration will be used
         . "$1"/gimrc-global &&
-        if [ -r "$1"/gimrc ]; then
-            . "$1"/gimrc # custom user-defined RC file
-        fi &&
+        cp -n "$1"/gimrc-global "$1"/gimrc && # copy without overwrite
+        . "$1"/gimrc && # custom user-defined RC file
         INSTALL_TYPE=global
     else # local configuration will be used
         if [ -r "$1"/gimrc-local ] && [ ! -r "$2"/gimrc-local ]; then
-            . "$1"/gimrc-local # local configuration provided by global installation
+            gimrc_local_path="$1"/gimrc-local # local configuration provided by global installation
         else
-            # try to source local whenever possible (in case of an error, it would be more helpful)
-            . "$2"/gimrc-local
+            # prefer sourcing local gimrc (in case of an error, it would be more helpful)
+            gimrc_local_path="$2"/gimrc-local
         fi &&
-        if [ -r "$2"/gimrc ]; then
-            . "$2"/gimrc # custom user-defined RC file
-        fi &&
+        . "$gimrc_local_path" &&
+        cp -n "$gimrc_local_path" "$2"/gimrc &&
+        . "$2"/gimrc && # custom user-defined RC file
         INSTALL_TYPE=local
     fi || return
 }
