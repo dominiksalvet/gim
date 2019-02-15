@@ -18,8 +18,9 @@
 #   $@ - gim parameters
 main() {
     check_deps &&
-    load_const &&
-    init &&
+    init_const &&
+    init_cfg_paths &&
+    init_global_vars &&
     process_args "$@" || return
 }
 
@@ -47,8 +48,8 @@ check_deps() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Loads gim constant data.
-load_const() {
+#   Initializes gim constant data.
+init_const() {
     # the current version of gim
     readonly VERSION=5.0.0
 
@@ -99,54 +100,23 @@ https://gitlab.com/dominiksalvet/gim'
     readonly HINT_MESSAGE="Try '$0 help' for getting help."
 }
 
-#-------------------------------------------------------------------------------
-# INITIALIZATION
-#-------------------------------------------------------------------------------
-
 # DESCRIPTION:
-#   Initializes gim runtime configuration.
-init() {
-    # load RC configuration
-    load_rc || return
-
-    # export environment variables
-    export INSTALLER=gim
-    export INSTALL_TYPE
-
-    # the file representing a database of locally installed projects
-    readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status
-    # gim cache for downloaded Git repositories and associated files
-    readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo
-
-    # global variables
-    use_force=false
+#   Initializes directory paths where gim configuration should be stored.
+init_cfg_paths() {
+    # global gim installation's configuration directory (used for the root)
+    readonly GLOBAL_CFG_DIR=/etc/gim
+    # local gim installation's configuration directory (used for users)
+    readonly LOCAL_CFG_DIR="$HOME"/.config/gim
 }
 
 # DESCRIPTION:
-#   Loads one of gim's RC files depending on current access level.
-load_rc() {
-    # source an appropriate RC file, it must load GIM_DB_DIR and GIM_CACHE_DIR variables
-    if [ "$(id -u)" -eq 0 ]; then
-        . /etc/gimrc &&
-        INSTALL_TYPE=global
-    else
-        . ~/.gimrc &&
-        INSTALL_TYPE=local
-    fi || return
+#   Initializes all global variables.
+init_global_vars() {
+    # used for the '-force' option
+    use_force=false
 
-    # verify that required variables were loaded
-    : "${GIM_DB_DIR:?}"
-    : "${GIM_CACHE_DIR:?}"
-
-    # verify that gim has access to the directories
-    if [ ! -w "$GIM_DB_DIR" ]; then
-        echo "$0: can't write to $GIM_DB_DIR" >&2
-        return 1
-    fi
-    if [ ! -w "$GIM_CACHE_DIR" ]; then
-        echo "$0: can't write to $GIM_CACHE_DIR" >&2
-        return 1
-    fi
+    # installation type, later it will be exported
+    INSTALL_TYPE=
 }
 
 #-------------------------------------------------------------------------------
@@ -177,7 +147,7 @@ $HINT_MESSAGE" >&2
                         return 1
                         ;;
                     *)
-                        touch_db "$GIM_STATUS_PATH" || return
+                        init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" || return
                         accept_action_options=false # expecting first URL
                         ;;
                 esac
@@ -192,11 +162,12 @@ $HINT_MESSAGE" >&2
                     action="$arg" # use the given action
                     ;;
                 autoclean)
-                    touch_db "$GIM_STATUS_PATH" || return
+                    init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" || return
                     autoclean
                     return 0
                     ;;
                 clean)
+                    init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" || return
                     rm -r -f "${GIM_CACHE_REPO_DIR:?}"/*
                     return 0
                     ;;
@@ -219,11 +190,66 @@ $HINT_MESSAGE" >&2
     fi
 }
 
+#-------------------------------------------------------------------------------
+# RUNTIME INITIALIZATION
+#-------------------------------------------------------------------------------
+
 # DESCRIPTION:
-#   Ensures that gim database is in consistent state.
+#   Prepares a runtime environment for gim. After calling this function, it is
+#   possible to work with gim's database and cache.
+# PARAMETERS:
+#   $1 - global configuration directory path
+#   $2 - local configuration directory path
+init_runtime() {
+    load_cfg "$1" "$2" &&
+    init_runtime_const &&
+    init_storage "$GIM_STATUS_PATH" "$GIM_CACHE_REPO_DIR" &&
+    export_vars || return
+}
+
+# DESCRIPTION:
+#   Loads gim dynamic configuration data and determines an installation type.
+#   That may involve in reading (sourcing) multiple files. If key files don't
+#   exist, returns fail.
+# PARAMETERS:
+#   $1 - global configuration directory path
+#   $2 - local configuration directory path
+load_cfg() {
+    if [ "$(id -u)" -eq 0 ]; then # global configuration will be used
+        . "$1"/gimrc-global &&
+        if [ -r "$1"/gimrc ]; then
+            . "$1"/gimrc # custom user-defined RC file
+        fi &&
+        INSTALL_TYPE=global
+    else # local configuration will be used
+        if [ -r "$1"/gimrc-local ] && [ ! -r "$2"/gimrc-local ]; then
+            . "$1"/gimrc-local # local configuration provided by global installation
+        else
+            # try to source local whenever possible (in case of an error, it would be more helpful)
+            . "$2"/gimrc-local
+        fi &&
+        if [ -r "$2"/gimrc ]; then
+            . "$2"/gimrc # custom user-defined RC file
+        fi &&
+        INSTALL_TYPE=local
+    fi || return
+}
+
+# DESCRIPTION:
+#   Initializes runtime constants created from loaded configuration variables.
+init_runtime_const() {
+    # the file representing a database of locally installed projects
+    readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status
+    # gim cache for downloaded Git repositories and associated files
+    readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo
+}
+
+# DESCRIPTION:
+#   Initializes gim's storage structure including the check of gim's database.
 # PARAMETERS:
 #   $1 - gim status file path
-touch_db() {
+#   $2 - gime repository cache directory path
+init_storage() {
     # check if gim status file exists
     if [ ! -f "$1" ]; then
         mkdir -p "$(dirname "$1")" &&
@@ -232,7 +258,17 @@ touch_db() {
     elif [ "$(wc -l < "$1")" -eq 0 ]; then
         # append a newline character
         echo >> "$1"
-    fi || return
+    fi &&
+
+    # create a directory for gim's cache
+    mkdir -p "$2"/ || return
+}
+
+# DESCRIPTION:
+#   Exports variables for invoked makefile targets and associated scripts.
+export_vars() {
+    export INSTALLER=gim
+    export INSTALL_TYPE
 }
 
 #-------------------------------------------------------------------------------

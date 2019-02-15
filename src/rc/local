@@ -5,13 +5,17 @@
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
+# NOTICE
+#-------------------------------------------------------------------------------
+# DO NOT MODIFY THIS FILE IF IT IS NAMED 'gimrc-local'!
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
 # DESCRIPTION
 #-------------------------------------------------------------------------------
-# This file is expected to be sourced. It represents a local (per user) RC
-# initialization file for gim. And so it should be stored as '~/.gimrc' file.
+# This file is expected to be sourced. It represents a local RC initialization
+# file for gim. It is expected to be stored as "$HOME/.config/gim/gimrc" file.
 # Gim reads it when running without root permissions.
-# 
-# The text after '#' character represents a comment.
 #-------------------------------------------------------------------------------
 
 
@@ -20,10 +24,10 @@
 #-------------------------------------------------------------------------------
 
 # gim database directory
-GIM_DB_DIR=~/.local/share/gim
-
-# gim binary directory
-GIM_BIN_DIR=~/.local/bin
+GIM_DB_DIR="$HOME"/.local/share/gim
 
 # gim cache directory
-GIM_CACHE_DIR=~/.cache/gim
+GIM_CACHE_DIR="$HOME"/.cache/gim
+
+# gim binary directory
+GIM_BIN_DIR="$HOME"/.local/bin
