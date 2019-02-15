@@ -56,8 +56,8 @@ if [ "$INSTALL_TYPE" = global ]; then
         . "$1"/rc/global
     fi
 else
-    if [ -r ~/.gimrc ]; then
-        . ~/.gimrc
+    if [ -r "$HOME"/.gimrc ]; then
+        . "$HOME"/.gimrc
     else
         . "$1"/rc/local
     fi

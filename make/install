@@ -55,10 +55,10 @@ if [ "$INSTALL_TYPE" = global ]; then
     fi &&
     . /etc/gimrc
 else
-    if [ ! -r ~/.gimrc ]; then
-        cp "$1"/rc/local ~/.gimrc
+    if [ ! -r "$HOME"/.gimrc ]; then
+        cp "$1"/rc/local "$HOME"/.gimrc
     fi &&
-    . ~/.gimrc
+    . "$HOME"/.gimrc
 fi || exit
 
 # verify that required variables were loaded
