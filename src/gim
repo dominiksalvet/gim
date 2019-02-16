@@ -220,7 +220,7 @@ load_cfg() {
         . "$1"/gimrc-global &&
         if [ -r "$1"/gimrc ]; then
             . "$1"/gimrc # custom user-defined RC file
-        else
+        elif [ ! -e "$1"/gimrc ]; then # if not existing
             cp "$1"/gimrc-global "$1"/gimrc # create gimrc from gimrc-global
         fi &&
         INSTALL_TYPE=global
@@ -234,7 +234,7 @@ load_cfg() {
         . "$gimrc_local_path" &&
         if [ -r "$2"/gimrc ]; then
             . "$2"/gimrc # custom user-defined RC file
-        else
+        elif [ ! -e "$2"/gimrc ]; then # if not existing
             mkdir -p "$2"/ &&
             cp "$gimrc_local_path" "$2"/gimrc # create gimrc from gimrc-local
         fi &&
