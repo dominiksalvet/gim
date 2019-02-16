@@ -8,19 +8,24 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
+* Gim manages its own database of installed programs in *status* file.
 * Gim now exports environment variable `INSTALLER` equal to `gim` for invoked makefile targets or scripts to indicate used installation manager.
 * Support for RC files that set up gim's directory definitions. And so they are no longer hard-coded.
 * Projects installed by gim can be installed locally. Gim has one global database and another one for each user.
 * Gim exports environment variables `INSTALL_TYPE` equal either `global` or `local` representing the installation type.
 * Support for local installation of gim itself has been added.
+* Installation and uninstallation scripts load current system configuration of gim from RC files during their execution.
 
 ### Changed
 
 * Option `-ignore-unsupported` has been renamed to `-force`.
 * The format of status reports has been changed. A label concept has been established, which significantly distinguishes errors from normal status reports.
-* Gim now manages its own database of installed programs, *status* file, and no longer uses `$PATH` root's variable. Due this change, it is required to uninstall all projects installed by gim and install them back after update to this version.
 * Commands `-autoclean`, `-clean`, `-help`, `-about` and `-version` have been renamed to `autoclean`, `clean`, `help`, `about` and `version`.
 * Gim project control files have been renamed; *gim/unsupported* -> *gim/unsupported-versions*, *gim/names* -> *gim/mirror-urls* (now stores mirror URLs instead of just names). The content of both files is separated by newlines rather than spaces.
+
+### Removed
+
+* Previous installation management using `$PATH` root's variable has been removed. Due to this change, it is required to uninstall all projects installed by gim, update gim to this version and then install them back. Phew, no more breaking changes like this one.
 
 ## 5.0.0 (2018-12-28)
 
