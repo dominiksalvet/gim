@@ -218,8 +218,11 @@ init_runtime() {
 load_cfg() {
     if [ "$(id -u)" -eq 0 ]; then # global configuration will be used
         . "$1"/gimrc-global &&
-        cp -n "$1"/gimrc-global "$1"/gimrc && # copy without overwrite
-        . "$1"/gimrc && # custom user-defined RC file
+        if [ -r "$1"/gimrc ]; then
+            . "$1"/gimrc # custom user-defined RC file
+        else
+            cp "$1"/gimrc-global "$1"/gimrc # create gimrc from gimrc-global
+        fi &&
         INSTALL_TYPE=global
     else # local configuration will be used
         if [ -r "$1"/gimrc-local ] && [ ! -r "$2"/gimrc-local ]; then
@@ -229,9 +232,12 @@ load_cfg() {
             gimrc_local_path="$2"/gimrc-local
         fi &&
         . "$gimrc_local_path" &&
-        mkdir -p "$2" &&
-        cp -n "$gimrc_local_path" "$2"/gimrc && # copy without overwrite
-        . "$2"/gimrc && # custom user-defined RC file
+        if [ -r "$2"/gimrc ]; then
+            . "$2"/gimrc # custom user-defined RC file
+        else
+            mkdir -p "$2"/ &&
+            cp "$gimrc_local_path" "$2"/gimrc # create gimrc from gimrc-local
+        fi &&
         INSTALL_TYPE=local
     fi || return
 }
