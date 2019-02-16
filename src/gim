@@ -115,7 +115,7 @@ init_global_vars() {
     # used for the '-force' option
     use_force=false
 
-    # installation type, later it will be exported
+    # installation type, later it will be set and exported
     INSTALL_TYPE=
 }
 
