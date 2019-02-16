@@ -229,6 +229,7 @@ load_cfg() {
             gimrc_local_path="$2"/gimrc-local
         fi &&
         . "$gimrc_local_path" &&
+        mkdir -p "$2" &&
         cp -n "$gimrc_local_path" "$2"/gimrc && # copy without overwrite
         . "$2"/gimrc && # custom user-defined RC file
         INSTALL_TYPE=local
@@ -239,9 +240,9 @@ load_cfg() {
 #   Initializes runtime constants created from loaded configuration variables.
 init_runtime_const() {
     # the file representing a database of locally installed projects
-    readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status
+    readonly GIM_STATUS_PATH="${GIM_DB_DIR:?}"/status
     # gim cache for downloaded Git repositories and associated files
-    readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo
+    readonly GIM_CACHE_REPO_DIR="${GIM_CACHE_DIR:?}"/repo
 }
 
 # DESCRIPTION:
