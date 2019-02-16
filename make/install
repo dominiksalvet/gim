@@ -11,6 +11,12 @@
 
 
 #-------------------------------------------------------------------------------
+# GLOBAL DIRECTIVES
+#-------------------------------------------------------------------------------
+# shellcheck disable=1090
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
 # SOFTWARE DEPENDENCIES
 #-------------------------------------------------------------------------------
 
@@ -36,7 +42,7 @@ if [ ! "$1" ] || [ ! -d "$1"/ ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# INITIALIZATION
+# LOADING VARIABLES
 #-------------------------------------------------------------------------------
 
 # check installation type
@@ -48,35 +54,42 @@ if [ ! "$INSTALL_TYPE" ]; then
     fi
 fi
 
-# load environment variables
+# load configuration from RC files
 if [ "$INSTALL_TYPE" = global ]; then
-    if [ ! -r /etc/gimrc ]; then
-        cp "$1"/rc/global /etc/gimrc
-    fi &&
-    . /etc/gimrc
+    . "$1"/rc/global && # use delivered global RC file
+    if [ "$GLOBAL_CFG_DIR" ] && [ -r "$GLOBAL_CFG_DIR"/gimrc ]; then
+        . "$GLOBAL_CFG_DIR"/gimrc # custom user-defined RC file
+    fi
 else
-    if [ ! -r "$HOME"/.gimrc ]; then
-        cp "$1"/rc/local "$HOME"/.gimrc
-    fi &&
-    . "$HOME"/.gimrc
+    . "$1"/rc/local && # use delivered local RC file
+    if [ "$LOCAL_CFG_DIR" ] && [ -r "$LOCAL_CFG_DIR"/gimrc ]; then
+        . "$LOCAL_CFG_DIR"/gimrc # custom user-defined RC file
+    fi
 fi || exit
 
-# verify that required variables were loaded
-: "${GIM_DB_DIR:?}"
-: "${GIM_BIN_DIR:?}"
+#-------------------------------------------------------------------------------
+# GIM_DB_DIR checks
+#-------------------------------------------------------------------------------
 
-# verify that this script can access to the directories
-if [ ! -w "$GIM_DB_DIR" ]; then
-    echo "$0: can't write to $GIM_DB_DIR" >&2
+# the file representing a database of locally installed projects
+readonly GIM_STATUS_PATH="${GIM_DB_DIR:?}"/status
+
+if [ ! -w "$GIM_STATUS_PATH" ]; then
+    echo "$0: can't write to $GIM_STATUS_PATH" >&2
     exit 1
 fi
+
+#-------------------------------------------------------------------------------
+# GIM_BIN_DIR checks
+#-------------------------------------------------------------------------------
+
+# verify that the gim binary path variable is set
+: "${GIM_BIN_DIR:?}"
+
 if [ ! -w "$GIM_BIN_DIR" ]; then
     echo "$0: can't write to $GIM_BIN_DIR" >&2
     exit 1
 fi
-
-# create additional constants
-readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status
 
 #-------------------------------------------------------------------------------
 # INSTALLATION

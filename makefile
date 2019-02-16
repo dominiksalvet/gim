@@ -16,9 +16,13 @@ SED := sed
 COLUMN := column
 TRUE := true
 
-# directory definitions
+# make directory definitions
 MAKE_DIR := make
 SRC_DIR := src
+
+# gim directory definitions, exported for called scripts
+export GLOBAL_CFG_DIR := /etc/gim
+export LOCAL_CFG_DIR := $(HOME)/.config/gim
 
 #-------------------------------------------------------------------------------
 # HELP GENERATOR
