@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 # a list of required software
-readonly SW_REQUIRED='command echo [ id : mkdir cp dirname wc sed true git'
+readonly SW_REQUIRED='command echo [ id : mkdir cp dirname wc sed true git touch grep head'
 
 # check if any piece of software is missing
 for sw in $SW_REQUIRED; do
@@ -41,6 +41,10 @@ if [ ! "$1" ] || [ ! -d "$1"/ ]; then
     exit 1
 fi
 
+# verify that required environment variables were provided
+: "${GLOBAL_CFG_DIR:?}"
+: "${LOCAL_CFG_DIR:?}"
+
 #-------------------------------------------------------------------------------
 # LOADING VARIABLES
 #-------------------------------------------------------------------------------
@@ -57,12 +61,12 @@ fi
 # load configuration from RC files
 if [ "$INSTALL_TYPE" = global ]; then
     . "$1"/rc/global && # use delivered global RC file
-    if [ "$GLOBAL_CFG_DIR" ] && [ -r "$GLOBAL_CFG_DIR"/gimrc ]; then
+    if [ -r "$GLOBAL_CFG_DIR"/gimrc ]; then
         . "$GLOBAL_CFG_DIR"/gimrc # custom user-defined RC file
     fi
 else
     . "$1"/rc/local && # use delivered local RC file
-    if [ "$LOCAL_CFG_DIR" ] && [ -r "$LOCAL_CFG_DIR"/gimrc ]; then
+    if [ -r "$LOCAL_CFG_DIR"/gimrc ]; then
         . "$LOCAL_CFG_DIR"/gimrc # custom user-defined RC file
     fi
 fi || exit
@@ -74,7 +78,7 @@ fi || exit
 # the file representing a database of locally installed projects
 readonly GIM_STATUS_PATH="${GIM_DB_DIR:?}"/status
 
-if [ ! -w "$GIM_STATUS_PATH" ]; then
+if [ -e "$GIM_STATUS_PATH" ] && [ ! -w "$GIM_STATUS_PATH" ]; then
     echo "$0: can't write to $GIM_STATUS_PATH" >&2
     exit 1
 fi
@@ -86,7 +90,7 @@ fi
 # verify that the gim binary path variable is set
 : "${GIM_BIN_DIR:?}"
 
-if [ ! -w "$GIM_BIN_DIR" ]; then
+if [ -e "$GIM_BIN_DIR"/ ] && [ ! -w "$GIM_BIN_DIR"/ ]; then
     echo "$0: can't write to $GIM_BIN_DIR" >&2
     exit 1
 fi
@@ -95,18 +99,42 @@ fi
 # INSTALLATION
 #-------------------------------------------------------------------------------
 
+# shellcheck disable=2016
+readonly COMPLETION_SOURCE='for completion_file in "$HOME"/.bash_completion.d/*; do
+    [ -r "$completion_file" ] && . "$completion_file"
+done'
+
+# copy default gimrc files
+if [ "$INSTALL_TYPE" = global ]; then
+    mkdir -p "$GLOBAL_CFG_DIR"/ &&
+    cp -f "$1"/rc/global "$GLOBAL_CFG_DIR"/gimrc-global &&
+    cp -f "$1"/rc/global "$GLOBAL_CFG_DIR"/gimrc-local
+else
+    mkdir -p "$LOCAL_CFG_DIR"/ &&
+    cp -f "$1"/rc/local "$LOCAL_CFG_DIR"/gimrc-local
+fi &&
+
 # copy program files
 mkdir -p "$GIM_BIN_DIR"/ &&
 cp "$1"/gim "$GIM_BIN_DIR"/ &&
+
+# set up bash TAB completion
 {
-    mkdir -p /etc/bash_completion.d/ &&
-    cp "$1"/gim-completion /etc/bash_completion.d/ ||
-        echo "$0: can't set up TAB completion" >&2
+    if [ "$INSTALL_TYPE" = global ]; then
+        mkdir -p /etc/bash_completion.d/ &&
+        cp "$1"/bash/gim-completion /etc/bash_completion.d/
+    else
+        touch "$HOME"/.bash_completion &&
+        if ! grep -q -F "$(echo "$COMPLETION_SOURCE" | head -n 1)" "$HOME"/.bash_completion; then
+            echo "$COMPLETION_SOURCE" >> "$HOME"/.bash_completion
+        fi &&
+        mkdir -p "$HOME"/.bash_completion.d/ &&
+        cp "$1"/bash/gim-completion "$HOME"/.bash_completion.d/
+    fi || echo "$0: can't set up TAB completion" >&2
     true
 } &&
 
-# if INSTALLER is gim, it is possible that gim is calling this script
-# if INSTALLER is not gim, insert a record of installation into gim's database manually
+# if INSTALLER is not gim, it is required to modify gim status file manually
 if [ "$INSTALLER" != gim ]; then
     # check if gim status file exists
     if [ ! -f "$GIM_STATUS_PATH" ]; then
@@ -122,6 +150,6 @@ if [ "$INSTALLER" != gim ]; then
     # use tag name pointing to the commit as gim version if any
     commit_gim_version="$(git tag -l --points-at "$COMMIT_SHORT_HASH")" &&
     # if no tags found, use short commit hash as gim version
-    commit_gim_version="${commit_gim_version:-"$commit_short_hash"}" &&
+    commit_gim_version="${commit_gim_version:-"$COMMIT_SHORT_HASH"}" &&
     sed -i -E -e '1i '"gitlab.com/dominiksalvet/gim $commit_gim_version" "$GIM_STATUS_PATH"
 fi || exit
