@@ -108,6 +108,19 @@ done'
 # INSTALLATION
 #-------------------------------------------------------------------------------
 
+# set up bash TAB completion
+if [ "$INSTALL_TYPE" = global ]; then
+    mkdir -p /etc/bash_completion.d/ &&
+    cp "$1"/bash/gim-completion /etc/bash_completion.d/
+else
+    touch "$HOME"/.bash_completion &&
+    if ! grep -q -F "$(echo "$COMPLETION_SOURCING" | head -n 1)" "$HOME"/.bash_completion; then
+        echo "$COMPLETION_SOURCING" >> "$HOME"/.bash_completion
+    fi &&
+    mkdir -p "$HOME"/.bash_completion.d/ &&
+    cp "$1"/bash/gim-completion "$HOME"/.bash_completion.d/
+fi || echo "$0: can't set up TAB completion" >&2
+
 # copy default gimrc files
 if [ "$INSTALL_TYPE" = global ]; then
     mkdir -p "$GLOBAL_CFG_DIR"/ &&
@@ -122,25 +135,10 @@ fi &&
 mkdir -p "$GIM_BIN_DIR"/ &&
 cp "$1"/gim "$GIM_BIN_DIR"/ &&
 
-# set up bash TAB completion
-{
-    if [ "$INSTALL_TYPE" = global ]; then
-        mkdir -p /etc/bash_completion.d/ &&
-        cp "$1"/bash/gim-completion /etc/bash_completion.d/
-    else
-        touch "$HOME"/.bash_completion &&
-        if ! grep -q -F "$(echo "$COMPLETION_SOURCING" | head -n 1)" "$HOME"/.bash_completion; then
-            echo "$COMPLETION_SOURCING" >> "$HOME"/.bash_completion
-        fi &&
-        mkdir -p "$HOME"/.bash_completion.d/ &&
-        cp "$1"/bash/gim-completion "$HOME"/.bash_completion.d/
-    fi || echo "$0: can't set up TAB completion" >&2
-} &&
-
 # if INSTALLER is not gim, it is required to modify gim status file manually
 if [ "$INSTALLER" != gim ]; then
     # check if gim status file exists
-    if [ ! -f "$GIM_STATUS_PATH" ]; then
+    if [ ! -e "$GIM_STATUS_PATH" ]; then
         mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
         echo > "$GIM_STATUS_PATH"
     # check if the status file has at least one newline character
