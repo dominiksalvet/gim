@@ -11,7 +11,7 @@ The changes not yet present in any release are listed in this section.
 * Gim manages its own database of installed programs in *status* file.
 * Gim now exports environment variable `INSTALLER` equal to `gim` for invoked makefile targets or scripts to indicate used installation manager.
 * Support for RC files that set up gim's directory definitions. And so they are no longer hard-coded.
-* Projects installed by gim can be installed locally. Gim has one global database and another one for each user.
+* Projects installed by gim can be installed locally. Gim has one global database and another one for each active user.
 * Gim exports environment variables `INSTALL_TYPE` equal either `global` or `local` representing the installation type.
 * Support for local installation of gim itself has been added.
 * Installation and uninstallation scripts load current system configuration of gim from RC files during their execution.

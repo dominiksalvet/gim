@@ -7,4 +7,4 @@ A Git project is **gim compliant** if an associated repository is gim compliant.
 3. Every annotated tag's commit has a *makefile* containing the following targets. Furthermore, their execution **does not involve any user interaction**; building sources and delivering default arguments are expected.
    * `install` - installs dependencies and then the project of the commit.
    * `uninstall` - uninstalls the project of the commit while **keeping configuration files and dependencies**.
-4. It respects control policy stated in the [*CONTROL.md*](CONTROL.md) file.
+4. If further control needed, it respects control policy stated in the [*CONTROL.md*](CONTROL.md) file.
