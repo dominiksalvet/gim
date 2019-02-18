@@ -91,7 +91,7 @@ COMMAND:
   version    show version"
 
     readonly ABOUT_MESSAGE="gim $VERSION
-Install, update or uninstall Git projects easily with a single command.
+A simple smart Git-based installation manager.
 
 Copy"'right 2018-2019 Dominik Salvet
 SPDX License Identifier: MIT
