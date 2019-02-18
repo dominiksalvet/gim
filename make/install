@@ -37,7 +37,7 @@ done
 
 # check if the source directory argument is correct
 if [ ! "$1" ] || [ ! -d "$1"/ ]; then
-    echo "$0: first argument must be an existing directory's path" >&2
+    echo "$0: first argument must be the path of an existing directory" >&2
     exit 1
 fi
 
@@ -96,22 +96,26 @@ if [ -e "$GIM_BIN_DIR"/ ] && [ ! -w "$GIM_BIN_DIR"/ ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# INSTALLATION
+# DEFINITIONS
 #-------------------------------------------------------------------------------
 
 # shellcheck disable=2016
-readonly COMPLETION_SOURCE='for completion_file in "$HOME"/.bash_completion.d/*; do
+readonly COMPLETION_SOURCING='for completion_file in "$HOME"/.bash_completion.d/*; do
     [ -r "$completion_file" ] && . "$completion_file"
 done'
+
+#-------------------------------------------------------------------------------
+# INSTALLATION
+#-------------------------------------------------------------------------------
 
 # copy default gimrc files
 if [ "$INSTALL_TYPE" = global ]; then
     mkdir -p "$GLOBAL_CFG_DIR"/ &&
-    cp -f "$1"/rc/global "$GLOBAL_CFG_DIR"/gimrc-global &&
-    cp -f "$1"/rc/global "$GLOBAL_CFG_DIR"/gimrc-local
+    cp "$1"/rc/global "$GLOBAL_CFG_DIR"/gimrc-global &&
+    cp "$1"/rc/local "$GLOBAL_CFG_DIR"/gimrc-local
 else
     mkdir -p "$LOCAL_CFG_DIR"/ &&
-    cp -f "$1"/rc/local "$LOCAL_CFG_DIR"/gimrc-local
+    cp "$1"/rc/local "$LOCAL_CFG_DIR"/gimrc-local
 fi &&
 
 # copy program files
@@ -125,8 +129,8 @@ cp "$1"/gim "$GIM_BIN_DIR"/ &&
         cp "$1"/bash/gim-completion /etc/bash_completion.d/
     else
         touch "$HOME"/.bash_completion &&
-        if ! grep -q -F "$(echo "$COMPLETION_SOURCE" | head -n 1)" "$HOME"/.bash_completion; then
-            echo "$COMPLETION_SOURCE" >> "$HOME"/.bash_completion
+        if ! grep -q -F "$(echo "$COMPLETION_SOURCING" | head -n 1)" "$HOME"/.bash_completion; then
+            echo "$COMPLETION_SOURCING" >> "$HOME"/.bash_completion
         fi &&
         mkdir -p "$HOME"/.bash_completion.d/ &&
         cp "$1"/bash/gim-completion "$HOME"/.bash_completion.d/
