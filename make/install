@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 # a list of required software
-readonly SW_REQUIRED='command echo [ id : mkdir cp dirname wc sed true git touch grep head'
+readonly SW_REQUIRED='command echo [ id : mkdir cp dirname wc sed git touch grep head'
 
 # check if any piece of software is missing
 for sw in $SW_REQUIRED; do
@@ -135,7 +135,6 @@ cp "$1"/gim "$GIM_BIN_DIR"/ &&
         mkdir -p "$HOME"/.bash_completion.d/ &&
         cp "$1"/bash/gim-completion "$HOME"/.bash_completion.d/
     fi || echo "$0: can't set up TAB completion" >&2
-    true
 } &&
 
 # if INSTALLER is not gim, it is required to modify gim status file manually
