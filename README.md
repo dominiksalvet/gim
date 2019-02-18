@@ -14,11 +14,11 @@ And when they are no longer needed, **uninstall** them that way?
 gim uninstall <url>
 ```
 
-If you are in, then gim comes pretty handy. No more reading through an exhaustive README file to get out of it how to install, update or uninstall a specific project if stated at all. All you need is a Git URL of a compatible project and gim will do the rest. And trust me, there are a lot of compatible projects thanks to the flexibility of gim.
+If you are in, then gim comes pretty handy. As you can see, all you need is a Git URL of a compatible project and gim will do the rest. And trust me, there are a lot of compatible projects thanks to the standard approaches used in gim.
 
 ---
 
-**Are you a developer** of a Git project? Do you want to **automate its distribution** with gim? It is easier than you would think. There are also high chances that your project is already set up. The official rules for a Git project to be **gim compliant** are stated in the [*RULES.md*](RULES.md) file. Once your project is gim compliant, it can be installed, updated or uninstalled using gim by end users. And don't forget about a [badge](#badge)!
+**Are you a developer** of a Git project? Do you want to **automate its distribution** with gim? There are high chances that your project is already set up. The official rules of **gim compliance** are stated in the [*RULES.md*](RULES.md) file. Once your project is gim compliant, it can be installed, updated or uninstalled using gim by end users. And don't forget about this [badge](#badge)!
 
 > Gim is the place where development is distribution.
 
@@ -32,9 +32,9 @@ If you are in, then gim comes pretty handy. No more reading through an exhaustiv
 
 ## Install
 
-Installation of gim itself must be done manually; just **copy-paste appropriate commands** stated below into a terminal emulator based on the desired type of installation and execute them. 
+Installation of gim itself must be done manually; **copy-paste the following commands** stated below into a terminal emulator and execute them.
 
-* **Global installation** can perform both global and local installations (by any user) of Git projects.
+* **Global installation** can perform global installations and local installations (by any user) of Git projects.
 
 ```sh
 mkdir -p ~/Downloads/gim/ && # create a directory for gim repository
@@ -63,26 +63,26 @@ After success:
 
 ---
 
-Note that uninstalling gim will not remove its created configuration and **will not cause** projects installed by gim to be uninstalled as well. However, you will probably need to install gim back to easily manage those projects.
+Note that uninstalling gim will not remove its created configuration and **will not uninstall** any project installed by gim. However, you will probably need to install gim back to easily manage those projects.
 
 ## Usage
 
 Gim generally **can perform both local and global installations**. Global installation will be performed in case gim has root permissions (e.g., it was executed using `sudo`), local installation will be performed otherwise.
 
 
-To **install or update** a Git project, use the following command:
+**Install or update** a Git project:
 
 ```sh
 gim install <url>
 ```
 
-To **uninstall** it, use this command:
+**Uninstall** a Git project:
 
 ```sh
 gim uninstall <url>
 ```
 
-If you want to know the installation **status** of a Git project, use that command:
+Show **status** of a Git project:
 
 ```sh
 gim status <url>
@@ -92,19 +92,27 @@ gim status <url>
 
 Note that gim manages one database for global installations and one database for each active user for local installations. And so when gim is running with root permissions, it will access **a different database** than running gim without them.
 
-### Example
+### Examples
 
-For illustration, we want to get an installation status of gim itself from the global database (i.e., check if gim is installed globally). It can be done using the following command.
+1. We want to check if gim is installed globally. We will use:
 
 ```sh
 sudo gim status gitlab.com/dominiksalvet/gim
 ```
 
-Also, there can be leading `https://` or trailing `.git` in the URL. All those formats work equally.
+2. We want to update gim, which is installed locally by current user. We will use
+
+```sh
+gim install gitlab.com/dominiksalvet/gim
+```
+
+---
+
+Also, there can be leading `https://` or trailing `.git` in the URLs. All those formats work equally.
 
 ## Badge
 
-If **your project is gim compliant** and so it meets rules stated in the [*RULES.md*](RULES.md) file, **you are allowed to use the following badge** in Markdown format in connection with the project as a sign of the gim compliance.
+If your project is gim compliant, **you are allowed to use the following badge** in Markdown format as a sign of the gim compliance.
 
 ```
 [![gim compliant](https://img.shields.io/badge/gim-compliant-571997.svg)](https://gitlab.com/dominiksalvet/gim)
