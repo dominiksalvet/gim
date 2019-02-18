@@ -1,24 +1,24 @@
 # gim
 
-> Install, update or uninstall Git projects easily with a single command.
+> A simple smart Git-based installation manager.
 
-What about to **install and update Git projects** like this?
-
-```sh
-sudo gim install <url>
-```
-
-And **uninstall them** like this?
+What about to **install and update** your favorite Git projects like this?
 
 ```sh
-sudo gim uninstall <url>
+gim install <url>
 ```
 
-That is exactly what gim allows you to do with Git projects marked as gim compliant. No more reading through an exhaustive README file to get out of it how to install, update or uninstall one specific project if stated at all. All you need is project's Git URL and gim will do the rest.
+And when they are no longer needed, **uninstall** them that way?
+
+```sh
+gim uninstall <url>
+```
+
+If you are in, then gim comes pretty handy. No more reading through an exhaustive README file to get out of it how to install, update or uninstall a specific project if stated at all. All you need is a Git URL of a compatible project and gim will do the rest. And trust me, there are a lot of compatible projects thanks to the flexibility of gim.
 
 ---
 
-**Are you a developer** of a Git project? Do you want to **distribute your project with gim**? It is really simple and also there is a chance that your project is already gim compliant without any further work. All you need is `git` and `make` software. Once your project is compliant with rules stated in the [*RULES.md*](RULES.md) file, it will become gim compliant and gim can be used to install, update or uninstall it by end users. **Distribution of Git projects can't be easier.**
+**Are you a developer** of a Git project? Do you want to **automate its distribution** with gim? It is easier than you would think. There are also high chances that your project is already set up. The official rules for a Git project to be **gim compliant** are stated in the [*RULES.md*](RULES.md) file. Once your project is gim compliant, it can be installed, updated or uninstalled using gim by end users. And don't forget about a [badge](#badge)!
 
 > Gim is the place where development is distribution.
 
@@ -32,59 +32,79 @@ That is exactly what gim allows you to do with Git projects marked as gim compli
 
 ## Install
 
-Installation of gim itself must be done manually, just **copy-paste the following commands** into a terminal emulator and execute them:
+Installation of gim itself must be done manually; just **copy-paste appropriate commands** stated below into a terminal emulator based on the desired type of installation and execute them. 
+
+* **Global installation** can perform both global and local installations (by any user) of Git projects.
 
 ```sh
 mkdir -p ~/Downloads/gim/ && # create a directory for gim repository
 cd ~/Downloads/gim/ && # go to the created directory
 git clone https://gitlab.com/dominiksalvet/gim.git . && # clone gim repository
 git checkout -q "$(git describe --abbrev=0)" && # use the latest gim version
-sudo make install && # install gim
+sudo make install && # install gim, requires root permissions
+echo 'SUCCESS' # print a message if everything succeeded
+```
+
+* **Local installation** generally can perform only local installations (by current user) of Git projects.
+
+```sh
+mkdir -p ~/Downloads/gim/ && # create a directory for gim repository
+cd ~/Downloads/gim/ && # go to the created directory
+git clone https://gitlab.com/dominiksalvet/gim.git . && # clone gim repository
+git checkout -q "$(git describe --abbrev=0)" && # use the latest gim version
+make install && # install gim, does not required root permissions
 echo 'SUCCESS' # print a message if everything succeeded
 ```
 
 After success:
 
 * The *~/Downloads/gim* directory can be manually removed.
-* Gim will be installed on your system and you can **use it to update itself** or even uninstall itself.
+* Gim will be installed on your system and you can **use gim to update itself** or even uninstall itself.
 
 ---
 
-Note that uninstalling gim will not cause projects installed by gim to be uninstalled as well. However, without gim you will need to update or uninstall those projects manually.
+Note that uninstalling gim will not remove its created configuration and **will not cause** projects installed by gim to be uninstalled as well. However, you will probably need to install gim back to easily manage those projects.
 
 ## Usage
 
-To **install or update** a gim compliant project, use the following command:
+Gim generally **can perform both local and global installations**. Global installation will be performed in case gim has root permissions (e.g., it was executed using `sudo`), local installation will be performed otherwise.
+
+
+To **install or update** a Git project, use the following command:
 
 ```sh
-sudo gim install <url>
+gim install <url>
 ```
 
 To **uninstall** it, use this command:
 
 ```sh
-sudo gim uninstall <url>
+gim uninstall <url>
 ```
 
-If you want to know the installation **status** of a project, use that command:
+If you want to know the installation **status** of a Git project, use that command:
 
 ```sh
-sudo gim status <url>
+gim status <url>
 ```
 
 ---
 
-For example, if you want to get installation status about gim, you can do it using the following command:
+Note that gim manages one database for global installations and one database for each active user for local installations. And so when gim is running with root permissions, it will access **a different database** than running gim without them.
+
+### Example
+
+For illustration, we want to get an installation status of gim itself from the global database (i.e., check if gim is installed globally). It can be done using the following command.
 
 ```sh
 sudo gim status gitlab.com/dominiksalvet/gim
 ```
 
-Also, if there is leading `https://` or trailing `.git` in the URL, it is not a problem. All those formats work equally.
+Also, there can be leading `https://` or trailing `.git` in the URL. All those formats work equally.
 
 ## Badge
 
-If **your project is gim compliant** and so it meets rules stated in the [*RULES.md*](RULES.md) file, **you are allowed to use the following badge** in Markdown format in connection with the project as a sign of a gim compliance:
+If **your project is gim compliant** and so it meets rules stated in the [*RULES.md*](RULES.md) file, **you are allowed to use the following badge** in Markdown format in connection with the project as a sign of the gim compliance.
 
 ```
 [![gim compliant](https://img.shields.io/badge/gim-compliant-571997.svg)](https://gitlab.com/dominiksalvet/gim)
@@ -100,4 +120,4 @@ See the [*CONTRIBUTING.md*](CONTRIBUTING.md) file for details.
 
 ## License
 
-Licensing policy of this project is compliant with [REUSE Practices](https://reuse.software/practices/2.0/). Therefore, the license of a file of this project is determined by a [SPDX](https://spdx.org/) License Identifier or by the [*debian/copyright*](debian/copyright) file content.
+Licensing policy of this project is compliant with [REUSE Practices](https://reuse.software/practices/2.0/). Therefore, the license of a file of this project is determined by an [SPDX](https://spdx.org/) License Identifier or by the [*debian/copyright*](debian/copyright) file content.
