@@ -258,7 +258,7 @@ init_runtime_const() {
 #   $2 - gime repository cache directory path
 init_storage() {
     # check if gim status file exists
-    if [ ! -f "$1" ]; then
+    if [ ! -e "$1" ]; then
         mkdir -p "$(dirname "$1")" &&
         echo > "$1"
     # check if the status file has at least one newline character
