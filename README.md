@@ -18,7 +18,7 @@ If you are in, then gim comes pretty handy. As you can see, all you need is a Gi
 
 ---
 
-**Are you a developer** of a Git project? Do you want to **automate its distribution** with gim? There are high chances that your project is already set up. The official rules of **gim compliance** are stated in the [*RULES.md*](RULES.md) file. Once your project is gim compliant, it can be installed, updated or uninstalled using gim by end users. And don't forget about this [badge](#badge)!
+**Are you a developer** of a Git project? Do you want to **automate its distribution** with gim? There are high chances that your project is already set up. The official rules of **gim compliance** are stated in the [*RULES.md*](RULES.md) file. Once your project is gim compliant, it can be installed, updated or uninstalled using gim by end users. And don't forget about [this badge](#badge)!
 
 > Gim is the place where development is distribution.
 
