@@ -114,9 +114,6 @@ init_cfg_paths() {
 init_global_vars() {
     # used for the '-force' option
     use_force=false
-
-    # installation type, later it will be set and exported
-    INSTALL_TYPE=
 }
 
 #-------------------------------------------------------------------------------
@@ -222,8 +219,7 @@ load_cfg() {
             . "$1"/gimrc # custom user-defined RC file
         elif [ ! -e "$1"/gimrc ]; then # if not existing
             cp "$1"/gimrc-global "$1"/gimrc # create gimrc from gimrc-global
-        fi &&
-        INSTALL_TYPE=global
+        fi
     else # local configuration will be used
         if [ -r "$1"/gimrc-local ] && [ ! -r "$2"/gimrc-local ]; then
             gimrc_local_path="$1"/gimrc-local # local configuration provided by global installation
@@ -237,8 +233,7 @@ load_cfg() {
         elif [ ! -e "$2"/gimrc ]; then # if not existing
             mkdir -p "$2"/ &&
             cp "$gimrc_local_path" "$2"/gimrc # create gimrc from gimrc-local
-        fi &&
-        INSTALL_TYPE=local
+        fi
     fi || return
 }
 
@@ -275,7 +270,6 @@ init_storage() {
 #   Exports variables for invoked makefile targets and associated scripts.
 export_vars() {
     export INSTALLER=gim
-    export INSTALL_TYPE
 }
 
 #-------------------------------------------------------------------------------

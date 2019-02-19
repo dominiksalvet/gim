@@ -49,26 +49,19 @@ fi
 # LOADING VARIABLES
 #-------------------------------------------------------------------------------
 
-# check installation type
-if [ ! "$INSTALL_TYPE" ]; then
-    if [ "$(id -u)" -eq 0 ]; then
-        INSTALL_TYPE=global
-    else
-        INSTALL_TYPE=local
-    fi
-fi
-
 # load configuration from RC files
-if [ "$INSTALL_TYPE" = global ]; then
+if [ "$(id -u)" -eq 0 ]; then
     . "$1"/rc/global && # use delivered global RC file
     if [ -r "$GLOBAL_CFG_DIR"/gimrc ]; then
         . "$GLOBAL_CFG_DIR"/gimrc # custom user-defined RC file
-    fi
+    fi &&
+    INSTALL_TYPE=global
 else
     . "$1"/rc/local && # use delivered local RC file
     if [ -r "$LOCAL_CFG_DIR"/gimrc ]; then
         . "$LOCAL_CFG_DIR"/gimrc # custom user-defined RC file
-    fi
+    fi &&
+    INSTALL_TYPE=local
 fi || exit
 
 #-------------------------------------------------------------------------------
