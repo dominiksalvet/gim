@@ -21,7 +21,7 @@ Furthermore, gim exports environment variables to your makefile targets and asso
 
 * `INSTALLER`
   * Equal to `gim` and represents the used installer.
-  * Useful when a different behavior is required when running makefile under gim and when running manually.
+  * Useful when a different behavior is required when running makefile under gim and when running the other way, e.g., manually.
 
 ## Others
 
