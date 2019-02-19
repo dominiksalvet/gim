@@ -63,4 +63,4 @@ uninstall: # uninstall the project
 	@./$(MAKE_DIR)/uninstall '$(SRC_DIR)'
 
 help: # show this help
-	$(call show_generated_help,makefile)
+	$(call show_generated_help,Makefile)
