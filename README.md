@@ -100,7 +100,7 @@ Note that gim manages one database for global installations and one database for
 sudo gim status gitlab.com/dominiksalvet/gim
 ```
 
-2. We want to update gim, which is installed locally by current user. We will use
+2. We want to update gim, which is installed locally by current user. We will use:
 
 ```sh
 gim install gitlab.com/dominiksalvet/gim
