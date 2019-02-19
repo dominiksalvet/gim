@@ -32,7 +32,7 @@ If you are in, then gim comes pretty handy. As you can see, all you need is a Gi
 
 ## Install
 
-Installation of gim itself must be done manually; **copy-paste the following commands** stated below into a terminal emulator and execute them.
+Installation of gim itself must be done manually; **copy-paste the following commands** into a terminal emulator and execute them.
 
 * **Global installation** can perform global installations and local installations (by any user) of Git projects.
 
