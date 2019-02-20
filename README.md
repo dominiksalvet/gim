@@ -1,6 +1,6 @@
 # gim
 
-> A simple smart Git-based installation manager.
+> A simple smart installation manager for your Git projects.
 
 What about to **install and update** your favorite Git projects like this?
 
