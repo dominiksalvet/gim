@@ -504,10 +504,11 @@ get_any_install_record() {
 #   repository found, empty string is returned.
 # PARAMETERS:
 #   $1 - short repository URL
-get_repo_version() {
-    git -C "$GIM_CACHE_REPO_DIR"/"$1"/ describe --abbrev=0 2>/dev/null
-    true
-}
+get_repo_version() { (
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ &&
+    git describe --abbrev=0 2>/dev/null
+    return 0 # always succeed
+) }
 
 #-------------------------------------------------------------------------------
 # PROJECT STATUS
