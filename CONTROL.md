@@ -28,4 +28,3 @@ Furthermore, gim exports environment variables to your makefile targets and asso
 Additional tips and suggestions are listed below.
 
 * Gim is performing a global operation if and only if it has root permissions. Your makefile targets and associated scripts are called with the same permissions. So based on this fact, you can easily check what type of operation is being executed and, e.g., set up appropriate directory paths.
-* Your makefile targets and scripts will be called by gim from the same working directory as the gim itself.
