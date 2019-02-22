@@ -427,10 +427,8 @@ touch_repo() { (
 
         # checkout the master branch
         git checkout -q master &&
-        # fetch changes to master branch together with all tags, it can ask a user for a password
-        git fetch -q --tags origin master &&
-        # merge all fetched remote master changes with local master branch
-        git merge -q FETCH_HEAD
+        # fetch changes from master and merge them into local master branch
+        git pull -q
     fi || return
 ) }
 
