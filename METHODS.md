@@ -4,7 +4,7 @@ This file describes which methods can be used by Git projects to being installed
 
 ## Installation
 
-After successfully finishing all steps of an installation method, a target Git project of the commit must be installed.
+After successfully finishing all steps of an installation method, a target Git project of a commit must be installed.
 
 * Makefile
   1. If *configure* file exists and is executable, it is executed.
@@ -14,7 +14,7 @@ After successfully finishing all steps of an installation method, a target Git p
 
 ## Uninstallation
 
-After successfully finishing all steps of an uninstallation method, a target Git project of the commit must be uninstalled while **keeping its configuration files**.
+After successfully finishing all steps of an uninstallation method, a target Git project of a commit must be uninstalled while **keeping its configuration files**.
 
 * Makefile
   1. If *configure* file exists and is executable, it is executed.
