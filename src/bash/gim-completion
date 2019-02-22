@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 
 # a list of required software
-SW_REQUIRED='command echo [ compgen complete'
+SW_REQUIRED='command compgen complete'
 
 # check if any piece of software is missing
 for sw in $SW_REQUIRED; do

@@ -22,9 +22,3 @@ Furthermore, gim exports environment variables for all called makefile targets a
 * `INSTALLER`
   * Equal to `gim` and represents the used installer.
   * Useful when a different behavior is required when running makefile targets or scripts under gim and when running them the other way, e.g., manually.
-
-## Others
-
-Additional tips and suggestions are listed below.
-
-* Gim is performing a global operation if and only if it has root permissions. Your makefile targets and scripts are called with the same permissions. So you can easily check what type of operation is being executed and, e.g., set up appropriate directory paths.

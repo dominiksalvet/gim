@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 # a list of required software
-readonly SW_REQUIRED='command echo [ id : sed git rm'
+readonly SW_REQUIRED='command id sed git rm'
 
 # check if any piece of software is missing
 for sw in $SW_REQUIRED; do
