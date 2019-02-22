@@ -25,7 +25,7 @@ SW_REQUIRED='command echo [ compgen complete'
 for sw in $SW_REQUIRED; do
     if ! command -v -- "$sw" > /dev/null; then
         echo "$0: missing $sw software" >&2
-        exit 1
+        exit 2
     fi
 done
 

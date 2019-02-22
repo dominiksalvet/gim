@@ -32,13 +32,13 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    readonly SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir id true false dirname wc read cp'
+    readonly SW_REQUIRED='command echo [ git make cd mkdir sed grep rm ls rmdir id true false dirname wc read cp :'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
         if ! command -v -- "$sw" > /dev/null; then
             echo "$0: missing $sw software" >&2
-            return 1
+            return 2
         fi
     done
 }
@@ -68,6 +68,9 @@ init_const() {
     readonly ESTATUS_NO_TAR_VER=NO-TAR-VER
     readonly ESTATUS_UNSUP_SRC_VER=UNSUP-SRC-VER
     readonly ESTATUS_MAKE_FAIL=MAKE-FAIL
+    readonly ESTATUS_MAKE_INSTALL_FAIL=MAKE-INSTALL-FAIL
+    readonly ESTATUS_MAKE_UNINSTALL_FAIL=MAKE-UNINSTALL-FAIL
+    readonly ESTATUS_CONFIGURE_FAIL=CONFIGURE-FAIL
 
     # constant string data
     readonly HELP_MESSAGE="USAGE:
@@ -110,10 +113,13 @@ init_cfg_paths() {
 }
 
 # DESCRIPTION:
-#   Initializes all global variables.
+#   Defines all global variables. If there is a global variable, it must be
+#   stated here even if its value is going to be overwritten.
 init_global_vars() {
     # used for the '-force' option
     use_force=false
+    # represents error statuses, which may arise during gim's execution
+    error_statuses=
 }
 
 #-------------------------------------------------------------------------------
@@ -159,14 +165,14 @@ $HINT_MESSAGE" >&2
                     action="$arg" # use the given action
                     ;;
                 autoclean)
-                    init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" || return
-                    autoclean
-                    return 0
+                    init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" &&
+                    autoclean "$GIM_CACHE_BUILD_DIR" "$GIM_CACHE_REPO_DIR"
+                    return
                     ;;
                 clean)
-                    init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" || return
-                    rm -r -f "${GIM_CACHE_REPO_DIR:?}"/*
-                    return 0
+                    init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" &&
+                    rm -r -f "${GIM_CACHE_BUILD_DIR:?}"/* "${GIM_CACHE_REPO_DIR:?}"/*
+                    return
                     ;;
                 help) echo "$HELP_MESSAGE"; return 0 ;;
                 about) echo "$ABOUT_MESSAGE"; return 0 ;;
@@ -199,8 +205,9 @@ $HINT_MESSAGE" >&2
 #   $2 - local configuration directory path
 init_runtime() {
     load_cfg "$1" "$2" &&
+    verify_cfg && # verify that the configuration is sufficient
     init_runtime_const &&
-    init_storage "$GIM_STATUS_PATH" "$GIM_CACHE_REPO_DIR" &&
+    init_storage &&
     export_vars || return
 }
 
@@ -238,36 +245,42 @@ load_cfg() {
 }
 
 # DESCRIPTION:
+#   Verifies that appropriate constants were successfully loaded.
+verify_cfg() { (
+    # it must be listed here to provide a good error report
+    : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_CONFIGURE_PREFIX:?}"
+) }
+
+# DESCRIPTION:
 #   Initializes runtime constants created from loaded configuration variables.
 init_runtime_const() {
-    # the file representing a database of locally installed projects
-    readonly GIM_STATUS_PATH="${GIM_DB_DIR:?}"/status
-    # gim cache for downloaded Git repositories and associated files
-    readonly GIM_CACHE_REPO_DIR="${GIM_CACHE_DIR:?}"/repo
+    readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status # database of installed projects
+
+    readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo # cache for repositories
+    readonly GIM_CACHE_BUILD_DIR="$GIM_CACHE_DIR"/build # cache for builds
 }
 
 # DESCRIPTION:
-#   Initializes gim's storage structure including the check of gim's database.
-# PARAMETERS:
-#   $1 - gim status file path
-#   $2 - gime repository cache directory path
+#   Initializes gim's storage structure including the check of gim's database
+#   based on prepared global variables.
 init_storage() {
     # check if gim status file exists
-    if [ ! -e "$1" ]; then
-        mkdir -p "$(dirname "$1")" &&
-        echo > "$1"
+    if [ ! -e "$GIM_STATUS_PATH" ]; then
+        mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
+        echo > "$GIM_STATUS_PATH"
     # check if the status file has at least one newline character
-    elif [ "$(wc -l < "$1")" -eq 0 ]; then
+    elif [ "$(wc -l < "$GIM_STATUS_PATH")" -eq 0 ]; then
         # append a newline character
-        echo >> "$1"
+        echo >> "$GIM_STATUS_PATH"
     fi &&
 
-    # create a directory for gim's cache
-    mkdir -p "$2"/ || return
+    # create directories for gim's cache
+    mkdir -p "$GIM_CACHE_REPO_DIR"/ &&
+    mkdir -p "$GIM_CACHE_BUILD_DIR"/ || return
 }
 
 # DESCRIPTION:
-#   Exports variables for invoked makefile targets and associated scripts.
+#   Exports variables for all called makefile targets and scripts by gim.
 export_vars() {
     export INSTALLER=gim
 }
@@ -277,29 +290,37 @@ export_vars() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Performs an automatic cleaning of gim's cache. It removes the cached
-#   repositories of projects that are not currently installed and active in the
-#   gim status file.
+#   Performs an automatic cleaning of given directories. It expects their
+#   following sub directories' structure: "$1/<hostname>/<maintaner>/<project>".
+#   Then, it removes those directories that do not belong any installed project
+#   or the ones that are empty. Useful for automatic cleaning of gim's cache.
+# PARAMATERS:
+#   $@ - target directories
 autoclean() { (
-    # go to gim cache
-    cd "$GIM_CACHE_REPO_DIR"/ || return 0
-
-    # go through all Git repositories
-    for repo_short_url in */*/*; do
-        if [ -d "$repo_short_url"/ ]; then
-            # if the repository is not in the status list, it can be removed
-            if ! has_exact_install_record "$repo_short_url"; then
-                # remove the project's cached Git repository
-                rm -r -f "${repo_short_url:?}"/
-            fi
+    for tar_dir in "$@"; do
+        # skip if tar_dir is empty
+        if [ ! "$tar_dir" ]; then
+            break
         fi
+        
+        cd "$tar_dir"/ || return 0 # go to the given directory, if not existing, clean-up done
+
+        # go through all Git repositories
+        for repo_short_url in */*/*; do
+            if [ -d "$repo_short_url"/ ]; then
+                # if the repository is not in the status list, it can be removed
+                if ! has_exact_install_record "$repo_short_url"; then
+                    # remove the project's cached Git repository
+                    rm -r -f "${repo_short_url:?}"/
+                fi
+            fi
+        done
+
+        # remove maintainer directories if they are empty
+        rm_empty_dirs "$tar_dir"/*/*
+        # remove hostname directories if they are empty
+        rm_empty_dirs "$tar_dir"/*
     done
-
-    # remove maintainer directories if they are empty
-    rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*/*
-
-    # remove hostname directories if they are empty
-    rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*
 ) }
 
 # DESCRIPTION:
@@ -351,6 +372,9 @@ process_action() {
     # prepare Git repository
     touch_repo "$repo_short_url" &&
 
+    # clear error statuses
+    error_statuses= &&
+
     # execute the action itself
     execute_action "$1" "$repo_short_url" || return
 }
@@ -360,9 +384,9 @@ process_action() {
 # PARAMETERS:
 #   $1 - repository URL
 check_url() {
-    readonly URL_REGEX='^(|https://)[[:alnum:]_][[:alnum:]_\.-]*(/[[:alnum:]_][[:alnum:]_\.-]*){2}(|.git)$'
+    url_regex='^(|https://)[[:alnum:]_][[:alnum:]_\.-]*(/[[:alnum:]_][[:alnum:]_\.-]*){2}(|.git)$'
     # check the format of given repository URL
-    if ! echo "$1" | grep -q -E -e "$URL_REGEX"; then
+    if ! echo "$1" | grep -q -E -e "$url_regex"; then
         echo "$0: unsupported URL delivered" >&2
         return 1
     fi
@@ -437,8 +461,8 @@ execute_action() {
 
     # getting project status
     version_status="$(get_version_status "$local_version" "$repo_version")"
-    error_statuses="$(get_error_statuses "$2" "$local_version" "$repo_version")"
     report_status="$version_status"
+    register_static_error_statuses "$2" "$local_version" "$repo_version"
     
     if [ ! "$error_statuses" ]; then
         case "$1" in
@@ -463,7 +487,7 @@ execute_action() {
                 esac
                 ;;
         esac
-    fi || error_statuses="$error_statuses""$ESTATUS_MAKE_FAIL "
+    fi
 
     if [ ! "$error_statuses" ] || [ "$1" = "$ACTION_STATUS" ]; then
         print_status "$error_statuses" "$report_status" "$2" "$local_version" "$repo_version"
@@ -530,25 +554,31 @@ get_version_status() {
 }
 
 # DESCRIPTION:
-#   Returns error statuses of the given Git project and versions considering the
-#   '-force' flag if delivered. If there is at least one error status, a
-#   trailing space will be appended. Otherwise, returns an empty string.
+#   Returns static error statuses of the given Git project and versions
+#   considering the '-force' flag if delivered without running any external
+#   code. If there is at least one error status, a trailing space will be
+#   appended. Otherwise, returns an empty string.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
 #   $3 - target project version
-get_error_statuses() {
-    error_statuses=
-
+register_static_error_statuses() {
     if [ ! "$3" ]; then
-        error_statuses="$error_statuses""$ESTATUS_NO_TAR_VER "
+        add_error_status "$ESTATUS_NO_TAR_VER"
     fi
     
     if ! "$use_force" && ! is_supported_version "$1" "$2"; then
-        error_statuses="$error_statuses""$ESTATUS_UNSUP_SRC_VER "
+        add_error_status "$ESTATUS_UNSUP_SRC_VER"
     fi
+}
 
-    echo "$error_statuses"
+# DESCRIPTION:
+#   Adds a given error status to the global variable representing current gim's
+#   error statuses.
+# PARAMETERS:
+#   $1 - error status
+add_error_status() {
+    error_statuses="$error_statuses""$1 "
 }
 
 # DESCRIPTION:
@@ -574,30 +604,56 @@ is_supported_version() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Installs a given project to a given version.
+#   Installs a given project to a given version. Also, creates an installation
+#   record in gim's database.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - target project version
 install() {
-    repo_make install "$1" "$2" &&
+    # ./configure
+    { repo_configure "$1" "$2" || {
+        add_error_status "$ESTATUS_CONFIGURE_FAIL"; false # propagate the error further
+    } } &&
+
+    # make
+    { repo_make "$1" "$2" || {
+        add_error_status "$ESTATUS_MAKE_FAIL"; false
+    } } &&
+
+    # make install
+    { repo_make "$1" "$2" install || {
+        add_error_status "$ESTATUS_MAKE_INSTALL_FAIL"; false
+    } } &&
+
+    # access gim's database
     insert_install_record "$1 $2"
 }
 
 # DESCRIPTION:
-#   Uninstalls a given project of a given version. Also erases a given
-#   installation record from gim status file.
+#   Uninstalls a given project of a given version. Also, erases a given
+#   installation record from gim's database.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
 #   $3 - installation record to erase
 uninstall() {
-    repo_make uninstall "$1" "$2" &&
+    # ./configure
+    { repo_configure "$1" "$2" || {
+        add_error_status "$ESTATUS_CONFIGURE_FAIL"; false # propagate the error further
+    } } &&
+
+    # make uninstall
+    { repo_make "$1" "$2" uninstall || {
+        add_error_status "$ESTATUS_MAKE_UNINSTALL_FAIL"; false
+    } } &&
+
+    # access gim's database
     erase_install_record "$3"
 }
 
 # DESCRIPTION:
-#   Update a given project from a given version to another. Also erases a given
-#   installation record from gim status file and creates a inserts a new one.
+#   Update a given project from a given version to another. Also, erases a given
+#   installation record from gim's database and creates a inserts a new one.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
@@ -609,21 +665,33 @@ update() {
 }
 
 # DESCRIPTION:
+#   Configure target repository directory of the given version.
+# PARAMETERS:
+#   $1 - short repository URL
+#   $2 - version
+repo_configure() { (
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
+    git checkout -q "$2" && # use the given version as a tag
+    if [ -x configure ]; then
+        ./configure --prefix="$GIM_CONFIGURE_PREFIX"
+    fi
+) }
+
+# DESCRIPTION:
 #   Execute a make target in a repository directory over a given version of the
 #   repository.
 # PARAMETERS:
-#   $1 - make target
-#   $2 - short repository URL
-#   $3 - version
+#   $1 - short repository URL
+#   $2 - version
+#   $3 - make target
 repo_make() { (
-    cd "$GIM_CACHE_REPO_DIR"/"$2"/ && # go to the repository
-    git checkout -q "$3" && # use the given version as a tag
-    if [ "$1" ]; then
-        make "$1" # execute a make target
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
+    git checkout -q "$2" && # use the given version as a tag
+    if [ "$3" ]; then
+        BUILD_DIR="$GIM_CACHE_BUILD_DIR"/"$1"/ make -e "$3" # execute a make target
     else
-        make # execute the default make target
-    fi &&
-    git checkout -q master # checkout the master branch
+        BUILD_DIR="$GIM_CACHE_BUILD_DIR"/"$1"/ make -e # execute the default make target
+    fi
 ) }
 
 # DESCRIPTION:

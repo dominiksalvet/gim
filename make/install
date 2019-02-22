@@ -27,7 +27,7 @@ readonly SW_REQUIRED='command echo [ id : mkdir cp dirname wc sed git touch grep
 for sw in $SW_REQUIRED; do
     if ! command -v -- "$sw" > /dev/null; then
         echo "$0: missing $sw software" >&2
-        exit 1
+        exit 2
     fi
 done
 
@@ -41,12 +41,11 @@ if [ ! "$1" ] || [ ! -d "$1"/ ]; then
     exit 1
 fi
 
-# verify that required environment variables were provided
-: "${GLOBAL_CFG_DIR:?}"
-: "${LOCAL_CFG_DIR:?}"
+# verify that essential environment variables were provided
+: "${GLOBAL_CFG_DIR:?}" "${LOCAL_CFG_DIR:?}"
 
 #-------------------------------------------------------------------------------
-# LOADING VARIABLES
+# LOAD VARIABLES
 #-------------------------------------------------------------------------------
 
 # load configuration from RC files
@@ -65,27 +64,23 @@ else
 fi || exit
 
 #-------------------------------------------------------------------------------
-# GIM_DB_DIR checks
+# VERIFY VARIABLES
 #-------------------------------------------------------------------------------
+
+# verify variables that should have been loaded from an RC file
+: "${GIM_DB_DIR:?}" "${GIM_BIN_DIR:?}"
 
 # the file representing a database of locally installed projects
-readonly GIM_STATUS_PATH="${GIM_DB_DIR:?}"/status
+readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status
 
+# verify access permissions
 if [ -e "$GIM_STATUS_PATH" ] && [ ! -w "$GIM_STATUS_PATH" ]; then
     echo "$0: can't write to $GIM_STATUS_PATH" >&2
-    exit 1
+    exit 2
 fi
-
-#-------------------------------------------------------------------------------
-# GIM_BIN_DIR checks
-#-------------------------------------------------------------------------------
-
-# verify that the gim binary path variable is set
-: "${GIM_BIN_DIR:?}"
-
 if [ -e "$GIM_BIN_DIR"/ ] && [ ! -w "$GIM_BIN_DIR"/ ]; then
     echo "$0: can't write to $GIM_BIN_DIR" >&2
-    exit 1
+    exit 2
 fi
 
 #-------------------------------------------------------------------------------
