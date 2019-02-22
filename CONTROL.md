@@ -1,6 +1,6 @@
 # Control
 
-This file describes the ways how to control gim-related issues in a Git project.
+This file describes the ways to control gim-related issues in Git projects.
 
 ## Repository
 
@@ -17,14 +17,14 @@ To control gim's execution from a Git repository, create *gim* directory in the 
 
 ## Environment variables
 
-Furthermore, gim exports environment variables to your makefile targets and associated scripts to provide a helpful information for their execution. It means that you can work with the following variables in your makefile targets and associated scripts like with normal variables.
+Furthermore, gim exports environment variables for all called makefile targets and scripts. It means that you can work with the following variables in your makefile targets and scripts like they were normal variables.
 
 * `INSTALLER`
   * Equal to `gim` and represents the used installer.
-  * Useful when a different behavior is required when running makefile under gim and when running the other way, e.g., manually.
+  * Useful when a different behavior is required when running makefile targets or scripts under gim and when running them the other way, e.g., manually.
 
 ## Others
 
 Additional tips and suggestions are listed below.
 
-* Gim is performing a global operation if and only if it has root permissions. Your makefile targets and associated scripts are called with the same permissions. So based on this fact, you can easily check what type of operation is being executed and, e.g., set up appropriate directory paths.
+* Gim is performing a global operation if and only if it has root permissions. Your makefile targets and scripts are called with the same permissions. So you can easily check what type of operation is being executed and, e.g., set up appropriate directory paths.

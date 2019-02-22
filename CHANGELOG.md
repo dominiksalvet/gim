@@ -14,6 +14,7 @@ The changes not yet present in any release are listed in this section.
 * Projects installed by gim can be installed locally. Gim has one global database and another one for each active user.
 * Support for local installation of gim itself has been added.
 * Installation and uninstallation scripts load current system configuration of gim from RC files during their execution.
+* Added support for standard `./configure && make && make install` installation approach.
 
 ### Changed
 

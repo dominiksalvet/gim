@@ -39,3 +39,6 @@ GIM_CACHE_DIR=/var/cache/gim
 
 # gim binary directory
 GIM_BIN_DIR=/usr/local/bin
+
+# default path prefix for Git projects installed by gim
+GIM_CONFIGURE_PREFIX=/usr/local
