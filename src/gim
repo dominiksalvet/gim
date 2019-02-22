@@ -411,9 +411,8 @@ url_to_short_url() {
 # PARAMETERS:
 #   $1 - short repository URL
 touch_repo() { (
-    repo_dir="$GIM_CACHE_REPO_DIR"/"$1" &&
-    mkdir -p "$repo_dir"/ &&
-    cd "$repo_dir"/ &&
+    mkdir -p "$GIM_CACHE_REPO_DIR"/"$1"/ &&
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ &&
 
     if [ ! "$(ls -A)" ]; then # if the cache directory for the target project is empty
         # clone the Git repository master branch to this directory, it can ask a user for a password
@@ -421,13 +420,13 @@ touch_repo() { (
         # disable push remote URL
         git remote set-url --push origin ''
     else
-        # remove all untracked files and directories
-        git clean -q -f -d &&
-        # discard all changes done to the cached repositories
+        # remove all untracked files and directories (even those listed in .gitignore)
+        git clean -q -d -f -x &&
+        # discard all changes done to the repository
         git reset -q --hard &&
+
         # checkout the master branch
         git checkout -q master &&
-
         # fetch changes to master branch together with all tags, it can ask a user for a password
         git fetch -q --tags origin master &&
         # merge all fetched remote master changes with local master branch
