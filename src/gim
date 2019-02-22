@@ -248,7 +248,7 @@ load_cfg() {
 #   Verifies that appropriate constants were successfully loaded.
 verify_cfg() { (
     # it must be listed here to provide a good error report
-    : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_CONFIGURE_PREFIX:?}"
+    : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_INSTALLER_PREFIX:?}"
 ) }
 
 # DESCRIPTION:
@@ -670,7 +670,7 @@ repo_configure() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
     git checkout -q "$2" && # use the given version as a tag
     if [ -x configure ]; then
-        ./configure --prefix="$GIM_CONFIGURE_PREFIX"
+        ./configure --prefix="$GIM_INSTALLER_PREFIX"
     fi
 ) }
 

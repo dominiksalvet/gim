@@ -41,4 +41,4 @@ GIM_CACHE_DIR="$HOME"/.cache/gim
 GIM_BIN_DIR="$HOME"/.local/bin
 
 # default path prefix for Git projects installed by gim
-GIM_CONFIGURE_PREFIX="$HOME"/.local
+GIM_INSTALLER_PREFIX="$HOME"/.local
