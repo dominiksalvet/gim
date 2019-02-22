@@ -14,7 +14,7 @@ And when they are no longer needed, **uninstall** them that way?
 gim uninstall <url>
 ```
 
-If you are in, then gim comes pretty handy. As you can see, all you need is a Git URL of a compatible project and gim will do the rest. And trust me, there are a lot of compatible projects thanks to the standard approaches used in gim.
+If you are in, then gim comes pretty handy. As you can see, all you need is a Git URL of a compatible project and gim will do the rest. And trust me, there are a lot of compatible projects thanks to standard approaches used in gim.
 
 ---
 
