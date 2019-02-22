@@ -10,18 +10,18 @@ The changes not yet present in any release are listed in this section.
 
 * Gim manages its own database of installed programs in *status* file.
 * Gim now exports environment variable `INSTALLER` equal to `gim` for invoked makefile targets or scripts to indicate used installation manager.
-* Support for RC files that set up gim's directory definitions. And so they are no longer hard-coded.
+* Added support for RC files that set up gim's directory definitions. And so they are no longer hard-coded.
 * Projects installed by gim can be installed locally. Gim has one global database and another one for each active user.
 * Support for local installation of gim itself has been added.
 * Installation and uninstallation scripts load current system configuration of gim from RC files during their execution.
-* Added support for standard `./configure && make && make install` installation approach.
+* Added support for a Makefile installation method.
 
 ### Changed
 
 * Option `-ignore-unsupported` has been renamed to `-force`.
 * The format of status reports has been changed. A label concept has been established, which significantly distinguishes errors from normal status reports.
 * Commands `-autoclean`, `-clean`, `-help`, `-about` and `-version` have been renamed to `autoclean`, `clean`, `help`, `about` and `version`.
-* Gim project control files have been renamed; *gim/unsupported* -> *gim/unsupported-versions*, *gim/names* -> *gim/mirror-urls* (now stores mirror URLs instead of just names). The content of both files is separated by newlines rather than spaces.
+* Gim project control files have been renamed; *gim/unsupported* -> *gim/unsupported-versions*, *gim/names* -> *gim/mirror-urls* (now stores mirror URLs instead of just names). The content of both files is separated by newlines rather than by spaces.
 
 ### Removed
 
