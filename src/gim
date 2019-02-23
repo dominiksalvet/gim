@@ -64,13 +64,21 @@ init_const() {
     readonly VSTATUS_DIFF=old
     readonly VSTATUS_MATCH=latest
 
-    # error statuses
+    # available installer methods
+    readonly IMETHOD_CAM=cam # Configure & Makefile
+    readonly IMETHOD_MAKEFILE=makefile # Makefile
+
+    # static error statuses
     readonly ESTATUS_NO_TAR_VER=NO-TAR-VER
     readonly ESTATUS_UNSUP_SRC_VER=UNSUP-SRC-VER
+
+    # installer error statuses
+    readonly ESTATUS_NO_INSTALL_METHOD=NO-INSTALL-METHOD
+    readonly ESTATUS_NO_UNINSTALL_METHOD=NO-UNINSTALL-METHOD
+    readonly ESTATUS_CONFIGURE_FAIL=CONFIGURE-FAIL
     readonly ESTATUS_MAKE_FAIL=MAKE-FAIL
     readonly ESTATUS_MAKE_INSTALL_FAIL=MAKE-INSTALL-FAIL
     readonly ESTATUS_MAKE_UNINSTALL_FAIL=MAKE-UNINSTALL-FAIL
-    readonly ESTATUS_CONFIGURE_FAIL=CONFIGURE-FAIL
 
     # constant string data
     readonly HELP_MESSAGE="USAGE:
@@ -166,12 +174,12 @@ $HINT_MESSAGE" >&2
                     ;;
                 autoclean)
                     init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" &&
-                    autoclean "$GIM_CACHE_BUILD_DIR" "$GIM_CACHE_REPO_DIR"
+                    autoclean
                     return
                     ;;
                 clean)
                     init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" &&
-                    rm -r -f "${GIM_CACHE_BUILD_DIR:?}"/* "${GIM_CACHE_REPO_DIR:?}"/*
+                    rm -r -f "${GIM_CACHE_REPO_DIR:?}"/*
                     return
                     ;;
                 help) echo "$HELP_MESSAGE"; return 0 ;;
@@ -255,9 +263,7 @@ verify_cfg() { (
 #   Initializes runtime constants created from loaded configuration variables.
 init_runtime_const() {
     readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status # database of installed projects
-
-    readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo # cache for repositories
-    readonly GIM_CACHE_BUILD_DIR="$GIM_CACHE_DIR"/build # cache for builds
+    readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo # cache for Git repositories
 }
 
 # DESCRIPTION:
@@ -275,8 +281,7 @@ init_storage() {
     fi &&
 
     # create directories for gim's cache
-    mkdir -p "$GIM_CACHE_REPO_DIR"/ &&
-    mkdir -p "$GIM_CACHE_BUILD_DIR"/ || return
+    mkdir -p "$GIM_CACHE_REPO_DIR"/ || return
 }
 
 # DESCRIPTION:
@@ -290,38 +295,26 @@ export_vars() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Performs an automatic cleaning of given directories. It expects their
-#   following sub directories' structure: "$1/<hostname>/<maintaner>/<project>".
-#   Then, it removes those directories that do not belong any installed project
-#   or the ones that are empty. Useful for automatic cleaning of gim's cache.
-# PARAMATERS:
-#   $@ - target directories
-autoclean() { (
-    for tar_dir in "$@"; do
-        # skip if tar_dir is empty
-        if [ ! "$tar_dir" ]; then
-            break
-        fi
-        
-        cd "$tar_dir"/ || return 0 # go to the given directory, if not existing, clean-up done
-
-        # go through all Git repositories
-        for repo_short_url in */*/*; do
-            if [ -d "$repo_short_url"/ ]; then
-                # if the repository is not in the status list, it can be removed
-                if ! has_exact_install_record "$repo_short_url"; then
-                    # remove the project's cached Git repository
-                    rm -r -f "${repo_short_url:?}"/
-                fi
+#   Performs an automatic cleaning of gim's cache. It removes only those files
+#   and directories not belonging to a Git project installed on the system.
+autoclean() {
+    # go through all cached Git repositories
+    for repo_dir in "${GIM_CACHE_REPO_DIR:?}"/*/*/*; do
+        if [ -d "$repo_dir"/ ]; then
+            # if the repository is not in the database, it can be removed
+            if ! has_exact_install_record "$repo_dir"; then
+                # remove the project's cached Git repository
+                rm -r -f "${repo_dir:?}"/
             fi
-        done
+        fi
+    done &&
 
-        # remove maintainer directories if they are empty
-        rm_empty_dirs "$tar_dir"/*/*
-        # remove hostname directories if they are empty
-        rm_empty_dirs "$tar_dir"/*
-    done
-) }
+    # remove maintainer directories if they are empty
+    rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*/* &&
+
+    # remove hostname directories if they are empty
+    rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*
+}
 
 # DESCRIPTION:
 #   Decides whether a project from a given repository URL has an exact record in
@@ -348,7 +341,7 @@ get_exact_install_record() {
 #   $@ - directories paths
 rm_empty_dirs() {
     for dir in "$@"; do
-        if [ -d "$dir"/ ]; then
+        if [ -d "${dir:?}"/ ]; then
             rmdir --ignore-fail-on-non-empty -- "$dir"/
         fi
     done
@@ -420,8 +413,8 @@ touch_repo() { (
         # disable push remote URL
         git remote set-url --push origin ''
     else
-        # remove all untracked files and directories (even those listed in .gitignore)
-        git clean -q -d -f -x &&
+        # remove all untracked files and directories (respect .gitignore for performance gains)
+        git clean -q -d -f &&
         # discard all changes done to the repository
         git reset -q --hard &&
 
@@ -597,52 +590,43 @@ is_supported_version() {
 }
 
 #-------------------------------------------------------------------------------
-# INSTALLATION AND UNINSTALLATION
+# CHOOSE AN INSTALLER METHOD
 #-------------------------------------------------------------------------------
 
-# DESCRIPTION:
-#   Installs a given project to a given version. Also, creates an installation
-#   record in gim's database.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - target project version
 install() {
-    # ./configure
-    { repo_configure "$1" "$2" || {
-        add_error_status "$ESTATUS_CONFIGURE_FAIL"; false # propagate the error further
+    # choose used installation method
+    { installer_method="$(get_installer_method "$1" "$2")" || {
+        add_error_status "$ESTATUS_NO_INSTALL_METHOD"
     } } &&
 
-    # make
-    { repo_make "$1" "$2" || {
-        add_error_status "$ESTATUS_MAKE_FAIL"; false
-    } } &&
-
-    # make install
-    { repo_make "$1" "$2" install || {
-        add_error_status "$ESTATUS_MAKE_INSTALL_FAIL"; false
-    } } &&
+    # perform an installation
+    case "$installer_method" in
+        "$IMETHOD_CAM") cam_install "$1" "$2" ;;
+        "$IMETHOD_MAKEFILE") makefile_install "$1" "$2" ;;
+    esac &&
 
     # access gim's database
     insert_install_record "$1 $2"
 }
 
-# DESCRIPTION:
-#   Uninstalls a given project of a given version. Also, erases a given
-#   installation record from gim's database.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
 #   $3 - installation record to erase
 uninstall() {
-    # ./configure
-    { repo_configure "$1" "$2" || {
-        add_error_status "$ESTATUS_CONFIGURE_FAIL"; false # propagate the error further
+    # choose used uninstallation method
+    { installer_method="$(get_installer_method "$1" "$2")" || {
+        add_error_status "$ESTATUS_NO_UNINSTALL_METHOD"
     } } &&
 
-    # make uninstall
-    { repo_make "$1" "$2" uninstall || {
-        add_error_status "$ESTATUS_MAKE_UNINSTALL_FAIL"; false
-    } } &&
+    # perform an uninstallation
+    case "$installer_method" in
+        "$IMETHOD_CAM") cam_uninstall "$1" "$2" ;;
+        "$IMETHOD_MAKEFILE") makefile_uninstall "$1" "$2" ;;
+    esac &&
 
     # access gim's database
     erase_install_record "$3"
@@ -650,7 +634,7 @@ uninstall() {
 
 # DESCRIPTION:
 #   Update a given project from a given version to another. Also, erases a given
-#   installation record from gim's database and creates a inserts a new one.
+#   installation record from gim's database and inserts a new one.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
@@ -661,35 +645,91 @@ update() {
     install "$1" "$4"
 }
 
-# DESCRIPTION:
-#   Configure target repository directory of the given version.
 # PARAMETERS:
 #   $1 - short repository URL
-#   $2 - version
-repo_configure() { (
+#   $2 - project version
+get_installer_method() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
     git checkout -q "$2" && # use the given version as a tag
+
     if [ -x configure ]; then
-        ./configure --prefix="$GIM_INSTALLER_PREFIX"
+        echo "$IMETHOD_CAM"
+    elif [ -e Makefile ] || [ -e makefile ]; then
+        echo "$IMETHOD_MAKEFILE"
+    else
+        return 1 # no installer method found, fail
     fi
 ) }
 
-# DESCRIPTION:
-#   Execute a make target in a repository directory over a given version of the
-#   repository.
+#-------------------------------------------------------------------------------
+# CONFIGURE & MAKEFILE INSTALLER
+#-------------------------------------------------------------------------------
+
 # PARAMETERS:
 #   $1 - short repository URL
-#   $2 - version
-#   $3 - make target
-repo_make() { (
+#   $2 - target project version
+cam_install() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
     git checkout -q "$2" && # use the given version as a tag
-    if [ "$3" ]; then
-        BUILD_DIR="$GIM_CACHE_BUILD_DIR"/"$1"/ make -e "$3" # execute a make target
-    else
-        BUILD_DIR="$GIM_CACHE_BUILD_DIR"/"$1"/ make -e # execute the default make target
-    fi
+
+    # installation process
+    { ./configure --prefix="$GIM_INSTALLER_PREFIX"/ || {
+        add_error_status "$ESTATUS_CONFIGURE_FAIL"; false
+    } } &&
+    { make || { add_error_status "$ESTATUS_MAKE_FAIL"; false; } } &&
+    { make install || { add_error_status "$ESTATUS_MAKE_INSTALL_FAIL"; false; } }
 ) }
+
+# PARAMETERS:
+#   $1 - short repository URL
+#   $2 - source project version
+cam_uninstall() { (
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
+    git checkout -q "$2" && # use the given version as a tag
+
+    # uninstallation process
+    { ./configure --prefix="$GIM_INSTALLER_PREFIX"/ || {
+        add_error_status "$ESTATUS_CONFIGURE_FAIL"; false
+    } } &&
+    { make uninstall || { add_error_status "$ESTATUS_MAKE_UNINSTALL_FAIL"; false; } }
+) }
+
+#-------------------------------------------------------------------------------
+# MAKEFILE INSTALLER
+#-------------------------------------------------------------------------------
+
+# PARAMETERS:
+#   $1 - short repository URL
+#   $2 - target project version
+makefile_install() { (
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
+    git checkout -q "$2" && # use the given version as a tag
+
+    # installation process
+    { PREFIX="$GIM_INSTALLER_PREFIX"/ make || {
+        add_error_status "$ESTATUS_MAKE_FAIL"; false
+    } } &&
+    { PREFIX="$GIM_INSTALLER_PREFIX"/ make install || {
+        add_error_status "$ESTATUS_MAKE_INSTALL_FAIL"; false
+    } }
+) }
+
+# PARAMETERS:
+#   $1 - short repository URL
+#   $2 - source project version
+makefile_uninstall() { (
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
+    git checkout -q "$2" && # use the given version as a tag
+
+    # uninstallation process
+    { PREFIX="$GIM_INSTALLER_PREFIX"/ make uninstall || {
+        add_error_status "$ESTATUS_MAKE_UNINSTALL_FAIL"; false
+    } }
+) }
+
+#-------------------------------------------------------------------------------
+# ACCESS INSTALALTION DATABASE
+#-------------------------------------------------------------------------------
 
 # DESCRIPTION:
 #   Insert a given installation record before the first line of the gim status

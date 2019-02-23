@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Added
+
+* Added support for 'Configure & Makefile' and 'Makefile' installer methods.
+* Simplify process of adding installer methods.
+
+### Removed
+
+* Gim no longer delivers suggested build directory to projects that are being built. They can be built in the repository directory itself.
+
 ## 6.0.0 (2019-02-23)
 
 ### Added
@@ -16,7 +25,7 @@ The changes not yet present in any release are listed in this section.
 * Projects installed by gim can be installed locally. Gim has one global database and another one for each active user.
 * Support for local installation of gim itself has been added.
 * Installation and uninstallation scripts load current system configuration of gim from RC files during their execution.
-* Added support for a Makefile installation method.
+* Added a basic installer method support.
 
 ### Changed
 
