@@ -599,7 +599,7 @@ is_supported_version() {
 install() {
     # choose used installation method
     { installer_method="$(get_installer_method "$1" "$2")" || {
-        add_error_status "$ESTATUS_NO_INSTALL_METHOD"
+        add_error_status "$ESTATUS_NO_INSTALL_METHOD"; false
     } } &&
 
     # perform an installation
@@ -619,7 +619,7 @@ install() {
 uninstall() {
     # choose used uninstallation method
     { installer_method="$(get_installer_method "$1" "$2")" || {
-        add_error_status "$ESTATUS_NO_UNINSTALL_METHOD"
+        add_error_status "$ESTATUS_NO_UNINSTALL_METHOD"; false
     } } &&
 
     # perform an uninstallation
