@@ -32,7 +32,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    readonly SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp realpath'
+    readonly SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp realpath cut'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -112,7 +112,8 @@ https://gitlab.com/dominiksalvet/gim'
 }
 
 # DESCRIPTION:
-#   Initializes directory paths where gim configuration should be stored.
+#   Initializes absolute directory paths where gim configuration is stored.
+#   Those paths are expected to be constant during the gim's development.
 init_cfg_paths() {
     # global gim installation's configuration directory (used for the root)
     readonly GLOBAL_CFG_DIR=/etc/gim
@@ -258,9 +259,17 @@ verify_cfg() { (
     # it must be listed here to provide a good error report
     : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_INSTALLER_PREFIX:?}"
 
-    # check if any gim's path is set to '/', which could be dangerous
+    # gim's paths can't start with '-'
+    first_chars="$(echo "$GIM_DB_DIR" | cut -c1)" # get first character of each variable
+    first_chars="$first_chars""$(echo "$GIM_CACHE_DIR" | cut -c1)"
+    if echo "$first_chars" | grep -q -E -e '-'; then # concatenation then must not include '-'
+        echo "$0: configuration paths can't start with '-'" >&2
+        return 1
+    fi
+
+    # check if gim's path is set to '/', which could be dangerous
     if [ "$(realpath -m "$GIM_DB_DIR")" = / ] || [ "$(realpath -m "$GIM_CACHE_DIR")" = / ]; then
-        echo "$0: a configuration path can't be set to '/'" >&2
+        echo "$0: configuration paths can't be set to '/'" >&2
         return 1
     fi
 ) }
@@ -313,7 +322,7 @@ autoclean() { (
             # if the repository is not in the database, it can be removed
             if ! has_exact_install_record "$repo_short_url"; then
                 # remove the project's cached Git repository
-                rm -r -f "${repo_short_url:?}"/
+                rm -r -f -- "${repo_short_url:?}"/
             fi
         fi
     done &&
@@ -659,7 +668,7 @@ update() {
 #   $2 - project version
 get_installer_method() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q "$2" && # use the given version as a tag
+    git checkout -q -- "$2" && # use the given version as a tag
 
     if [ -x configure ]; then
         echo "$IMETHOD_CAM"
@@ -679,7 +688,7 @@ get_installer_method() { (
 #   $2 - target project version
 cam_install() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q "$2" && # use the given version as a tag
+    git checkout -q -- "$2" && # use the given version as a tag
 
     # installation process
     { ./configure --prefix="$GIM_INSTALLER_PREFIX"/ || {
@@ -694,7 +703,7 @@ cam_install() { (
 #   $2 - source project version
 cam_uninstall() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q "$2" && # use the given version as a tag
+    git checkout -q -- "$2" && # use the given version as a tag
 
     # uninstallation process
     { ./configure --prefix="$GIM_INSTALLER_PREFIX"/ || {
@@ -712,7 +721,7 @@ cam_uninstall() { (
 #   $2 - target project version
 makefile_install() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q "$2" && # use the given version as a tag
+    git checkout -q -- "$2" && # use the given version as a tag
 
     # installation process
     { PREFIX="$GIM_INSTALLER_PREFIX"/ make || {
@@ -728,7 +737,7 @@ makefile_install() { (
 #   $2 - source project version
 makefile_uninstall() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q "$2" && # use the given version as a tag
+    git checkout -q -- "$2" && # use the given version as a tag
 
     # uninstallation process
     { PREFIX="$GIM_INSTALLER_PREFIX"/ make uninstall || {
