@@ -29,4 +29,4 @@ Finishing an uninstallation method must uninstall a target Git project of the co
 ## Notes
 
 * All arguments stated above are **delivered automatically by gim**.
-* Prefix arguments stand for a base directory that the target Git project is being installed to or uninstalled from. If used, gim can perform both global and local installations.
+* A prefix argument represents an installation directory. If a Git project uses it, gim can perform both global and local installations.
