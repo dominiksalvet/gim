@@ -6,29 +6,25 @@ This file describes which methods can be used by Git projects to being installed
 
 Finishing any installation method must install a target Git project of the commit.
 
-* Configure & Makefile
-  1. An executable file named *configure* must exist.
-  2. The *configure* file is executed from a build directory delivering `--prefix=<dir>` argument.
-  3. A *Makefile* file must exist in the build directory.
-  4. Make calls a default target in the build directory.
-  5. Make calls the `install` target in the build directory.
-* Makefile
-  1. A *Makefile* must exist.
-  2. Make calls a default target delivering `BUILD_DIR=<dir>`, `PREFIX=<dir>` arguments.
-  3. Make calls the `install` target delivering `BUILD_DIR=<dir>`, `PREFIX=<dir>` arguments.
+* **Configure & Makefile method** is used if executable file named *configure* exists.
+  1. The *configure* file is executed from a build directory delivering `--prefix=<dir>` argument.
+  2. A *Makefile* file must exist in the build directory.
+  3. Make calls a default target in the build directory.
+  4. Make calls the `install` target in the build directory.
+* **Makefile method** is used if a *Makefile* exists.
+  1. Make calls a default target delivering `BUILD_DIR=<dir>`, `PREFIX=<dir>` arguments.
+  2. Make calls the `install` target delivering `BUILD_DIR=<dir>`, `PREFIX=<dir>` arguments.
 
 ## Uninstallation
 
 Finishing any uninstallation method must uninstall a target Git project of the commit while **keeeping its configuration files**.
 
-* Configure & Makefile
-  1. An executable file named *configure* must exist.
-  2. The *configure* file is executed from a build directory delivering `--prefix=<dir>` argument.
-  3. A *Makefile* file must exist in the build directory.
-  4. Make calls the `uninstall` target in the build directory.
-* Makefile
-  1. A *Makefile* must exist.
-  3. Make calls the `uninstall` target delivering `BUILD_DIR=<dir>`, `PREFIX=<dir>` arguments.
+* **Configure & Makefile method** is used if executable file named *configure* exists.
+  1. The *configure* file is executed from a build directory delivering `--prefix=<dir>` argument.
+  2. A *Makefile* file must exist in the build directory.
+  3. Make calls the `uninstall` target in the build directory.
+* **Makefile method** is used if a *Makefile* exists.
+  1. Make calls the `uninstall` target delivering `BUILD_DIR=<dir>`, `PREFIX=<dir>` arguments.
 
 ## Notes
 
