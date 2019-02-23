@@ -24,7 +24,7 @@ Finishing an uninstallation method must uninstall a target Git project of the co
   2. A *Makefile* file must exist.
   4. Make calls the `uninstall` target.
 * **Makefile method** is used if a *Makefile* file exists.
-  1. Make calls the `install` target delivering `PREFIX=<dir>` argument.
+  1. Make calls the `uninstall` target delivering `PREFIX=<dir>` argument.
 
 ## Notes
 
