@@ -297,14 +297,17 @@ export_vars() {
 # DESCRIPTION:
 #   Performs an automatic cleaning of gim's cache. It removes only those files
 #   and directories not belonging to a Git project installed on the system.
-autoclean() {
+autoclean() { (
+    # change directory to gim's cache
+    cd "${GIM_CACHE_REPO_DIR:?}"/ &&
+
     # go through all cached Git repositories
-    for repo_dir in "${GIM_CACHE_REPO_DIR:?}"/*/*/*; do
-        if [ -d "$repo_dir"/ ]; then
+    for repo_short_url in */*/*; do
+        if [ -d "$repo_short_url"/ ]; then
             # if the repository is not in the database, it can be removed
-            if ! has_exact_install_record "$repo_dir"; then
+            if ! has_exact_install_record "$repo_short_url"; then
                 # remove the project's cached Git repository
-                rm -r -f "${repo_dir:?}"/
+                rm -r -f "${repo_short_url:?}"/
             fi
         fi
     done &&
@@ -314,7 +317,7 @@ autoclean() {
 
     # remove hostname directories if they are empty
     rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*
-}
+) }
 
 # DESCRIPTION:
 #   Decides whether a project from a given repository URL has an exact record in
