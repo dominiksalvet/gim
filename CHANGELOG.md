@@ -8,8 +8,8 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
-* Added support for 'Configure & Makefile' and 'Makefile' installer methods.
-* Simplify process of adding installer methods.
+* Added support for 'Configure & Makefile' and 'Makefile' installers.
+* Simplify process of adding another installers.
 
 ### Removed
 
@@ -25,7 +25,7 @@ The changes not yet present in any release are listed in this section.
 * Projects installed by gim can be installed locally. Gim has one global database and another one for each active user.
 * Support for local installation of gim itself has been added.
 * Installation and uninstallation scripts load current system configuration of gim from RC files during their execution.
-* Added a basic installer method support.
+* Added a basic installer support.
 
 ### Changed
 

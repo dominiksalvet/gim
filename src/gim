@@ -64,17 +64,17 @@ init_const() {
     readonly VSTATUS_DIFF=old
     readonly VSTATUS_MATCH=latest
 
-    # available installer methods
-    readonly IMETHOD_CAM=cam # Configure & Makefile
-    readonly IMETHOD_MAKEFILE=makefile # Makefile
+    # available installers
+    readonly INSTALLER_CAM=cam # Configure & Makefile
+    readonly INSTALLER_MAKEFILE=makefile # Makefile
 
     # static error statuses
     readonly ESTATUS_NO_TAR_VER=NO-TAR-VER
     readonly ESTATUS_UNSUP_SRC_VER=UNSUP-SRC-VER
 
     # installer error statuses
-    readonly ESTATUS_NO_INSTALL_METHOD=NO-INSTALL-METHOD
-    readonly ESTATUS_NO_UNINSTALL_METHOD=NO-UNINSTALL-METHOD
+    readonly ESTATUS_NO_TAR_INSTALL=NO-TAR-INSTALL
+    readonly ESTATUS_NO_SRC_UNINSTALL=NO-SRC-UNINSTALL
     readonly ESTATUS_CONFIGURE_FAIL=CONFIGURE-FAIL
     readonly ESTATUS_MAKE_FAIL=MAKE-FAIL
     readonly ESTATUS_MAKE_INSTALL_FAIL=MAKE-INSTALL-FAIL
@@ -608,22 +608,22 @@ is_supported_version() {
 }
 
 #-------------------------------------------------------------------------------
-# CHOOSE AN INSTALLER METHOD
+# CHOOSE AN INSTALLER
 #-------------------------------------------------------------------------------
 
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - target project version
 install() {
-    # choose used installation method
-    { installer_method="$(get_installer_method "$1" "$2")" || {
-        add_error_status "$ESTATUS_NO_INSTALL_METHOD"; false
+    # choose used installer for installation
+    { installer="$(get_installer "$1" "$2")" || {
+        add_error_status "$ESTATUS_NO_TAR_INSTALL"; false
     } } &&
 
     # perform an installation
-    case "$installer_method" in
-        "$IMETHOD_CAM") cam_install "$1" "$2" ;;
-        "$IMETHOD_MAKEFILE") makefile_install "$1" "$2" ;;
+    case "$installer" in
+        "$INSTALLER_CAM") cam_install "$1" "$2" ;;
+        "$INSTALLER_MAKEFILE") makefile_install "$1" "$2" ;;
     esac &&
 
     # access gim's database
@@ -635,15 +635,15 @@ install() {
 #   $2 - source project version
 #   $3 - installation record to erase
 uninstall() {
-    # choose used uninstallation method
-    { installer_method="$(get_installer_method "$1" "$2")" || {
-        add_error_status "$ESTATUS_NO_UNINSTALL_METHOD"; false
+    # choose used installer for uninstallation
+    { installer="$(get_installer "$1" "$2")" || {
+        add_error_status "$ESTATUS_NO_SRC_UNINSTALL"; false
     } } &&
 
     # perform an uninstallation
-    case "$installer_method" in
-        "$IMETHOD_CAM") cam_uninstall "$1" "$2" ;;
-        "$IMETHOD_MAKEFILE") makefile_uninstall "$1" "$2" ;;
+    case "$installer" in
+        "$INSTALLER_CAM") cam_uninstall "$1" "$2" ;;
+        "$INSTALLER_MAKEFILE") makefile_uninstall "$1" "$2" ;;
     esac &&
 
     # access gim's database
@@ -666,16 +666,16 @@ update() {
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - project version
-get_installer_method() { (
+get_installer() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
     git checkout -q -- "$2" && # use the given version as a tag
 
     if [ -x configure ]; then
-        echo "$IMETHOD_CAM"
+        echo "$INSTALLER_CAM"
     elif [ -e Makefile ] || [ -e makefile ]; then
-        echo "$IMETHOD_MAKEFILE"
+        echo "$INSTALLER_MAKEFILE"
     else
-        return 1 # no installer method found, fail
+        return 1 # no installer found, fail
     fi
 ) }
 

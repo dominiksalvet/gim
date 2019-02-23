@@ -4,5 +4,5 @@ A Git project is **gim compliant** if an associated repository is gim compliant.
 
 1. It has at least one annotated tag.
 2. Annotated tags cannot be removed.
-3. It supports an installation method and an uninstallation method as described in the [*METHODS.md*](METHODS.md) file.
+3. It supports installation and uninstallation as described in the [*INSTALLERS.md*](INSTALLERS.md) file.
 4. **If further control needed**, it respects a control policy stated in the [*CONTROL.md*](CONTROL.md) file.
