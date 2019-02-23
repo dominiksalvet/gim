@@ -32,7 +32,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    readonly SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp'
+    readonly SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp realpath'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -257,6 +257,12 @@ load_cfg() {
 verify_cfg() { (
     # it must be listed here to provide a good error report
     : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_INSTALLER_PREFIX:?}"
+
+    # check if any gim's path is set to '/', which could be dangerous
+    if [ "$(realpath -m "$GIM_DB_DIR")" = / ] || [ "$(realpath -m "$GIM_CACHE_DIR")" = / ]; then
+        echo "$0: a configuration path can't be set to '/'" >&2
+        return 1
+    fi
 ) }
 
 # DESCRIPTION:
@@ -303,7 +309,7 @@ autoclean() { (
 
     # go through all cached Git repositories
     for repo_short_url in */*/*; do
-        if [ -d "$repo_short_url"/ ]; then
+        if [ -d "${repo_short_url:?}"/ ]; then
             # if the repository is not in the database, it can be removed
             if ! has_exact_install_record "$repo_short_url"; then
                 # remove the project's cached Git repository
@@ -345,7 +351,7 @@ get_exact_install_record() {
 rm_empty_dirs() {
     for dir in "$@"; do
         if [ -d "${dir:?}"/ ]; then
-            rmdir --ignore-fail-on-non-empty -- "$dir"/
+            rmdir --ignore-fail-on-non-empty -- "${dir:?}"/
         fi
     done
 }
