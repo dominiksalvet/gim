@@ -611,6 +611,9 @@ is_supported_version() {
 # CHOOSE AN INSTALLER
 #-------------------------------------------------------------------------------
 
+# DESCRIPTION:
+#   Automatically chooses an installer and performs installation by delivered
+#   arguments. If it succeeds, it will update gim's database.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - target project version
@@ -630,6 +633,9 @@ install() {
     insert_install_record "$1 $2"
 }
 
+# DESCRIPTION:
+#   Automatically chooses an installer and performs uninstallation by delivered
+#   arguments. If it succeeds, it will update gim's database.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
@@ -651,8 +657,9 @@ uninstall() {
 }
 
 # DESCRIPTION:
-#   Update a given project from a given version to another. Also, erases a given
-#   installation record from gim's database and inserts a new one.
+#   Automatically chooses an installer for uninstallation and an installer for
+#   installation. Then performs a project update by delivered arguments. It
+#   updates gim's database as per installation and uninstallation do.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
@@ -663,6 +670,9 @@ update() {
     install "$1" "$4"
 }
 
+# DESCRIPTION:
+#   Detects the most appropriate installer for given project and version. If
+#   there is no such, it returns fail.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - project version
@@ -683,6 +693,8 @@ get_installer() { (
 # CONFIGURE & MAKEFILE INSTALLER
 #-------------------------------------------------------------------------------
 
+# DESCRIPTION:
+#   Configure & Makefile installer uses standard Linux installation approach.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - target project version
@@ -698,6 +710,8 @@ cam_install() { (
     { make install || { add_error_status "$ESTATUS_MAKE_INSTALL_FAIL"; false; } }
 ) }
 
+# DESCRIPTION:
+#   Configure & Makefile installer uses standard Linux uninstallation approach.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
@@ -716,6 +730,8 @@ cam_uninstall() { (
 # MAKEFILE INSTALLER
 #-------------------------------------------------------------------------------
 
+# DESCRIPTION:
+#   Makefile installer uses only a Makefile to install a project.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - target project version
@@ -732,6 +748,8 @@ makefile_install() { (
     } }
 ) }
 
+# DESCRIPTION:
+#   Makefile installer uses only a Makefile to uninstall a project.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
