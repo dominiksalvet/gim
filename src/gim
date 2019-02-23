@@ -313,10 +313,10 @@ autoclean() { (
     done &&
 
     # remove maintainer directories if they are empty
-    rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*/* &&
+    rm_empty_dirs ./*/* &&
 
     # remove hostname directories if they are empty
-    rm_empty_dirs "$GIM_CACHE_REPO_DIR"/*
+    rm_empty_dirs ./*
 ) }
 
 # DESCRIPTION:
