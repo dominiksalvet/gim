@@ -1,6 +1,6 @@
 # Methods
 
-This file describes which methods can be used by Git projects to being installed or uninstalled by gim. Those methods and their steps are sorted in the same order as gim will be trying them. Regardless of used methods, their execution **must not involve any user interaction**. Used file paths are relative to the project repository directory unless otherwise stated.
+This file describes which methods can be used by Git projects to being installed or uninstalled by gim. Those methods and their steps are sorted in the same order as gim will be trying to perform them. Regardless of used methods, their execution **must not involve any user interaction**. Used file paths are relative to the project repository directory unless otherwise stated.
 
 ## Installation
 
