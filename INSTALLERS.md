@@ -1,6 +1,6 @@
 # Installers
 
-This file describes which installers (methods) can be used by Git projects to being installed or uninstalled using gim. Those installers and their steps stated below are sorted in the same order as gim will be trying to perform them. Regardless of used installers, their execution **must not involve any user interaction**. All file paths stated below are relative to a Git repository directory.
+This file describes essential installers (methods) that can be used by Git projects to being installed or uninstalled using gim. Those installers and their steps stated below are sorted in the same order as gim will be trying to perform them. Regardless of used installers, their execution under gim **must not involve any user interaction**. All file paths stated below are relative to a Git repository directory.
 
 ## Installation
 
@@ -30,3 +30,4 @@ Finishing an uninstallation using one of listed installers must uninstall a proj
 
 * All arguments stated above are **delivered automatically by gim**.
 * A prefix argument represents a suggested installation directory path for Git projects. If a Git project respects the prefix, gim can perform both global and local installations.
+* Gim also exports environment variables that can be used in any installer as stated in the [*CONTROL.md*](CONTROL.md) file.
