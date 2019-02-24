@@ -8,7 +8,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
-* Added support for 'Configure & Makefile' and 'Makefile' installers.
+* Added support for 'Configure & Make' and 'Make' installers.
 * Simplify process of adding another installers.
 
 ### Fixed

@@ -6,12 +6,12 @@ This file describes essential installers (methods) that can be used by Git proje
 
 Finishing an installation using one of listed installers must install a project of the current commit.
 
-* **Configure & Makefile installer** is used if an executable file named *configure* exists.
+* **Configure & Make installer** is used if an executable file named *configure* exists.
   1. The *configure* file is executed delivering `--prefix=<dir>` argument.
   2. A *Makefile* file must exist.
   3. Make calls a default target.
   4. Make calls the `install` target.
-* **Makefile installer** is used if a *Makefile* file exists.
+* **Make installer** is used if a *Makefile* file exists.
   1. Make calls a default target delivering `PREFIX=<dir>` argument.
   2. Make calls the `install` target delivering `PREFIX=<dir>` argument.
 
@@ -19,11 +19,11 @@ Finishing an installation using one of listed installers must install a project 
 
 Finishing an uninstallation using one of listed installers must uninstall a project of the current commit while **keeeping its configuration files**.
 
-* **Configure & Makefile installer** is used if an executable file named *configure* exists.
+* **Configure & Make installer** is used if an executable file named *configure* exists.
   1. The *configure* file is executed delivering `--prefix=<dir>` argument.
   2. A *Makefile* file must exist.
   4. Make calls the `uninstall` target.
-* **Makefile installer** is used if a *Makefile* file exists.
+* **Make installer** is used if a *Makefile* file exists.
   1. Make calls the `uninstall` target delivering `PREFIX=<dir>` argument.
 
 ## Notes
