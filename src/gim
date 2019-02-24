@@ -300,7 +300,7 @@ init_storage() {
 }
 
 # DESCRIPTION:
-#   Exports variables for all called makefile targets and scripts by gim.
+#   Exports variables for all called installers by gim.
 export_vars() {
     export INSTALLER=gim
 }
@@ -538,6 +538,7 @@ get_any_install_record() {
 #   $1 - short repository URL
 get_repo_version() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ &&
+    git checkout -q master &&
     git describe --abbrev=0 2>/dev/null
     return 0 # always succeed
 ) }
