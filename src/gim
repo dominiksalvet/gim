@@ -21,7 +21,7 @@ main() {
     init_const &&
     init_cfg_paths &&
     init_global_vars &&
-    process_args "$@" || return
+    process_args "$@"
 }
 
 #-------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ init_runtime() {
     verify_cfg && # verify that the configuration is sufficient
     init_runtime_const &&
     init_storage &&
-    export_vars || return
+    export_vars
 }
 
 # DESCRIPTION:
@@ -250,7 +250,7 @@ load_cfg() {
             mkdir -p "$2"/ &&
             cp "$gimrc_local_path" "$2"/gimrc # create gimrc from gimrc-local
         fi
-    fi || return
+    fi
 }
 
 # DESCRIPTION:
@@ -259,17 +259,17 @@ verify_cfg() { (
     # it must be listed here to provide a good error report
     : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_INSTALLER_PREFIX:?}"
 
-    # gim's paths can't start with '-'
+    # gim's paths must not start with '-'
     first_chars="$(echo "$GIM_DB_DIR" | cut -c1)" # get first character of each variable
     first_chars="$first_chars""$(echo "$GIM_CACHE_DIR" | cut -c1)"
     if echo "$first_chars" | grep -q -E -e '-'; then # concatenation then must not include '-'
-        echo "$0: configuration paths can't start with '-'" >&2
+        echo "$0: configuration paths must not start with '-'" >&2
         return 1
     fi
 
     # check if gim's path is set to '/', which could be dangerous
     if [ "$(realpath -m "$GIM_DB_DIR")" = / ] || [ "$(realpath -m "$GIM_CACHE_DIR")" = / ]; then
-        echo "$0: configuration paths can't be set to '/'" >&2
+        echo "$0: configuration paths must not be set to '/'" >&2
         return 1
     fi
 ) }
@@ -296,7 +296,7 @@ init_storage() {
     fi &&
 
     # create directories for gim's cache
-    mkdir -p "$GIM_CACHE_REPO_DIR"/ || return
+    mkdir -p "$GIM_CACHE_REPO_DIR"/
 }
 
 # DESCRIPTION:
@@ -387,7 +387,7 @@ process_action() {
     error_statuses= &&
 
     # execute the action itself
-    execute_action "$1" "$repo_short_url" || return
+    execute_action "$1" "$repo_short_url"
 }
 
 # DESCRIPTION:
@@ -440,7 +440,7 @@ touch_repo() { (
         git checkout -q master &&
         # fetch changes from master and merge them into local master branch
         git pull -q
-    fi || return
+    fi
 ) }
 
 # DESCRIPTION:
