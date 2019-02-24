@@ -13,7 +13,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Fixed
 
-* Obtaining of repository version always checkouts master branch before its execution.
+* Obtaining of repository version always performs checkout the master branch before its execution.
 
 ### Removed
 
