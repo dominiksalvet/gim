@@ -51,7 +51,7 @@ check_deps() {
 #   Initializes gim constant data.
 init_const() {
     # the current version of gim
-    readonly VERSION=6.0.0
+    readonly VERSION=6.0.1
 
     # gim actions
     readonly ACTION_INSTALL=install
