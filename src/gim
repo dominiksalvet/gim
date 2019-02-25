@@ -51,7 +51,7 @@ check_deps() {
 #   Initializes gim constant data.
 init_const() {
     # the current version of gim
-    readonly VERSION=6.0.0
+    readonly VERSION=6.0.1
 
     # gim actions
     readonly ACTION_INSTALL=install
@@ -533,14 +533,14 @@ get_any_install_record() {
 
 # DESCRIPTION:
 #   Returns the repository project version from the given URL. If no version or
-#   repository found, empty string is returned.
+#   repository found, empty string is returned. Always succeeds.
 # PARAMETERS:
 #   $1 - short repository URL
 get_repo_version() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ &&
     git checkout -q master &&
     git describe --abbrev=0 2>/dev/null
-    return 0 # always succeed
+    return 0
 ) }
 
 #-------------------------------------------------------------------------------
