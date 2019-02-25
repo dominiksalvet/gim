@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Fixed
+
+* Obtaining of repository version always performs checkout the master branch before its execution.
+
 ## 6.0.0 (2019-02-23)
 
 ### Added
