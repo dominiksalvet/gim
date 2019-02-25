@@ -65,20 +65,22 @@ init_const() {
     readonly VSTATUS_MATCH=latest
 
     # available installers
-    readonly INSTALLER_CAM=cam # Configure & Makefile
-    readonly INSTALLER_MAKEFILE=makefile # Makefile
+    readonly INSTALLER_CAMI=cami # Configure & Make installer
+    readonly INSTALLER_MAKEI=makei # Make installer
 
-    # static error statuses
-    readonly ESTATUS_NO_TAR_VER=NO-TAR-VER
-    readonly ESTATUS_UNSUP_SRC_VER=UNSUP-SRC-VER
+    # static target version statuses
+    readonly STATUS_NO_TAR_VER=no-tar-ver
+    readonly STATUS_NO_TAR_INSTALL=no-tar-install
 
-    # installer error statuses
-    readonly ESTATUS_NO_TAR_INSTALL=NO-TAR-INSTALL
-    readonly ESTATUS_NO_SRC_UNINSTALL=NO-SRC-UNINSTALL
-    readonly ESTATUS_CONFIGURE_FAIL=CONFIGURE-FAIL
-    readonly ESTATUS_MAKE_FAIL=MAKE-FAIL
-    readonly ESTATUS_MAKE_INSTALL_FAIL=MAKE-INSTALL-FAIL
-    readonly ESTATUS_MAKE_UNINSTALL_FAIL=MAKE-UNINSTALL-FAIL
+    # static source version statuses
+    readonly STATUS_UNSUP_SRC_VER=unsup-src-ver
+    readonly STATUS_NO_SRC_UNINSTALL=no-src-uninstall
+
+    # installer statuses
+    readonly STATUS_CONFIGURE_FAIL=configure-fail
+    readonly STATUS_MAKE_FAIL=make-fail
+    readonly STATUS_MAKE_INSTALL_FAIL=make-install-fail
+    readonly STATUS_MAKE_UNINSTALL_FAIL=make-uninstall-fail
 
     # constant string data
     readonly HELP_MESSAGE="USAGE:
@@ -127,7 +129,8 @@ init_cfg_paths() {
 init_global_vars() {
     # used for the '-force' option
     use_force=false
-    # represents error statuses, which may arise during gim's execution
+
+    # statuses that may arise during gim's execution
     error_statuses=
 }
 
@@ -371,7 +374,7 @@ rm_empty_dirs() {
 
 # DESCRIPTION:
 #   Performs several checks, prepares target Git repository and executes the
-#   given action itself.
+#   given action itself. Requires gim's runtime to be already initialized.
 # PARAMETERS:
 #   $1 - action
 #   $2 - repository URL
@@ -457,7 +460,7 @@ short_url_to_long_url() {
 
 # DESCRIPTION:
 #   Executes a given action with an associated local Git repository prepared.
-#   Also prints the status after executing the action.
+#   Also prints a report after executing the action.
 # PARAMETERS:
 #   $1 - action
 #   $2 - short repository URL
@@ -573,11 +576,11 @@ get_version_status() {
 #   $3 - target project version
 register_static_error_statuses() {
     if [ ! "$3" ]; then
-        add_error_status "$ESTATUS_NO_TAR_VER"
+        add_error_status "$STATUS_NO_TAR_VER"
     fi
     
     if ! "$use_force" && ! is_supported_version "$1" "$2"; then
-        add_error_status "$ESTATUS_UNSUP_SRC_VER"
+        add_error_status "$STATUS_UNSUP_SRC_VER"
     fi
 }
 
@@ -621,13 +624,13 @@ is_supported_version() {
 install() {
     # choose used installer for installation
     { installer="$(get_installer "$1" "$2")" || {
-        add_error_status "$ESTATUS_NO_TAR_INSTALL"; false
+        add_error_status "$STATUS_NO_TAR_INSTALL"; false
     } } &&
 
     # perform an installation
     case "$installer" in
-        "$INSTALLER_CAM") cam_install "$1" "$2" ;;
-        "$INSTALLER_MAKEFILE") makefile_install "$1" "$2" ;;
+        "$INSTALLER_CAMI") cam_install "$1" "$2" ;;
+        "$INSTALLER_MAKEI") makefile_install "$1" "$2" ;;
     esac &&
 
     # access gim's database
@@ -644,13 +647,13 @@ install() {
 uninstall() {
     # choose used installer for uninstallation
     { installer="$(get_installer "$1" "$2")" || {
-        add_error_status "$ESTATUS_NO_SRC_UNINSTALL"; false
+        add_error_status "$STATUS_NO_SRC_UNINSTALL"; false
     } } &&
 
     # perform an uninstallation
     case "$installer" in
-        "$INSTALLER_CAM") cam_uninstall "$1" "$2" ;;
-        "$INSTALLER_MAKEFILE") makefile_uninstall "$1" "$2" ;;
+        "$INSTALLER_CAMI") cam_uninstall "$1" "$2" ;;
+        "$INSTALLER_MAKEI") makefile_uninstall "$1" "$2" ;;
     esac &&
 
     # access gim's database
@@ -682,9 +685,9 @@ get_installer() { (
     git checkout -q -- "$2" && # use the given version as a tag
 
     if [ -x configure ]; then
-        echo "$INSTALLER_CAM"
+        echo "$INSTALLER_CAMI"
     elif [ -e Makefile ] || [ -e makefile ]; then
-        echo "$INSTALLER_MAKEFILE"
+        echo "$INSTALLER_MAKEI"
     else
         return 1 # no installer found, fail
     fi
@@ -705,10 +708,10 @@ cam_install() { (
 
     # installation process
     { ./configure --prefix="$GIM_INSTALLER_PREFIX"/ || {
-        add_error_status "$ESTATUS_CONFIGURE_FAIL"; false
+        add_error_status "$STATUS_CONFIGURE_FAIL"; false
     } } &&
-    { make || { add_error_status "$ESTATUS_MAKE_FAIL"; false; } } &&
-    { make install || { add_error_status "$ESTATUS_MAKE_INSTALL_FAIL"; false; } }
+    { make || { add_error_status "$STATUS_MAKE_FAIL"; false; } } &&
+    { make install || { add_error_status "$STATUS_MAKE_INSTALL_FAIL"; false; } }
 ) }
 
 # DESCRIPTION:
@@ -722,9 +725,9 @@ cam_uninstall() { (
 
     # uninstallation process
     { ./configure --prefix="$GIM_INSTALLER_PREFIX"/ || {
-        add_error_status "$ESTATUS_CONFIGURE_FAIL"; false
+        add_error_status "$STATUS_CONFIGURE_FAIL"; false
     } } &&
-    { make uninstall || { add_error_status "$ESTATUS_MAKE_UNINSTALL_FAIL"; false; } }
+    { make uninstall || { add_error_status "$STATUS_MAKE_UNINSTALL_FAIL"; false; } }
 ) }
 
 #-------------------------------------------------------------------------------
@@ -742,10 +745,10 @@ makefile_install() { (
 
     # installation process
     { PREFIX="$GIM_INSTALLER_PREFIX"/ make || {
-        add_error_status "$ESTATUS_MAKE_FAIL"; false
+        add_error_status "$STATUS_MAKE_FAIL"; false
     } } &&
     { PREFIX="$GIM_INSTALLER_PREFIX"/ make install || {
-        add_error_status "$ESTATUS_MAKE_INSTALL_FAIL"; false
+        add_error_status "$STATUS_MAKE_INSTALL_FAIL"; false
     } }
 ) }
 
@@ -760,12 +763,12 @@ makefile_uninstall() { (
 
     # uninstallation process
     { PREFIX="$GIM_INSTALLER_PREFIX"/ make uninstall || {
-        add_error_status "$ESTATUS_MAKE_UNINSTALL_FAIL"; false
+        add_error_status "$STATUS_MAKE_UNINSTALL_FAIL"; false
     } }
 ) }
 
 #-------------------------------------------------------------------------------
-# ACCESS INSTALALTION DATABASE
+# ACCESS GIM'S DATABASE
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
