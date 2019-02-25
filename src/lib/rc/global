@@ -9,15 +9,14 @@
 #-------------------------------------------------------------------------------
 # NOTICE
 #-------------------------------------------------------------------------------
-# DO NOT MODIFY THIS FILE IF IT IS NAMED 'gimrc-local'!
+# DO NOT MODIFY THIS FILE UNLESS IT IS NAMED 'gimrc'!
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 # DESCRIPTION
 #-------------------------------------------------------------------------------
-# This file is expected to be sourced. It represents a local RC initialization
-# file for gim. It is expected to be stored as "$HOME/.config/gim/gimrc" file.
-# Gim reads it when running without root permissions.
+# This file is expected to be sourced. It represents a global RC initialization
+# file for gim. Gim should read it when running with root permissions.
 #-------------------------------------------------------------------------------
 
 
@@ -31,14 +30,14 @@
 # DEFINITIONS
 #-------------------------------------------------------------------------------
 
-# gim database directory
-GIM_DB_DIR="$HOME"/.local/share/gim
+# gim configuration directory (where customizable 'gimrc' file is)
+GIM_CFG_DIR=/etc/gim
 
-# gim cache directory
-GIM_CACHE_DIR="$HOME"/.cache/gim
+# gim database directory (where the list of installed programs is)
+GIM_DB_DIR=/var/lib/gim
 
-# gim binary directory
-GIM_BIN_DIR="$HOME"/.local/bin
+# gim cache directory (where gim stores cached Git repositories)
+GIM_CACHE_DIR=/var/cache/gim
 
-# default path prefix for Git projects installed by gim
-GIM_INSTALLER_PREFIX="$HOME"/.local
+# prefix for installers used by gim (where gim installs programs)
+GIM_PREFIX=/usr/local
