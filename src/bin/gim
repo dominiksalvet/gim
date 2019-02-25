@@ -260,7 +260,7 @@ load_cfg() {
 #   Verifies that appropriate constants were successfully loaded.
 verify_cfg() { (
     # it must be listed here to provide a good error report
-    : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_INSTALLER_PREFIX:?}"
+    : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_PREFIX:?}"
 
     # gim's paths must not start with '-'
     first_chars="$(echo "$GIM_DB_DIR" | cut -c1)" # get first character of each variable
@@ -707,7 +707,7 @@ cam_install() { (
     git checkout -q -- "$2" && # use the given version as a tag
 
     # installation process
-    { ./configure --prefix="$GIM_INSTALLER_PREFIX"/ || {
+    { ./configure --prefix="$GIM_PREFIX"/ || {
         add_error_status "$STATUS_CONFIGURE_FAIL"; false
     } } &&
     { make || { add_error_status "$STATUS_MAKE_FAIL"; false; } } &&
@@ -724,7 +724,7 @@ cam_uninstall() { (
     git checkout -q -- "$2" && # use the given version as a tag
 
     # uninstallation process
-    { ./configure --prefix="$GIM_INSTALLER_PREFIX"/ || {
+    { ./configure --prefix="$GIM_PREFIX"/ || {
         add_error_status "$STATUS_CONFIGURE_FAIL"; false
     } } &&
     { make uninstall || { add_error_status "$STATUS_MAKE_UNINSTALL_FAIL"; false; } }
@@ -744,10 +744,10 @@ makefile_install() { (
     git checkout -q -- "$2" && # use the given version as a tag
 
     # installation process
-    { PREFIX="$GIM_INSTALLER_PREFIX"/ make || {
+    { PREFIX="$GIM_PREFIX"/ make || {
         add_error_status "$STATUS_MAKE_FAIL"; false
     } } &&
-    { PREFIX="$GIM_INSTALLER_PREFIX"/ make install || {
+    { PREFIX="$GIM_PREFIX"/ make install || {
         add_error_status "$STATUS_MAKE_INSTALL_FAIL"; false
     } }
 ) }
@@ -762,7 +762,7 @@ makefile_uninstall() { (
     git checkout -q -- "$2" && # use the given version as a tag
 
     # uninstallation process
-    { PREFIX="$GIM_INSTALLER_PREFIX"/ make uninstall || {
+    { PREFIX="$GIM_PREFIX"/ make uninstall || {
         add_error_status "$STATUS_MAKE_UNINSTALL_FAIL"; false
     } }
 ) }
