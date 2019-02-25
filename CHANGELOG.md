@@ -11,13 +11,15 @@ The changes not yet present in any release are listed in this section.
 * Added support for 'Configure & Make' and 'Make' installers.
 * Simplify process of adding another installers.
 
-### Fixed
-
-* Obtaining of repository version always performs checkout the master branch before its execution.
-
 ### Removed
 
 * Gim no longer delivers suggested build directory to projects that are being built. They can be built in the repository directory itself.
+
+## 6.0.1 (2019-02-25)
+
+### Fixed
+
+* Obtaining of repository version always performs checkout the master branch before its execution.
 
 ## 6.0.0 (2019-02-23)
 
