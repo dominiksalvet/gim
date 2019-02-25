@@ -19,7 +19,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Fixed
 
-* Obtaining of repository version always performs checkout the master branch before its execution.
+* Obtaining of repository version always performs checkout of the master branch before its execution.
 
 ## 6.0.0 (2019-02-23)
 
