@@ -52,7 +52,7 @@ mkdir -p ~/Downloads/gim/ && # create a directory for gim repository
 cd ~/Downloads/gim/ && # go to the created directory
 git clone https://gitlab.com/dominiksalvet/gim.git . && # clone gim repository
 git checkout -q "$(git describe --abbrev=0)" && # use the latest gim version
-make install && # install gim, does not required root permissions
+make install && # install gim, does not require root permissions
 echo 'SUCCESS' # print a message if everything succeeded
 ```
 
