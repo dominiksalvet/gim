@@ -33,11 +33,11 @@
 # gim configuration directory (where customizable 'gimrc' file is)
 GIM_CFG_DIR="$HOME"/.config/gim
 
-# gim database directory (where the list of installed programs is)
-GIM_DB_DIR="$HOME"/.local/share/gim
-
 # gim cache directory (where gim stores cached Git repositories)
 GIM_CACHE_DIR="$HOME"/.cache/gim
+
+# gim database directory (where the list of installed programs is)
+GIM_DB_DIR="$HOME"/.local/share/gim
 
 # prefix for installers used by gim (where gim installs programs)
 GIM_PREFIX="$HOME"/.local

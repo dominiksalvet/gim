@@ -33,11 +33,11 @@
 # gim configuration directory (where customizable 'gimrc' file is)
 GIM_CFG_DIR=/etc/gim
 
-# gim database directory (where the list of installed programs is)
-GIM_DB_DIR=/var/lib/gim
-
 # gim cache directory (where gim stores cached Git repositories)
 GIM_CACHE_DIR=/var/cache/gim
+
+# gim database directory (where the list of installed programs is)
+GIM_DB_DIR=/var/lib/gim
 
 # prefix for installers used by gim (where gim installs programs)
 GIM_PREFIX=/usr/local
