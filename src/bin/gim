@@ -17,11 +17,11 @@
 # PARAMETERS:
 #   $@ - gim parameters
 main() {
-    check_deps &&
-    init_constants &&
-    init_strings &&
-    def_global_vars &&
-    process_args "$@"
+    check_deps && # check software dependencies
+    init_constants && # initialize static constants
+    init_strings && # initialize string constants
+    def_global_vars && # defined global variables used later in this script
+    process_args "$@" # process all given arguments
 }
 
 # DESCRIPTION:
