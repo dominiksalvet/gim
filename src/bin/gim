@@ -205,8 +205,8 @@ $HINT_MESSAGE" >&2
 
 # DESCRIPTION:
 #   Prepares a runtime environment for gim. After calling this function, gim's
-#   essential directory structure will be prepared and an appropriate
-#   configuration will be applied.
+#   essential file structure will be prepared and an appropriate configuration
+#   will be applied.
 init_runtime() {
     init_paths && # initialize paths related to dynamic initialization
     load_default_rc && # load default configuration
@@ -214,7 +214,8 @@ init_runtime() {
     load_custom_rc && # load custom configuration (if it exists)
     verify_cfg && # verify that custom configuration is valid
     init_cfg_constants && # create constants derived from applied configuration
-    init_storage && # this should be the first write access to storage
+    init_storage && # try to create a file structure, first write access to storage
+    check_storage_access && # verify that gim can access required files and directories
     export_vars # export variables for called installers
 }
 
@@ -278,8 +279,9 @@ init_cfg_constants() {
 }
 
 # DESCRIPTION:
-#   Initializes gim's storage structure including the check of gim's database
-#   based on prepared global variables.
+#   Initializes gim's file structure including the check of gim's database based
+#   on prepared global variables. It fails if it cannot create a file or a
+#   directory. It does not check file permissions, though.
 init_storage() {
     # create custom RC file from the default one if it does not exist
     if [ ! -e "$GIM_CFG_DIR"/gimrc ]; then # if not existing
@@ -302,6 +304,25 @@ init_storage() {
 
     # create directory for default installation prefix
     mkdir -p -- "$GIM_PREFIX"/
+}
+
+# DESCRIPTION:
+#   Checks whether gim can access all required files and directories. The gim
+#   file structure must already been prepared.
+check_storage_access() {
+    # check access to files
+    if [ ! -r "$GIM_STATUS_PATH" ] || [ ! -w "$GIM_STATUS_PATH" ]; then
+        echo "$0: can't access '$GIM_STATUS_PATH' file" >&2
+        return 1
+    fi
+
+    # check access to directories
+    for dir in "$GIM_CACHE_REPO_DIR" "$GIM_PREFIX"; do
+        if [ ! -r "$dir"/ ] || [ ! -w "$dir"/ ]; then
+            echo "$0: can't access '$dir' directory" >&2
+            return 1
+        fi
+    done
 }
 
 # DESCRIPTION:

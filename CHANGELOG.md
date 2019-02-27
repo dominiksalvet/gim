@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 The changes not yet present in any release are listed in this section.
 
+### Added
+
+* Enhanced checks of files and directories read from RC files are performed. It includes an early check of file access permissions to prevent later problem with accessing files.
+
 ### Removed
 
 * Gim no longer delivers suggested build directory to projects that are being built. They can be built in the repository directory itself.
