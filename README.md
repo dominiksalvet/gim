@@ -33,6 +33,7 @@ If you are in, then gim comes pretty handy. As you can see, all you need is a Gi
 
 * [Install](#install)
 * [Usage](#usage)
+  * [Examples](#examples)
 * [Badge](#badge)
 * [Contributing](#contributing)
 * [License](#license)
