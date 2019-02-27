@@ -18,15 +18,11 @@
 #   $@ - gim parameters
 main() {
     check_deps &&
-    init_const &&
-    init_cfg_paths &&
-    init_global_vars &&
+    init_constants &&
+    init_strings &&
+    def_global_vars &&
     process_args "$@"
 }
-
-#-------------------------------------------------------------------------------
-# SOFTWARE DEPENDENCIES
-#-------------------------------------------------------------------------------
 
 # DESCRIPTION:
 #   Checks whether all software dependencies are satisfied.
@@ -44,12 +40,14 @@ check_deps() {
 }
 
 #-------------------------------------------------------------------------------
-# DEFINITIONS
+# STATIC INITIALIZATION
+#-------------------------------------------------------------------------------
+# Variables and constants of this section can be read everywhere in this script.
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Initializes gim constant data.
-init_const() {
+#   Initializes static constants.
+init_constants() {
     # the current version of gim
     readonly VERSION=6.0.1
 
@@ -81,8 +79,12 @@ init_const() {
     readonly STATUS_MAKE_FAIL=make-fail
     readonly STATUS_MAKE_INSTALL_FAIL=make-install-fail
     readonly STATUS_MAKE_UNINSTALL_FAIL=make-uninstall-fail
+}
 
-    # constant string data
+# DESCRIPTION:
+#   Initializes strings usually used to display reports to the user. Constants
+#   must be already initialized.
+init_strings() {
     readonly HELP_MESSAGE="USAGE:
   $0 ACTION [OPTION...] URL...
   $0 COMMAND
@@ -114,28 +116,18 @@ https://gitlab.com/dominiksalvet/gim'
 }
 
 # DESCRIPTION:
-#   Initializes absolute directory paths where gim configuration is stored.
-#   Those paths are expected to be constant during the gim's development.
-init_cfg_paths() {
-    # global gim installation's configuration directory (used for the root)
-    readonly GLOBAL_CFG_DIR=/etc/gim
-    # local gim installation's configuration directory (used for users)
-    readonly LOCAL_CFG_DIR="$HOME"/.config/gim
-}
-
-# DESCRIPTION:
-#   Defines all global variables. If there is a global variable, it must be
-#   stated here even if its value is going to be overwritten.
-init_global_vars() {
+#   Defines global variables. If there is a global variable, it must be stated
+#   here even though its value is going to be overwritten.
+def_global_vars() {
     # used for the '-force' option
     use_force=false
 
-    # statuses that may arise during gim's execution
+    # statuses that may arise during execution
     error_statuses=
 }
 
 #-------------------------------------------------------------------------------
-# ARGUMENTS PROCESSING
+# ARGUMENT PARSING
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
@@ -162,7 +154,7 @@ $HINT_MESSAGE" >&2
                         return 1
                         ;;
                     *)
-                        init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" || return
+                        init_runtime || return
                         accept_action_options=false # expecting first URL
                         ;;
                 esac
@@ -177,18 +169,18 @@ $HINT_MESSAGE" >&2
                     action="$arg" # use the given action
                     ;;
                 autoclean)
-                    init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" &&
-                    autoclean
+                    init_runtime &&
+                    cache_autoclean
                     return
                     ;;
                 clean)
-                    init_runtime "$GLOBAL_CFG_DIR" "$LOCAL_CFG_DIR" &&
+                    init_runtime &&
                     rm -r -f "${GIM_CACHE_REPO_DIR:?}"/*
                     return
                     ;;
-                help) echo "$HELP_MESSAGE"; return 0 ;;
-                about) echo "$ABOUT_MESSAGE"; return 0 ;;
-                version) echo "$VERSION"; return 0 ;;
+                help) echo "$HELP_MESSAGE"; return ;;
+                about) echo "$ABOUT_MESSAGE"; return ;;
+                version) echo "$VERSION"; return ;;
                 *)
                     echo "$0: unrecognized argument '$arg'
 $HINT_MESSAGE" >&2
@@ -206,88 +198,98 @@ $HINT_MESSAGE" >&2
 }
 
 #-------------------------------------------------------------------------------
-# RUNTIME INITIALIZATION
+# DYNAMIC INITIALIZATION
+#-------------------------------------------------------------------------------
+# Constants of this section can be read everywhere in this script.
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Prepares a runtime environment for gim. After calling this function, it is
-#   possible to work with gim's database and cache.
-# PARAMETERS:
-#   $1 - global configuration directory path
-#   $2 - local configuration directory path
+#   Prepares a runtime environment for gim. After calling this function, gim's
+#   essential directory structure will be prepared and an appropriate
+#   configuration will be applied.
 init_runtime() {
-    load_cfg "$1" "$2" &&
-    verify_cfg && # verify that the configuration is sufficient
-    init_runtime_const &&
-    init_storage &&
-    export_vars
+    init_paths && # initialize paths related to dynamic initialization
+    load_default_rc && # load default configuration
+    verify_cfg && # verify that default configuration is valid
+    load_custom_rc && # load custom configuration (if it exists)
+    verify_cfg && # verify that custom configuration is valid
+    init_cfg_constants && # create constants derived from applied configuration
+    init_storage && # this should be the first write access to storage
+    export_vars # export variables for called installers
 }
 
 # DESCRIPTION:
-#   Loads gim dynamic configuration data and determines an installation type.
-#   That may involve in reading (sourcing) multiple files. If key files don't
-#   exist, returns fail.
-# PARAMETERS:
-#   $1 - global configuration directory path
-#   $2 - local configuration directory path
-# shellcheck disable=1090
-load_cfg() {
+#   Initializes constant paths.
+init_paths() {
+    # gim library path is relative to gim binary path and it must exist
+    readonly GIM_LIB_DIR="$(realpath -e -- "$(dirname -- "$0")")"/../lib/gim &&
+
+    # set up the default RC file path according to the used installation type
     if [ "$(id -u)" -eq 0 ]; then # global configuration will be used
-        . "$1"/gimrc-global &&
-        if [ -r "$1"/gimrc ]; then
-            . "$1"/gimrc # custom user-defined RC file
-        elif [ ! -e "$1"/gimrc ]; then # if not existing
-            cp "$1"/gimrc-global "$1"/gimrc # create gimrc from gimrc-global
-        fi
+        readonly DEFAULT_RC_PATH="$GIM_LIB_DIR"/rc/global
     else # local configuration will be used
-        if [ -r "$1"/gimrc-local ] && [ ! -r "$2"/gimrc-local ]; then
-            gimrc_local_path="$1"/gimrc-local # local configuration provided by global installation
-        else
-            # prefer sourcing local gimrc (in case of an error, it would be more helpful)
-            gimrc_local_path="$2"/gimrc-local
-        fi &&
-        . "$gimrc_local_path" &&
-        if [ -r "$2"/gimrc ]; then
-            . "$2"/gimrc # custom user-defined RC file
-        elif [ ! -e "$2"/gimrc ]; then # if not existing
-            mkdir -p "$2"/ &&
-            cp "$gimrc_local_path" "$2"/gimrc # create gimrc from gimrc-local
-        fi
+        readonly DEFAULT_RC_PATH="$GIM_LIB_DIR"/rc/local
     fi
 }
 
 # DESCRIPTION:
-#   Verifies that appropriate constants were successfully loaded.
-verify_cfg() { (
-    # it must be listed here to provide a good error report
-    : "${GIM_DB_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_PREFIX:?}"
+#   Loads the default RC file.
+load_default_rc() {
+    # shellcheck disable=1090
+    . "$DEFAULT_RC_PATH"
+}
 
-    # gim's paths must not start with '-'
-    first_chars="$(echo "$GIM_DB_DIR" | cut -c1)" # get first character of each variable
+# DESCRIPTION:
+#   Verifies that configuration constants are valid.
+verify_cfg() {
+    # variables that are required to be nonempty must be listed here to provide good error reports
+    ( : "${GIM_CFG_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_DB_DIR:?}" "${GIM_PREFIX:?}" ) || return
+
+    # paths of gim's directories must not start with '-'
+    first_chars="$(echo "$GIM_CFG_DIR" | cut -c1)" # get first character of each variable
     first_chars="$first_chars""$(echo "$GIM_CACHE_DIR" | cut -c1)"
+    first_chars="$first_chars""$(echo "$GIM_DB_DIR" | cut -c1)"
     if echo "$first_chars" | grep -q -E -e '-'; then # concatenation then must not include '-'
         echo "$0: configuration paths must not start with '-'" >&2
         return 1
     fi
 
-    # check if gim's path is set to '/', which could be dangerous
-    if [ "$(realpath -m "$GIM_DB_DIR")" = / ] || [ "$(realpath -m "$GIM_CACHE_DIR")" = / ]; then
-        echo "$0: configuration paths must not be set to '/'" >&2
+    # check if gim cache path is set to '/', which could be dangerous
+    if [ "$(realpath -m "$GIM_CACHE_DIR")" = / ]; then
+        echo "$0: gim cache path must not be set to '/'" >&2
         return 1
     fi
-) }
+}
 
 # DESCRIPTION:
-#   Initializes runtime constants created from loaded configuration variables.
-init_runtime_const() {
-    readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status # database of installed projects
+#   Loads a custom RC file if it exists.
+load_custom_rc() {
+    if [ -r "$GIM_CFG_DIR"/gimrc ]; then
+        # shellcheck disable=1090
+        . "$GIM_CFG_DIR"/gimrc # load custom RC file
+    fi
+}
+
+# DESCRIPTION:
+#   Initializes runtime constants derived from read configuration variables.
+init_cfg_constants() {
     readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo # cache for Git repositories
+    readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status # database of installed projects
 }
 
 # DESCRIPTION:
 #   Initializes gim's storage structure including the check of gim's database
 #   based on prepared global variables.
 init_storage() {
+    # create custom RC file from the default one if it does not exist
+    if [ ! -e "$GIM_CFG_DIR"/gimrc ]; then # if not existing
+        mkdir -p "$GIM_CFG_DIR"/ &&
+        cp "$DEFAULT_RC_PATH" "$GIM_CFG_DIR"/gimrc # create gimrc from default RC file
+    fi &&
+
+    # create cache directory for Git repositories
+    mkdir -p "$GIM_CACHE_REPO_DIR"/ &&
+
     # check if gim status file exists
     if [ ! -e "$GIM_STATUS_PATH" ]; then
         mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
@@ -298,8 +300,8 @@ init_storage() {
         echo >> "$GIM_STATUS_PATH"
     fi &&
 
-    # create directories for gim's cache
-    mkdir -p "$GIM_CACHE_REPO_DIR"/
+    # create directory for default installation prefix
+    mkdir -p -- "$GIM_PREFIX"/
 }
 
 # DESCRIPTION:
@@ -315,7 +317,7 @@ export_vars() {
 # DESCRIPTION:
 #   Performs an automatic cleaning of gim's cache. It removes only those files
 #   and directories not belonging to a Git project installed on the system.
-autoclean() { (
+cache_autoclean() { (
     # change directory to gim's cache
     cd "${GIM_CACHE_REPO_DIR:?}"/ &&
 
@@ -536,14 +538,13 @@ get_any_install_record() {
 
 # DESCRIPTION:
 #   Returns the repository project version from the given URL. If no version or
-#   repository found, empty string is returned. Always succeeds.
+#   repository found, empty string is returned and fails.
 # PARAMETERS:
 #   $1 - short repository URL
 get_repo_version() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ &&
     git checkout -q master &&
     git describe --abbrev=0 2>/dev/null
-    return 0
 ) }
 
 #-------------------------------------------------------------------------------
@@ -629,8 +630,8 @@ install() {
 
     # perform an installation
     case "$installer" in
-        "$INSTALLER_CAMI") cam_install "$1" "$2" ;;
-        "$INSTALLER_MAKEI") makefile_install "$1" "$2" ;;
+        "$INSTALLER_CAMI") cami_install "$1" "$2" ;;
+        "$INSTALLER_MAKEI") makei_install "$1" "$2" ;;
     esac &&
 
     # access gim's database
@@ -652,8 +653,8 @@ uninstall() {
 
     # perform an uninstallation
     case "$installer" in
-        "$INSTALLER_CAMI") cam_uninstall "$1" "$2" ;;
-        "$INSTALLER_MAKEI") makefile_uninstall "$1" "$2" ;;
+        "$INSTALLER_CAMI") cami_uninstall "$1" "$2" ;;
+        "$INSTALLER_MAKEI") makei_uninstall "$1" "$2" ;;
     esac &&
 
     # access gim's database
@@ -694,15 +695,15 @@ get_installer() { (
 ) }
 
 #-------------------------------------------------------------------------------
-# CONFIGURE & MAKEFILE INSTALLER
+# CONFIGURE & MAKE INSTALLER
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Configure & Makefile installer uses standard Linux installation approach.
+#   Configure & Make installer uses standard Linux installation approach.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - target project version
-cam_install() { (
+cami_install() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
     git checkout -q -- "$2" && # use the given version as a tag
 
@@ -715,11 +716,11 @@ cam_install() { (
 ) }
 
 # DESCRIPTION:
-#   Configure & Makefile installer uses standard Linux uninstallation approach.
+#   Configure & Make installer uses standard Linux uninstallation approach.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
-cam_uninstall() { (
+cami_uninstall() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
     git checkout -q -- "$2" && # use the given version as a tag
 
@@ -731,15 +732,15 @@ cam_uninstall() { (
 ) }
 
 #-------------------------------------------------------------------------------
-# MAKEFILE INSTALLER
+# MAKE INSTALLER
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Makefile installer uses only a Makefile to install a project.
+#   Make installer uses only a Makefile to install a project.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - target project version
-makefile_install() { (
+makei_install() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
     git checkout -q -- "$2" && # use the given version as a tag
 
@@ -753,11 +754,11 @@ makefile_install() { (
 ) }
 
 # DESCRIPTION:
-#   Makefile installer uses only a Makefile to uninstall a project.
+#   Make installer uses only a Makefile to uninstall a project.
 # PARAMETERS:
 #   $1 - short repository URL
 #   $2 - source project version
-makefile_uninstall() { (
+makei_uninstall() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
     git checkout -q -- "$2" && # use the given version as a tag
 
