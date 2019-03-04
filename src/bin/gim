@@ -102,8 +102,7 @@ COMMAND:
   autoclean  remove old cache
   clean      remove all cache
   help       show this help
-  about      show information
-  version    show version"
+  about      show information"
 
     readonly ABOUT_MESSAGE="gim $VERSION
 A simple smart installation manager for your Git projects.
@@ -180,7 +179,6 @@ $HINT_MESSAGE" >&2
                     ;;
                 help) echo "$HELP_MESSAGE"; return ;;
                 about) echo "$ABOUT_MESSAGE"; return ;;
-                version) echo "$VERSION"; return ;;
                 *)
                     echo "$0: unrecognized argument '$arg'
 $HINT_MESSAGE" >&2
