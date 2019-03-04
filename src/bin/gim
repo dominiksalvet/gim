@@ -311,14 +311,14 @@ check_storage_access() {
     # check access to files
     if [ ! -r "$GIM_STATUS_PATH" ] || [ ! -w "$GIM_STATUS_PATH" ]; then
         echo "$0: can't access '$GIM_STATUS_PATH' file" >&2
-        return 1
+        return 2
     fi
 
     # check access to directories
     for dir in "$GIM_CACHE_REPO_DIR" "$GIM_PREFIX"; do
         if [ ! -r "$dir"/ ] || [ ! -w "$dir"/ ]; then
             echo "$0: can't access '$dir' directory" >&2
-            return 1
+            return 2
         fi
     done
 }
