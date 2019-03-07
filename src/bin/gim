@@ -42,7 +42,7 @@ check_deps() {
 #-------------------------------------------------------------------------------
 # STATIC INITIALIZATION
 #-------------------------------------------------------------------------------
-# Variables and constants of this section can be read everywhere in this script.
+# Variables and constants of this section can be accessed everywhere below.
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
@@ -198,7 +198,7 @@ $HINT_MESSAGE" >&2
 #-------------------------------------------------------------------------------
 # DYNAMIC INITIALIZATION
 #-------------------------------------------------------------------------------
-# Constants of this section can be read everywhere in this script.
+# Constants of this section can be read everywhere below.
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
