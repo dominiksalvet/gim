@@ -8,12 +8,12 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
-* Enhanced checks of files and directories read from RC files are performed. It includes an early check of file access permissions to prevent later problem with accessing files.
+* Early checks of files and directories read from RC files are performed.
 
 ### Removed
 
 * Gim no longer delivers suggested build directory to projects that are being built. They can be built in the repository directory itself.
-* Command `version` has been removed. The current gim's version can be obtained using command `about`.
+* Command `version` has been removed. The current gim's version is include in output of the `about` command.
 
 ## 6.0.1 (2019-02-25)
 
