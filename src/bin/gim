@@ -28,7 +28,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    readonly SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp realpath cut'
+    readonly SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp cut'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -221,7 +221,7 @@ init_runtime() {
 #   Initializes constant paths.
 init_paths() {
     # gim library path is relative to gim binary path and it must exist
-    readonly GIM_LIB_DIR="$(realpath -e -- "$(dirname -- "$0")")"/../lib/gim &&
+    readonly GIM_LIB_DIR="$(cd -- "$(dirname -- "$0")"/../lib/gim/ && pwd -P)" &&
 
     # set up the default RC file path according to the used installation type
     if [ "$(id -u)" -eq 0 ]; then # global configuration will be used
@@ -254,7 +254,8 @@ verify_cfg() {
     fi
 
     # check if gim cache path is set to '/', which could be dangerous
-    if [ "$(realpath -m "$GIM_CACHE_DIR")" = / ]; then
+    # TODO
+    if ( cd "$GIM_CACHE_DIR"/ 2>/dev/null && [ "$(pwd -P)" = / ] ); then
         echo "$0: gim cache path must not be set to '/'" >&2
         return 1
     fi
@@ -352,10 +353,10 @@ cache_autoclean() { (
     done &&
 
     # remove maintainer directories if they are empty
-    rm_empty_dirs ./*/* &&
+    rm_dirs_if_empty ./*/* &&
 
     # remove hostname directories if they are empty
-    rm_empty_dirs ./*
+    rm_dirs_if_empty ./*
 ) }
 
 # DESCRIPTION:
@@ -381,12 +382,13 @@ get_exact_install_record() {
 #   Removes given directories if they are empty.
 # PARAMETERS:
 #   $@ - directories paths
-rm_empty_dirs() {
+rm_dirs_if_empty() {
     for dir in "$@"; do
         if [ -d "${dir:?}"/ ]; then
-            rmdir --ignore-fail-on-non-empty -- "${dir:?}"/
+            rmdir -- "${dir:?}"/ 2>/dev/null
         fi
     done
+    true
 }
 
 #-------------------------------------------------------------------------------
@@ -792,12 +794,11 @@ makei_uninstall() { (
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Insert a given installation record before the first line of the gim status
-#   list, performing no checks.
+#   Append a given installation record to the gim status, performing no checks.
 # PARAMETERS:
 #   $1 - installation record
 insert_install_record() {
-    sed -i -E -e '1i '"$1" "$GIM_STATUS_PATH"
+    echo "$1" >> "$GIM_STATUS_PATH"
 }
 
 # DESCRIPTION:
@@ -806,7 +807,7 @@ insert_install_record() {
 # PARAMETERS:
 #   $1 - installation record
 erase_install_record() {
-    sed -i -E -e '\|'"$1"'|d' "$GIM_STATUS_PATH"
+    sed -i.tmp -E -e '\|'"$1"'|d' "$GIM_STATUS_PATH"
 }
 
 #-------------------------------------------------------------------------------

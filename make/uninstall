@@ -114,7 +114,7 @@ if [ "$INSTALLER" != gim ]; then
         commit_gim_version="$(git tag -l --points-at "$COMMIT_SHORT_HASH")" &&
         # if no tags found, use short commit hash as gim version
         commit_gim_version="${commit_gim_version:-"$COMMIT_SHORT_HASH"}" &&
-        sed -i -E -e '\|'"gitlab.com/dominiksalvet/gim $commit_gim_version"'|d' "$GIM_STATUS_PATH"
+        sed -i.tmp -E -e '\|'"gitlab.com/dominiksalvet/gim $commit_gim_version"'|d' "$GIM_STATUS_PATH"
     else
         echo > "$GIM_STATUS_PATH"
     fi

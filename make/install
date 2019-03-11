@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 # a list of required software
-readonly SW_REQUIRED='command id mkdir cp dirname wc sed git touch grep head'
+readonly SW_REQUIRED='command id mkdir cp dirname wc git touch grep head'
 
 # check if any piece of software is missing
 for sw in $SW_REQUIRED; do
@@ -140,5 +140,5 @@ if [ "$INSTALLER" != gim ]; then
     commit_gim_version="$(git tag -l --points-at "$COMMIT_SHORT_HASH")" &&
     # if no tags found, use short commit hash as gim version
     commit_gim_version="${commit_gim_version:-"$COMMIT_SHORT_HASH"}" &&
-    sed -i -E -e '1i '"gitlab.com/dominiksalvet/gim $commit_gim_version" "$GIM_STATUS_PATH"
+    echo "gitlab.com/dominiksalvet/gim $commit_gim_version" >> "$GIM_STATUS_PATH"
 fi || exit
