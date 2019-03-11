@@ -42,7 +42,7 @@ check_deps() {
 #-------------------------------------------------------------------------------
 # STATIC INITIALIZATION
 #-------------------------------------------------------------------------------
-# Variables and constants of this section can be accessed everywhere below.
+# All variables and constants of this section can be accessed everywhere below.
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
@@ -198,7 +198,7 @@ $HINT_MESSAGE" >&2
 #-------------------------------------------------------------------------------
 # DYNAMIC INITIALIZATION
 #-------------------------------------------------------------------------------
-# Constants of this section can be read everywhere below.
+# All constants of this section can be read everywhere below.
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
@@ -250,13 +250,6 @@ verify_cfg() {
     first_chars="$first_chars""$(echo "$GIM_DB_DIR" | cut -c1)"
     if echo "$first_chars" | grep -q -E -e '-'; then # concatenation then must not include '-'
         echo "$0: configuration paths must not start with '-'" >&2
-        return 1
-    fi
-
-    # check if gim cache path is set to '/', which could be dangerous
-    # TODO
-    if ( cd "$GIM_CACHE_DIR"/ 2>/dev/null && [ "$(pwd -P)" = / ] ); then
-        echo "$0: gim cache path must not be set to '/'" >&2
         return 1
     fi
 }
@@ -353,10 +346,10 @@ cache_autoclean() { (
     done &&
 
     # remove maintainer directories if they are empty
-    rm_dirs_if_empty ./*/* &&
+    rmdir_if_empty ./*/* &&
 
     # remove hostname directories if they are empty
-    rm_dirs_if_empty ./*
+    rmdir_if_empty ./*
 ) }
 
 # DESCRIPTION:
@@ -382,7 +375,7 @@ get_exact_install_record() {
 #   Removes given directories if they are empty.
 # PARAMETERS:
 #   $@ - directories paths
-rm_dirs_if_empty() {
+rmdir_if_empty() {
     for dir in "$@"; do
         if [ -d "${dir:?}"/ ]; then
             rmdir -- "${dir:?}"/ 2>/dev/null
