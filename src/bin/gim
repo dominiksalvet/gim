@@ -28,7 +28,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_deps() {
     # a list of required software
-    readonly SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp cut'
+    SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp cut'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -49,43 +49,43 @@ check_deps() {
 #   Initializes static constants.
 init_constants() {
     # the current version of gim
-    readonly VERSION=6.0.1
+    VERSION=6.0.1
 
     # gim actions
-    readonly ACTION_INSTALL=install
-    readonly ACTION_UNINSTALL=uninstall
-    readonly ACTION_STATUS=status
-    readonly ACTION_UPDATE=update # can't be directly invoked by a user
+    ACTION_INSTALL=install
+    ACTION_UNINSTALL=uninstall
+    ACTION_STATUS=status
+    ACTION_UPDATE=update # can't be directly invoked by a user
 
     # version comparison statuses
-    readonly VSTATUS_NO_SRC_VER=nothing
-    readonly VSTATUS_DIFF=old
-    readonly VSTATUS_MATCH=latest
+    VSTATUS_NO_SRC_VER=nothing
+    VSTATUS_DIFF=old
+    VSTATUS_MATCH=latest
 
     # available installers
-    readonly INSTALLER_CAMI=cami # Configure & Make installer
-    readonly INSTALLER_MAKEI=makei # Make installer
+    INSTALLER_CAMI=cami # Configure & Make installer
+    INSTALLER_MAKEI=makei # Make installer
 
     # static target version statuses
-    readonly STATUS_NO_TAR_VER=no-tar-ver
-    readonly STATUS_NO_TAR_INSTALL=no-tar-install
+    STATUS_NO_TAR_VER=no-tar-ver
+    STATUS_NO_TAR_INSTALL=no-tar-install
 
     # static source version statuses
-    readonly STATUS_UNSUP_SRC_VER=unsup-src-ver
-    readonly STATUS_NO_SRC_UNINSTALL=no-src-uninstall
+    STATUS_UNSUP_SRC_VER=unsup-src-ver
+    STATUS_NO_SRC_UNINSTALL=no-src-uninstall
 
     # installer statuses
-    readonly STATUS_CONFIGURE_FAIL=configure-fail
-    readonly STATUS_MAKE_FAIL=make-fail
-    readonly STATUS_MAKE_INSTALL_FAIL=make-install-fail
-    readonly STATUS_MAKE_UNINSTALL_FAIL=make-uninstall-fail
+    STATUS_CONFIGURE_FAIL=configure-fail
+    STATUS_MAKE_FAIL=make-fail
+    STATUS_MAKE_INSTALL_FAIL=make-install-fail
+    STATUS_MAKE_UNINSTALL_FAIL=make-uninstall-fail
 }
 
 # DESCRIPTION:
 #   Initializes strings usually used to display reports to the user. Constants
 #   must be already initialized.
 init_strings() {
-    readonly HELP_MESSAGE="USAGE:
+    HELP_MESSAGE="USAGE:
   $0 ACTION [OPTION...] URL...
   $0 COMMAND
 
@@ -104,14 +104,14 @@ COMMAND:
   help       show this help
   about      show information"
 
-    readonly ABOUT_MESSAGE="gim $VERSION
+    ABOUT_MESSAGE="gim $VERSION
 A simple smart installation manager for your Git projects.
 
 Copy"'right 2018-2019 Dominik Salvet
 SPDX License Identifier: MIT
 https://gitlab.com/dominiksalvet/gim'
 
-    readonly HINT_MESSAGE="Try '$0 help' for getting help."
+    HINT_MESSAGE="Try '$0 help' for getting help."
 }
 
 # DESCRIPTION:
@@ -221,13 +221,13 @@ init_runtime() {
 #   Initializes constant paths.
 init_paths() {
     # gim library path is relative to gim binary path and it must exist
-    readonly GIM_LIB_DIR="$(cd -- "$(dirname -- "$0")"/../lib/gim/ && pwd -P)" &&
+    GIM_LIB_DIR="$(cd -- "$(dirname -- "$0")"/../lib/gim/ && pwd -P)" &&
 
     # set up the default RC file path according to the used installation type
     if [ "$(id -u)" -eq 0 ]; then # global configuration will be used
-        readonly DEFAULT_RC_PATH="$GIM_LIB_DIR"/rc/global
+        DEFAULT_RC_PATH="$GIM_LIB_DIR"/rc/global
     else # local configuration will be used
-        readonly DEFAULT_RC_PATH="$GIM_LIB_DIR"/rc/local
+        DEFAULT_RC_PATH="$GIM_LIB_DIR"/rc/local
     fi
 }
 
@@ -273,8 +273,8 @@ load_custom_rc() {
 # DESCRIPTION:
 #   Initializes runtime constants derived from read configuration variables.
 init_cfg_constants() {
-    readonly GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo # cache for Git repositories
-    readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status # database of installed projects
+    GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo # cache for Git repositories
+    GIM_STATUS_PATH="$GIM_DB_DIR"/status # database of installed projects
 }
 
 # DESCRIPTION:

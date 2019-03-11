@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 # a list of required software
-readonly SW_REQUIRED='command id sed git rm'
+SW_REQUIRED='command id sed git rm'
 
 # check if any piece of software is missing
 for sw in $SW_REQUIRED; do
@@ -71,7 +71,7 @@ fi || exit
 : "${GIM_DB_DIR:?}" "${GIM_BIN_DIR:?}"
 
 # the file representing a database of locally installed projects
-readonly GIM_STATUS_PATH="$GIM_DB_DIR"/status
+GIM_STATUS_PATH="$GIM_DB_DIR"/status
 
 # verify access permissions
 if [ -e "$GIM_STATUS_PATH" ] && [ ! -w "$GIM_STATUS_PATH" ]; then
@@ -109,7 +109,7 @@ fi &&
 if [ "$INSTALLER" != gim ]; then
     if [ -e "$GIM_STATUS_PATH" ]; then
         # get short hash of the current git commit
-        readonly COMMIT_SHORT_HASH="$(git rev-parse --short HEAD)" &&
+        COMMIT_SHORT_HASH="$(git rev-parse --short HEAD)" &&
         # use tag name pointing to the commit as gim version if any
         commit_gim_version="$(git tag -l --points-at "$COMMIT_SHORT_HASH")" &&
         # if no tags found, use short commit hash as gim version
