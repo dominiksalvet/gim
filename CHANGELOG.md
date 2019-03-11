@@ -12,8 +12,8 @@ The changes not yet present in any release are listed in this section.
 
 ### Removed
 
-* Gim no longer delivers suggested build directory to projects that are being built. They can be built in the repository directory itself.
-* Command `version` has been removed. The current gim's version is include in output of the `about` command.
+* Gim no longer delivers suggested build directory to Git projects. They can be built in the repository directory itself.
+* Command `version` has been removed. The current gim's version is included in output of the `about` command.
 
 ## 6.0.1 (2019-02-25)
 
