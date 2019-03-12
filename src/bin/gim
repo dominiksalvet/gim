@@ -221,7 +221,7 @@ init_runtime() {
 #   Initializes constant paths.
 init_paths() {
     # gim library path is relative to gim binary path and it must exist
-    GIM_LIB_DIR="$(cd -- "$(dirname -- "$0")"/../lib/gim/ && pwd -P)" &&
+    GIM_LIB_DIR="$(cd -- "$(dirname -- "$0")"/../lib/gim/ && pwd)" &&
 
     # set up the default RC file path according to the used installation type
     if [ "$(id -u)" -eq 0 ]; then # global configuration will be used
@@ -377,7 +377,7 @@ get_exact_install_record() {
 rm_rf_with_checks() {
     for dir in "$@"; do
         # never remove the root directory
-        ( cd -- "${dir:?}"/ 2>/dev/null && [ "$(pwd -P)" != / ] ) &&
+        ( cd -- "${dir:?}"/ 2>/dev/null && [ "$(pwd)" != / ] ) &&
         rm -r -f -- "${dir:?}"/
     done
 }
