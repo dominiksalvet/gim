@@ -366,7 +366,7 @@ cache_autoclean() { (
     done
 
     # remove maintainer and hostname directories if they are empty
-    rmdir -p -- ./*/*/ 2>/dev/null
+    rmdir -p ./*/*/ 2>/dev/null
     true # even if there are no those directories, always succeed
 ) }
 
