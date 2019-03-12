@@ -242,7 +242,13 @@ load_default_rc() {
 #   Verifies that configuration constants are valid.
 verify_cfg() {
     # variables that are required to be nonempty must be listed here to provide good error reports
-    ( : "${GIM_CFG_DIR:?}" "${GIM_CACHE_DIR:?}" "${GIM_DB_DIR:?}" "${GIM_PREFIX:?}" ) || return
+    gim_env_vars='GIM_CFG_DIR GIM_CACHE_DIR GIM_DB_DIR GIM_PREFIX'
+    for gim_env_var in $gim_env_vars; do
+        if eval [ ! '$'"$gim_env_var" ]; then
+            echo "$0: $gim_env_var is null or not set" >&2
+            return 1
+        fi
+    done
 
     # paths of gim's directories must not start with '-'
     first_chars="$(echo "$GIM_CFG_DIR" | cut -c1)" # get first character of each variable
