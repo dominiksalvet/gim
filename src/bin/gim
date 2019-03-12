@@ -374,14 +374,13 @@ get_exact_install_record() {
 #   directory that is be prevented to be removed.
 # PARAMETERS:
 #   $@ - directories paths
-rm_rf_with_checks() { (
+rm_rf_with_checks() {
     for dir in "$@"; do
-        cd -- "${dir:?}"/ &&
-        if [ "$(pwd -P)" != / ]; then # never remove the root directory
-            rm -r -f -- "${dir:?}"/
-        fi
+        # never remove the root directory
+        ( cd -- "${dir:?}"/ 2>/dev/null && [ "$(pwd -P)" != / ] ) &&
+        rm -r -f -- "${dir:?}"/
     done
-) }
+}
 
 #-------------------------------------------------------------------------------
 # ACTION PROCESSING
@@ -696,7 +695,7 @@ update() {
 #   $2 - project version
 get_installer() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q -- "$2" && # use the given version as a tag
+    git checkout -q "$2" && # use the given version as a tag
 
     if [ -x configure ]; then
         echo "$INSTALLER_CAMI"
@@ -718,7 +717,7 @@ get_installer() { (
 #   $2 - target project version
 cami_install() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q -- "$2" && # use the given version as a tag
+    git checkout -q "$2" && # use the given version as a tag
 
     # installation process
     { ./configure --prefix="$GIM_PREFIX"/ || {
@@ -735,7 +734,7 @@ cami_install() { (
 #   $2 - source project version
 cami_uninstall() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q -- "$2" && # use the given version as a tag
+    git checkout -q "$2" && # use the given version as a tag
 
     # uninstallation process
     { ./configure --prefix="$GIM_PREFIX"/ || {
@@ -755,7 +754,7 @@ cami_uninstall() { (
 #   $2 - target project version
 makei_install() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q -- "$2" && # use the given version as a tag
+    git checkout -q "$2" && # use the given version as a tag
 
     # installation process
     { PREFIX="$GIM_PREFIX"/ make || {
@@ -773,7 +772,7 @@ makei_install() { (
 #   $2 - source project version
 makei_uninstall() { (
     cd "$GIM_CACHE_REPO_DIR"/"$1"/ && # go to the repository
-    git checkout -q -- "$2" && # use the given version as a tag
+    git checkout -q "$2" && # use the given version as a tag
 
     # uninstallation process
     { PREFIX="$GIM_PREFIX"/ make uninstall || {
