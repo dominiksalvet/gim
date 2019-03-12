@@ -17,7 +17,7 @@
 # PARAMETERS:
 #   $@ - gim parameters
 main() {
-    check_deps && # check software dependencies
+    check_sw_deps && # check software dependencies
     init_constants && # initialize static constants
     init_strings && # initialize string constants
     def_global_vars && # defined global variables used later in this script
@@ -26,7 +26,7 @@ main() {
 
 # DESCRIPTION:
 #   Checks whether all software dependencies are satisfied.
-check_deps() {
+check_sw_deps() {
     # a list of required software
     SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp cut'
 
