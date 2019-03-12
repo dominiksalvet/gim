@@ -206,15 +206,35 @@ $HINT_MESSAGE" >&2
 #   essential file structure will be prepared and an appropriate configuration
 #   will be applied.
 init_runtime() {
+    check_env_vars && # check required environment variables
     init_paths && # initialize paths related to dynamic initialization
-    load_default_rc && # load default configuration
+    load_default_cfg && # load default configuration
     verify_cfg && # verify that default configuration is valid
-    load_custom_rc && # load custom configuration (if it exists)
+    load_custom_cfg && # load custom configuration (if it exists)
     verify_cfg && # verify that custom configuration is valid
     init_cfg_constants && # create constants derived from applied configuration
     init_storage && # try to create a file structure, first write access to storage
     check_storage_access && # verify that gim can access required files and directories
-    export_vars # export variables for called installers
+    export_env_vars # export environment variables for called installers
+}
+
+# DESCRIPTION:
+#   Checks whether all required environment variables are set.
+check_env_vars() {
+    check_vars_if_set HOME
+}
+
+# DESCRIPTION:
+#   Checks whether all variables of given names are set and nonempty.
+# PARAMETERS:
+#   $@ - variable names
+check_vars_if_set() {
+    for var in "$@"; do
+        if eval [ ! '$'"$var" ]; then
+            echo "$0: variable $var is null or not set" >&2
+            return 1
+        fi
+    done
 }
 
 # DESCRIPTION:
@@ -232,23 +252,17 @@ init_paths() {
 }
 
 # DESCRIPTION:
-#   Loads the default RC file.
-load_default_rc() {
+#   Loads the default configuration.
+load_default_cfg() {
     # shellcheck disable=1090
-    . "$DEFAULT_RC_PATH"
+    . "$DEFAULT_RC_PATH" # source the default RC file
 }
 
 # DESCRIPTION:
 #   Verifies that configuration constants are valid.
 verify_cfg() {
-    # variables that are required to be nonempty must be listed here to provide good error reports
-    gim_env_vars='GIM_CFG_DIR GIM_CACHE_DIR GIM_DB_DIR GIM_PREFIX'
-    for gim_env_var in $gim_env_vars; do
-        if eval [ ! '$'"$gim_env_var" ]; then
-            echo "$0: $gim_env_var is null or not set" >&2
-            return 1
-        fi
-    done
+    # gim's variables that are required to be nonempty
+    check_vars_if_set GIM_CFG_DIR GIM_CACHE_DIR GIM_DB_DIR GIM_PREFIX
 
     # paths of gim's directories must not start with '-'
     first_chars="$(echo "$GIM_CFG_DIR" | cut -c1)" # get first character of each variable
@@ -261,11 +275,11 @@ verify_cfg() {
 }
 
 # DESCRIPTION:
-#   Loads a custom RC file if it exists.
-load_custom_rc() {
+#   Loads a custom configuration if it exists.
+load_custom_cfg() {
     if [ -r "$GIM_CFG_DIR"/gimrc ]; then
         # shellcheck disable=1090
-        . "$GIM_CFG_DIR"/gimrc # load custom RC file
+        . "$GIM_CFG_DIR"/gimrc # source custom RC file
     fi
 }
 
@@ -324,8 +338,8 @@ check_storage_access() {
 }
 
 # DESCRIPTION:
-#   Exports variables for all called installers by gim.
-export_vars() {
+#   Exports environment variables for all called commands (includes installers).
+export_env_vars() {
     export INSTALLER=gim
 }
 
