@@ -174,7 +174,7 @@ $HINT_MESSAGE" >&2
                     ;;
                 clean)
                     init_runtime &&
-                    rm -r -f "${GIM_CACHE_REPO_DIR:?}"/*
+                    rm_rf_with_checks "${GIM_CACHE_REPO_DIR:?}"/*
                     return
                     ;;
                 help) echo "$HELP_MESSAGE"; return ;;
@@ -338,9 +338,9 @@ cache_autoclean() { (
     for repo_short_url in */*/*; do # glob creates a short project URL, do not use ./*/*/* instead
         if [ -d "${repo_short_url:?}"/ ]; then
             # if the repository is not in the database, it can be removed
-            if ! has_exact_install_record "$repo_short_url"; then
+            if ! has_exact_install_record "${repo_short_url:?}"; then
                 # remove the project's cached Git repository
-                rm -r -f -- "${repo_short_url:?}"/
+                rm_rf_with_checks "${repo_short_url:?}"
             fi
         fi
     done
@@ -368,6 +368,20 @@ has_exact_install_record() {
 get_exact_install_record() {
     grep -m 1 -E -e '^'"$1"' .+$' "$GIM_STATUS_PATH"
 }
+
+# DESCRIPTION:
+#   Removes given directories with their content performing a check for the root
+#   directory that is be prevented to be removed.
+# PARAMETERS:
+#   $@ - directories paths
+rm_rf_with_checks() { (
+    for dir in "$@"; do
+        cd -- "${dir:?}"/ &&
+        if [ "$(pwd -P)" != / ]; then # never remove the root directory
+            rm -r -f -- "${dir:?}"/
+        fi
+    done
+) }
 
 #-------------------------------------------------------------------------------
 # ACTION PROCESSING
