@@ -28,7 +28,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_sw_deps() {
     # a list of required software
-    SW_REQUIRED='command git make mkdir sed grep rm ls rmdir id true false dirname wc read cp cut'
+    SW_REQUIRED='command git make mkdir grep rm ls rmdir id true false dirname wc read cp cut awk mv head'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -265,10 +265,10 @@ verify_cfg() {
     check_vars_if_set GIM_CFG_DIR GIM_CACHE_DIR GIM_DB_DIR GIM_PREFIX
 
     # paths of gim's directories must not start with '-'
-    first_chars="$(echo "$GIM_CFG_DIR" | cut -c1)" # get first character of each variable
-    first_chars="$first_chars""$(echo "$GIM_CACHE_DIR" | cut -c1)"
-    first_chars="$first_chars""$(echo "$GIM_DB_DIR" | cut -c1)"
-    if echo "$first_chars" | grep -q -E -e '-'; then # concatenation then must not include '-'
+    first_chars="$(echo "$GIM_CFG_DIR" | cut -c 1)" # get first character of each that variable
+    first_chars="$first_chars""$(echo "$GIM_CACHE_DIR" | cut -c 1)"
+    first_chars="$first_chars""$(echo "$GIM_DB_DIR" | cut -c 1)"
+    if echo "$first_chars" | grep -q -F '-'; then # concatenation then must not include '-'
         echo "$0: configuration paths must not start with '-'" >&2
         return 1
     fi
@@ -386,7 +386,7 @@ has_exact_install_record() {
 # PARAMETERS:
 #   $1 - short repository URL
 get_exact_install_record() {
-    grep -m 1 -E -e '^'"$1"' .+$' "$GIM_STATUS_PATH"
+    grep -E '^'"$1"' .+$' "$GIM_STATUS_PATH" | head -n 1
 }
 
 # DESCRIPTION:
@@ -434,7 +434,7 @@ process_action() {
 check_url() {
     url_regex='^(|https://)[[:alnum:]_][[:alnum:]_\.-]*(/[[:alnum:]_][[:alnum:]_\.-]*){2}(|\.git)$'
     # check the format of given repository URL
-    if ! echo "$1" | grep -q -E -e "$url_regex"; then
+    if ! echo "$1" | grep -q -E "$url_regex"; then
         echo "$0: unsupported URL delivered" >&2
         return 1
     fi
@@ -445,7 +445,8 @@ check_url() {
 # PARAMETERS:
 #   $1 - repository URL
 url_to_short_url() {
-    echo "$1" | sed -E -e 's|^https://||; s/\.git$//'
+    short_url="${1#https://}" && # remove https:// prefix
+    echo "${short_url%.git}" # remove .git suffix
 }
 
 #-------------------------------------------------------------------------------
@@ -501,7 +502,7 @@ short_url_to_long_url() {
 execute_action() {
     # getting project information
     install_record="$(get_any_install_record "$2")"
-    local_version="$(echo "$install_record" | sed -E -e 's/^[^ ]*(| )//')"
+    local_version="$(echo "$install_record" | awk '{ print $2 }')"
     repo_version="$(get_repo_version "$2")"
 
     # getting project status
@@ -818,7 +819,8 @@ insert_install_record() {
 # PARAMETERS:
 #   $1 - installation record
 erase_install_record() {
-    sed -i.tmp -E -e '\|'"$1"'|d' "$GIM_STATUS_PATH"
+    grep -F -x -v "$1" "$GIM_STATUS_PATH" > "$GIM_STATUS_PATH".tmp &&
+    mv "$GIM_STATUS_PATH".tmp "$GIM_STATUS_PATH"
 }
 
 #-------------------------------------------------------------------------------

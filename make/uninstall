@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 # a list of required software
-SW_REQUIRED='command id sed git rm'
+SW_REQUIRED='command id git rm grep mv'
 
 # check if any piece of software is missing
 for sw in $SW_REQUIRED; do
@@ -114,7 +114,8 @@ if [ "$INSTALLER" != gim ]; then
         commit_gim_version="$(git tag -l --points-at "$COMMIT_SHORT_HASH")" &&
         # if no tags found, use short commit hash as gim version
         commit_gim_version="${commit_gim_version:-"$COMMIT_SHORT_HASH"}" &&
-        sed -i.tmp -E -e '\|'"gitlab.com/dominiksalvet/gim $commit_gim_version"'|d' "$GIM_STATUS_PATH"
+        grep -F -x -v "gitlab.com/dominiksalvet/gim $commit_gim_version" "$GIM_STATUS_PATH" > "$GIM_STATUS_PATH".tmp &&
+        mv "$GIM_STATUS_PATH".tmp "$GIM_STATUS_PATH"
     else
         echo > "$GIM_STATUS_PATH"
     fi
