@@ -28,7 +28,7 @@ main() {
 #   Checks whether all software dependencies are satisfied.
 check_sw_deps() {
     # a list of required software
-    SW_REQUIRED='command git make mkdir grep rm ls rmdir id true false dirname wc read cp cut awk mv head'
+    SW_REQUIRED='command git make mkdir grep rm ls rmdir id true false dirname read cp cut awk mv head touch'
 
     # check if any piece of software is missing
     for sw in $SW_REQUIRED; do
@@ -293,7 +293,7 @@ init_cfg_constants() {
 # DESCRIPTION:
 #   Initializes gim's file structure including the check of gim's database based
 #   on prepared global variables. It fails if it cannot create a file or a
-#   directory. It does not check file permissions, though.
+#   directory. It does not explicitly check file permissions.
 init_storage() {
     # create custom RC file from the default one if it does not exist
     if [ ! -e "$GIM_CFG_DIR"/gimrc ]; then # if not existing
@@ -304,14 +304,10 @@ init_storage() {
     # create cache directory for Git repositories
     mkdir -p "$GIM_CACHE_REPO_DIR"/ &&
 
-    # check if gim status file exists
+    # create gim status file if it does not exist
     if [ ! -e "$GIM_STATUS_PATH" ]; then
         mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
-        echo > "$GIM_STATUS_PATH"
-    # check if the status file has at least one newline character
-    elif [ "$(wc -l < "$GIM_STATUS_PATH")" -eq 0 ]; then
-        # append a newline character
-        echo >> "$GIM_STATUS_PATH"
+        touch "$GIM_STATUS_PATH"
     fi &&
 
     # create directory for default installation prefix
@@ -319,8 +315,8 @@ init_storage() {
 }
 
 # DESCRIPTION:
-#   Checks whether gim can access all required files and directories. The gim
-#   file structure must already been prepared.
+#   Checks whether gim can access required files and directories. The gim file
+#   structure must have already been prepared.
 check_storage_access() {
     # check access to files
     if [ ! -r "$GIM_STATUS_PATH" ] || [ ! -w "$GIM_STATUS_PATH" ]; then

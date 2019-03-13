@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 # a list of required software
-SW_REQUIRED='command id mkdir cp dirname wc git touch grep head'
+SW_REQUIRED='command id mkdir cp dirname git touch grep head touch'
 
 # check if any piece of software is missing
 for sw in $SW_REQUIRED; do
@@ -128,11 +128,7 @@ if [ "$INSTALLER" != gim ]; then
     # check if gim status file exists
     if [ ! -e "$GIM_STATUS_PATH" ]; then
         mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
-        echo > "$GIM_STATUS_PATH"
-    # check if the status file has at least one newline character
-    elif [ "$(wc -l < "$GIM_STATUS_PATH")" -eq 0 ]; then
-        # append a newline character
-        echo >> "$GIM_STATUS_PATH"
+        touch "$GIM_STATUS_PATH"
     fi &&
     # get short hash of the current git commit
     COMMIT_SHORT_HASH="$(git rev-parse --short HEAD)" &&
