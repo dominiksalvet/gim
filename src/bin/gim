@@ -221,24 +221,24 @@ init_runtime() {
 # DESCRIPTION:
 #   Checks whether all required environment variables are set.
 check_env_vars() {
-    check_vars_if_set HOME
+    check_vars_if_not_null HOME
 }
 
 # DESCRIPTION:
 #   Checks whether all variables of given names are set and nonempty.
 # PARAMETERS:
 #   $@ - variable names
-check_vars_if_set() {
+check_vars_if_not_null() {
     for var in "$@"; do
         if eval [ ! '$'"$var" ]; then
-            echo "$0: variable $var is null or not set" >&2
+            echo "$0: variable $var is empty" >&2
             return 1
         fi
     done
 }
 
 # DESCRIPTION:
-#   Initializes constant paths.
+#   Initializes constant paths. It includes setting up gim library path.
 init_paths() {
     # gim library path is relative to gim binary path and it must exist
     GIM_LIB_DIR="$(cd -- "$(dirname -- "$0")"/../lib/gim/ && pwd)" &&
@@ -262,7 +262,7 @@ load_default_cfg() {
 #   Verifies that configuration constants are valid.
 verify_cfg() {
     # gim's variables that are required to be nonempty
-    check_vars_if_set GIM_CFG_DIR GIM_CACHE_DIR GIM_DB_DIR GIM_PREFIX
+    check_vars_if_not_null GIM_CFG_DIR GIM_CACHE_DIR GIM_DB_DIR GIM_PREFIX || return
 
     # paths of gim's directories must not start with '-'
     first_chars="$(echo "$GIM_CFG_DIR" | cut -c 1)" # get first character of each that variable
