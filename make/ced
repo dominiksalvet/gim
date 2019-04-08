@@ -79,8 +79,8 @@ ced_add_bash_completion() {
     fi
 done' >> "$ced_BASH_COMPLETION_PATH"
     fi &&
-    mkdir -p "$ced_BASH_COMPLETION_PATH".d/ && # create a directory for modular bash completion
-    cp "$1" "$ced_BASH_COMPLETION_PATH".d/ # create a new bash completion module
+    mkdir -p "$ced_BASH_COMPLETION_PATH".d/ && # create a directory for modular Bash completion
+    cp "$1" "$ced_BASH_COMPLETION_PATH".d/ # create a new Bash completion module
 }
 
 # DESCRIPTION:
@@ -89,7 +89,7 @@ done' >> "$ced_BASH_COMPLETION_PATH"
 #   $1 - completion file name
 ced_remove_bash_completion() {
     ced_BASH_COMPLETION_PATH="$(ced_get_bash_completion_path)" &&
-    rm -f "${ced_BASH_COMPLETION_PATH:?}".d/"${1:?}" # remove a given bash completion module
+    rm -f "${ced_BASH_COMPLETION_PATH:?}".d/"${1:?}" # remove a given Bash completion module
 }
 
 #-------------------------------------------------------------------------------
