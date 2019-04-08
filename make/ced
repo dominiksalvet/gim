@@ -54,7 +54,7 @@ done' >> "$ced_PROFILE_PATH"
 #   $1 - profile name
 ced_remove_profile() {
     ced_PROFILE_PATH="$(ced_get_profile_path)" &&
-    rm -f "${ced_PROFILE_PATH:?}".d/"$1".sh # remove a given profile
+    rm -f "${ced_PROFILE_PATH:?}".d/"${1:?}".sh # remove a given profile
 }
 
 #-------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ done' >> "$ced_BASH_COMPLETION_PATH"
 #   $1 - completion file name
 ced_remove_bash_completion() {
     ced_BASH_COMPLETION_PATH="$(ced_get_bash_completion_path)" &&
-    rm -f "${ced_BASH_COMPLETION_PATH:?}".d/"$1" # remove a given bash completion module
+    rm -f "${ced_BASH_COMPLETION_PATH:?}".d/"${1:?}" # remove a given bash completion module
 }
 
 #-------------------------------------------------------------------------------
