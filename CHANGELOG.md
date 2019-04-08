@@ -16,7 +16,7 @@ The changes not yet present in any release are listed in this section.
 * Installers are no longer part of the gim itself, they are modular and loadable during gim's execution now.
 * Gim stores prefix for each installed project, so that uninstallation is performed correctly.
 * Gim stores commit hash to database rather that an annotated tag name.
-* Installation and uninstallation of gim respects values of `PREFIX` and `DB_DIR` variables.
+* Installation and uninstallation of gim itself respects values of `PREFIX` and `DB_DIR` variables.
 
 ### Removed
 
