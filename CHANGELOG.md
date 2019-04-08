@@ -8,15 +8,15 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
-* Early checks of files and directories read from RC files are performed.
 * Essential support for macOS has been added.
-* Support for 'cami' and 'makei' installers has been added.
+* New installers 'cami' and 'makei' are supported.
 
 ### Changed
 
 * Installers are no longer part of the gim itself, they are modular and loadable during gim's execution now.
 * Gim stores prefix for each installed project, so that uninstallation is performed correctly.
 * Gim stores commit hash to database rather that an annotated tag name.
+* Installation and uninstallation of gim respects values of `PREFIX` and `DB_DIR` variables.
 
 ### Removed
 
@@ -24,6 +24,10 @@ The changes not yet present in any release are listed in this section.
 * Command `version` has been removed. The current gim's version is included in output of the `about` command.
 * Option `-fail-on-prompt` has been removed. Use an appropriate Git environment variable to get the same effect.
 * Option `-force` has been renamed to `-f` to be more POSIX-friendly.
+
+### Security
+
+* External commands are called using absolute paths to their binaries, ignoring `PATH` environment variable value.
 
 ## 6.0.1 (2019-02-25)
 
@@ -52,7 +56,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Removed
 
-* Previous installation management using `$PATH` root's variable has been removed. Due to this change, it is required to uninstall all projects installed by gim, update gim to this version and then install them back. Phew, no more breaking changes like this one.
+* Previous installation management using `PATH` root's variable has been removed. Due to this change, it is required to uninstall all projects installed by gim, update gim to this version and then install them back. Phew, no more breaking changes like this one.
 
 ## 5.0.0 (2018-12-28)
 
