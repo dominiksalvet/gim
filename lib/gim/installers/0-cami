@@ -1,0 +1,80 @@
+#!/bin/sh
+
+#-------------------------------------------------------------------------------
+# Copyright 2019 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a gim installer module. Gim calls every API function
+#   with the current working directory in a prepared Git repository directory.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# NAMESPACE: can_install, install, can_uninstall, uninstall, i_*
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# API - INSTALLATION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Decides whether is possible to install the project located in the current
+#   working directory using this installer.
+can_install() {
+    test -x configure &&
+    i_check_gen_make_target install
+}
+
+# DESCRIPTION:
+#   Installs the project of the current directory to a given prefix path. If
+#   installation is not successful, it must fail.
+# PARAMETERS:
+#   $1 - path prefix
+install() {
+    ./configure --prefix="$1" &&
+    make &&
+    make install
+}
+
+#-------------------------------------------------------------------------------
+# API - UNINSTALLATION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Decides whether is possible to uninstall the project located in the current
+#   working directory using this installer.
+can_uninstall() {
+    test -x configure &&
+    i_check_gen_make_target uninstall
+}
+
+# DESCRIPTION:
+#   Uninstalls the project of the current directory from a given prefix path. If
+#   uninstallation is not successful, it must fail.
+# PARAMETERS:
+#   $1 - path prefix
+uninstall() {
+    ./configure --prefix="$1" &&
+    make uninstall
+}
+
+#-------------------------------------------------------------------------------
+# FUNCTIONS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Checks whether there will be a given target in a makefile after its
+#   generation using the configure script.
+# PARAMETERS:
+#   $1 - expected target to be generated
+i_check_gen_make_target() {
+    i_target_regex='^[[:blank:]]*'"$1"'[[:blank:]]*:([^=].*)?$'
+
+    if [ -e Makefile.in ]; then
+        grep -q -E "$i_target_regex" Makefile.in
+    else
+        false # no configure input detected, fail
+    fi
+}

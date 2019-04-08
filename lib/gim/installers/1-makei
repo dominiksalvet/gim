@@ -1,0 +1,77 @@
+#!/bin/sh
+
+#-------------------------------------------------------------------------------
+# Copyright 2019 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a gim installer module. Gim calls every API function
+#   with the current working directory in a prepared Git repository directory.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# NAMESPACE: can_install, install, can_uninstall, uninstall, i_*
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# API - INSTALLATION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Decides whether is possible to install the project located in the current
+#   working directory using this installer.
+can_install() {
+    i_check_make_target install
+}
+
+# DESCRIPTION:
+#   Installs the project of the current directory to a given prefix path. If
+#   installation is not successful, it must fail.
+# PARAMETERS:
+#   $1 - path prefix
+install() {
+    make PREFIX="$1" &&
+    make PREFIX="$1" install
+}
+
+#-------------------------------------------------------------------------------
+# API - UNINSTALLATION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Decides whether is possible to uninstall the project located in the current
+#   working directory using this installer.
+can_uninstall() {
+    i_check_make_target uninstall
+}
+
+# DESCRIPTION:
+#   Uninstalls the project of the current directory from a given prefix path. If
+#   uninstallation is not successful, it must fail.
+# PARAMETERS:
+#   $1 - path prefix
+uninstall() {
+    make PREFIX="$1" uninstall
+}
+
+#-------------------------------------------------------------------------------
+# FUNCTIONS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Checks whether there is a required target in a makefile.
+# PARAMETERS:
+#   $1 - make target
+i_check_make_target() {
+    i_target_regex='^[[:blank:]]*'"$1"'[[:blank:]]*:([^=].*)?$'
+
+    if [ -e makefile ]; then
+        grep -q -E "$i_target_regex" makefile
+    elif [ -e Makefile ]; then
+        grep -q -E "$i_target_regex" Makefile
+    else
+        false # no makefile detected, fail
+    fi
+}

@@ -1,0 +1,75 @@
+#!/bin/sh
+
+#-------------------------------------------------------------------------------
+# Copyright 2019 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a gim library file path abstraction module. It provides
+#   file paths according to the current runtime environment to make gim more
+#   flexible as a whole.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# PRECONDITIONS: GIM_LIB_DIR
+#-------------------------------------------------------------------------------
+# NAMESPACE: path_*
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# API - LIBRARY PATHS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Returns software dependencies file path.
+path_deps() {
+    echo "$GIM_LIB_DIR"/deps
+}
+
+# DESCRIPTION:
+#   Returns database interface module path.
+path_dbi() {
+    echo "$GIM_LIB_DIR"/dbi
+}
+
+# DESCRIPTION:
+#   Returns default RC file path.
+path_default_rc() {
+    if path_is_root; then
+        echo "$GIM_LIB_DIR"/rc/global
+    else
+        echo "$GIM_LIB_DIR"/rc/local
+    fi
+}
+
+# DESCRIPTION:
+#   Returns path of a directory with installer modules.
+path_installers_dir() {
+    echo "$GIM_LIB_DIR"/installers
+}
+
+#-------------------------------------------------------------------------------
+# API - SYSTEM PATHS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Returns custom RC file path.
+path_gimrc() {
+    if path_is_root; then
+        echo /etc/gim/gimrc
+    else
+        echo "$HOME"/.config/gim/gimrc
+    fi
+}
+
+#-------------------------------------------------------------------------------
+# FUNCTIONS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Checks whether running with root permissions.
+path_is_root() {
+    test "$(id -u)" -eq 0
+}

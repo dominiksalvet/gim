@@ -1,0 +1,906 @@
+#!/bin/sh
+
+#-------------------------------------------------------------------------------
+# Copyright 2018-2019 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a main file of gim - simple Git installation manager.
+# PARAMETERS:
+#   All given parameters are processed as gim's help describes.
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# ENTRY POINT
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   This function represents a gim entry point and it is expected to be executed
+#   first of all, yet its calling should be at the end of this script.
+# PARAMETERS:
+#   $@ - gim parameters
+main() {
+    init_constants &&
+    init_strings &&
+    def_global_vars &&
+    process_args "$@"
+}
+
+#-------------------------------------------------------------------------------
+# STATIC INITIALIZATION
+#-------------------------------------------------------------------------------
+# All variables and constants of this section can be accessed everywhere below.
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Initializes static constants.
+init_constants() {
+    # the current version of gim
+    VERSION=6.0.1
+
+    # gim actions
+    ACTION_INSTALL=install
+    ACTION_UNINSTALL=uninstall
+    ACTION_STATUS=status
+
+    # project states of install action
+    STATE_INSTALL=install # just installed
+    STATE_UPDATE=update # just updated
+    STATE_DOWNGRADE=downgrade # just downgraded
+    STATE_INSTALLED=installed # already installed
+    # project states of uninstall action
+    STATE_UNINSTALL=uninstall # just uninstalled
+    STATE_UNINSTALLED=uninstalled # already uninstalled
+    # project states of status action
+    STATE_NOTHING=nothing # a project is not installed
+    STATE_OLD=old # a project is outdated
+    STATE_LATEST=latest # a project is fully updated
+    STATE_DEV=dev # a project is in a developer version
+
+    # target commit errors
+    ERROR_UNSUPPORTED_TAR=UNSUPPORTED-TAR
+    ERROR_NO_TAR_INSTALL=NO-TAR-INSTALL
+    ERROR_NO_TAR_UNINSTALL=NO-TAR-UNINSTALL
+    # source commit errors
+    ERROR_UNSUPPORTED_SRC=UNSUPPORTED-SRC
+    ERROR_NO_SRC_UNINSTALL=NO-SRC-UNINSTALL
+    # dynamic installer errors
+    ERROR_BAD_PREFIX=BAD-PREFIX
+    ERROR_INSTALL_FAIL=INSTALL-FAIL
+    ERROR_UNINSTALL_FAIL=UNINSTALL-FAIL
+}
+
+# DESCRIPTION:
+#   Initializes strings usually used to display reports to the user. Constants
+#   must be already initialized.
+init_strings() {
+    HELP_MESSAGE="USAGE:
+  $0 ACTION [OPTION...] URL...
+  $0 COMMAND
+
+ACTION:
+  $ACTION_INSTALL    install/update Git projects
+  $ACTION_UNINSTALL  uninstall Git projects
+  $ACTION_STATUS     show status of Git projects
+
+OPTION:
+  -f  ignore some errors
+
+COMMAND:
+  autoclean  remove old cache
+  clean      remove cache
+  help       show this help
+  about      show information"
+
+    ABOUT_MESSAGE="gim $VERSION
+A simple installation manager for your Git projects.
+
+Copy"'right 2018-2019 Dominik Salvet
+SPDX License Identifier: MIT
+https://gitlab.com/dominiksalvet/gim'
+
+    HINT_MESSAGE="Try '$0 help' for getting help."
+}
+
+# DESCRIPTION:
+#   Defines global variables. If there is a global variable, it must be stated
+#   here even though its value is going to be overwritten.
+def_global_vars() {
+    # used for the '-f' option
+    use_force=false
+
+    # errors of the current project
+    errors=
+
+    # state of the current project
+    state=
+}
+
+#-------------------------------------------------------------------------------
+# ARGUMENT PARSING
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Processes given gim parameters and performs all associated operations.
+# PARAMETERS:
+#   $@ - gim parameters
+process_args() {
+    action=
+    accept_action_options=true
+    
+    for arg in "$@"; do # process each argument individually
+        if [ "$action" ]; then
+            if "$accept_action_options"; then
+                case "$arg" in
+                    -f) use_force=true ;;
+                    -*) echo "$0: unrecognized argument '$arg'
+$HINT_MESSAGE" >&2
+                        return 1
+                        ;;
+                    *)  init_runtime || return
+                        accept_action_options=false # expecting first URL
+                        ;;
+                esac
+            fi
+
+            if ! "$accept_action_options"; then
+                process_action "$action" "$arg" || return
+            fi
+        else
+            case "$arg" in
+                "$ACTION_INSTALL" | "$ACTION_UNINSTALL" | "$ACTION_STATUS")
+                    action="$arg" # use the given action
+                    ;;
+                autoclean)
+                    init_runtime &&
+                    cache_autoclean
+                    return
+                    ;;
+                clean)
+                    init_runtime &&
+                    rm_rf_with_checks "${GIM_CACHE_REPO_DIR:?}"/*
+                    return
+                    ;;
+                help) echo "$HELP_MESSAGE"; return ;;
+                about) echo "$ABOUT_MESSAGE"; return ;;
+                *)  echo "$0: unrecognized argument '$arg'
+$HINT_MESSAGE" >&2
+                    return 1
+                    ;;
+            esac
+        fi
+    done
+
+    if [ ! "$action" ] || "$accept_action_options"; then
+        echo "$0: missing required arguments
+$HINT_MESSAGE" >&2
+        return 1
+    fi
+}
+
+#-------------------------------------------------------------------------------
+# DYNAMIC INITIALIZATION
+#-------------------------------------------------------------------------------
+# All constants of this section can be read everywhere below.
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Prepares a runtime environment for gim. After calling this function, gim's
+#   essential file structure will be prepared, an appropriate configuration will
+#   be applied and gim library modules will be prepared.
+init_runtime() {
+    load_lib &&
+    load_gimrc "$GIMRC_PATH" &&
+    init_runtime_constants &&
+    init_storage &&
+    export_env_vars
+}
+
+# DESCRIPTION:
+#   Loads the gim library. It includes reading an appropriate default RC file,
+#   loading functions for file paths abstraction and database access functions.
+# shellcheck disable=SC1090
+load_lib() {
+    # gim library path is relative to gim binary path and it must exist
+    GIM_LIB_DIR="$(cd -- "$(dirname -- "$0")"/../lib/gim/ && pwd)" &&
+    # load file path abstraction module
+    . "$GIM_LIB_DIR"/path &&
+
+    # initialize aliases based on a given software dependencies file
+    init_aliases "$(path_deps)" &&
+
+    # load gim database interface module
+    . "$(path_dbi)" &&
+
+    # prepare library paths
+    DEFAULT_RC_PATH="$(path_default_rc)" &&
+    GIMRC_PATH="$(path_gimrc)" &&
+    INSTALLERS_DIR="$(path_installers_dir)" &&
+
+    # load default RC
+    . "$DEFAULT_RC_PATH"
+}
+
+# DESCRIPTION:
+#   Removes all aliases, checks whether all software dependencies in a given
+#   file are satisfied and creates aliases only for this software.
+# PARAMETERS:
+#   $1 - software dependencies file
+# shellcheck disable=SC2139
+init_aliases() {
+    unalias -a && # remove all aliases
+    while read -r sw; do
+        if sw_alias="$(command -v -- "$sw")"; then
+            if [ "$sw_alias" != "$sw" ]; then # do not create alias with the same string
+                alias "$sw"="$sw_alias"
+            fi
+        else
+            echo "$0: missing $sw software" >&2
+            return 1
+        fi
+    done < "$1"
+}
+
+# DESCRIPTION:
+#   Loads a custom RC file if it exists.
+# PARAMETERS:
+#   $1 - gimrc path
+# shellcheck disable=SC1090
+load_gimrc() {
+    if [ -r "$1" ]; then
+        . "$1" &&
+        if ! check_first_chars 'GIM_CACHE_DIR GIM_DB_DIR GIM_PREFIX' '//.'; then
+            echo "$0: invalid $1 file" >&2
+            return 1
+        fi
+    fi
+}
+
+# DESCRIPTION:
+#   Checks whether first characters of given variables matches a given regex.
+# PARAMETERS:
+#   $1 - variables names
+#   $2 - ERE regex
+check_first_chars() {
+    first_chars= # clear from possible previous run
+
+    for var_name in $1; do
+        first_chars="${first_chars}$(eval echo '$'"$var_name" | cut -c 1)"
+    done
+
+    # matching to a given regex
+    echo "$first_chars" | grep -q -E "$2"
+}
+
+# DESCRIPTION:
+#   Initializes runtime constants derived from read RC constants.
+# shellcheck disable=SC2034,SC2153
+init_runtime_constants() {
+    GIM_CACHE_REPO_DIR="$GIM_CACHE_DIR"/repo # cache for Git repositories
+    GIM_STATUS_PATH="$GIM_DB_DIR"/status # database of installed projects
+}
+
+# DESCRIPTION:
+#   Initializes gim's file structure including the check of gim's database based
+#   on prepared global variables. It fails if it cannot create a file or a
+#   directory or if gim does not have read or write permissions.
+init_storage() {
+    # initialize gim database
+    dbi_init &&
+
+    # create custom RC file from the default one if it does not exist
+    if [ ! -e "$GIMRC_PATH" ]; then
+        mkdir -p "$(dirname "$GIMRC_PATH")"/ &&
+        cp "$DEFAULT_RC_PATH" "$GIMRC_PATH" # create gimrc from default RC file
+    fi
+}
+
+# DESCRIPTION:
+#   Exports environment variables for all called commands (includes installers).
+export_env_vars() {
+    export INSTALLER=gim
+}
+
+#-------------------------------------------------------------------------------
+# CACHE AUTOCLEAN
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Performs an automatic cleaning of gim's cache. It removes only those files
+#   and directories not belonging to a Git project installed on the system.
+cache_autoclean() { (
+    # change directory to gim's cache
+    cd "${GIM_CACHE_REPO_DIR:?}"/ || return
+
+    # go through all cached Git repositories
+    for url in */*/*; do # glob creates a short project URLs, do not use ./*/*/* instead
+        if [ -d "${url:?}"/ ]; then
+            # if the repository is not in the database, it can be removed
+            if ! dbi_has "${url:?}"; then
+                # remove the project's cached Git repository
+                rm_rf_with_checks "${url:?}"
+            fi
+        fi
+    done
+
+    # remove maintainer and hostname directories if they are empty
+    rmdir -p ./*/*/ 2>/dev/null; true # succeed even if there are not any
+) }
+
+# DESCRIPTION:
+#   Removes given directories with their content performing a check for the root
+#   directory that is be prevented to be removed.
+# PARAMETERS:
+#   $@ - directories paths
+rm_rf_with_checks() {
+    for dir in "$@"; do
+        # never remove the root directory
+        ( cd -- "${dir:?}"/ 2>/dev/null && [ "$(pwd)" != / ] ) &&
+        rm -r -f -- "${dir:?}"/
+    done
+}
+
+#-------------------------------------------------------------------------------
+# ACTION PROCESSING
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Performs several checks, prepares target Git repository and executes the
+#   given action itself. Requires gim's runtime to be already initialized.
+# PARAMETERS:
+#   $1 - action
+#   $2 - any URL
+process_action() {
+    # prepare Git URLs and check root permissions
+    check_url "$2" &&
+    url="$(url_to_short_url "$2")" &&
+
+    # prepare Git repository
+    touch_repo "$url" &&
+
+    # clean up previous action runtime
+    cleanup_runtime &&
+    # execute the action itself
+    execute_action "$1" "$url" "$GIM_PREFIX"
+}
+
+# DESCRIPTION:
+#   Checks whether given URL is supported.
+# PARAMETERS:
+#   $1 - any URL
+check_url() {
+    url_regex='^(https://)?[[:alnum:]_][[:alnum:]_\.-]*(/[[:alnum:]_][[:alnum:]_\.-]*){2}(\.git)?$'
+    # check the format of given repository URL
+    if ! echo "$1" | grep -q -E "$url_regex"; then
+        echo "$0: unsupported URL delivered" >&2
+        return 1
+    fi
+}
+
+# DESCRIPTION:
+#   Transforms a given repository URL into its short variant.
+# PARAMETERS:
+#   $1 - any URL
+url_to_short_url() {
+    short_url="${1#https://}" && # remove https:// prefix
+    echo "${short_url%.git}" # remove .git suffix
+}
+
+#-------------------------------------------------------------------------------
+# REPOSITORY OBTAINING
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Refreshes a Git repository from given URL. In case an associated directory
+#   does not exist, it is created and the repository is cloned. Otherwise, the
+#   repository is refreshed by fetching and merging changes.
+# PARAMETERS:
+#   $1 - short URL
+touch_repo() { (
+    mkdir -p "$GIM_CACHE_REPO_DIR"/"$1"/ &&
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ &&
+
+    if [ ! "$(ls -A)" ]; then # if the cache directory for the target project is empty
+        # clone the Git repository master branch to this directory, it can ask a user for a password
+        git clone -q --branch master --single-branch "$(short_url_to_long_url "$1")" . &&
+        # disable push remote URL
+        git remote set-url --push origin ''
+    else
+        # remove all untracked files and directories (respect .gitignore for performance gains)
+        git clean -q -d -f &&
+        # discard all changes done to the repository
+        git reset -q --hard &&
+
+        # checkout the master branch
+        git checkout -q master &&
+        # fetch changes from master and merge them into local master branch
+        git pull -q
+    fi
+) }
+
+# DESCRIPTION:
+#   Transforms a short repository URL into its long equivalent.
+# PARAMETERS:
+#   $1 - short URL
+short_url_to_long_url() {
+    echo https://"$1".git
+}
+
+#-------------------------------------------------------------------------------
+# RUNTIME CLEANING
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Resets the runtime state to prepare it for processing another action.
+cleanup_runtime() {
+    # clear the project errors
+    errors=
+
+    # clear the project state
+    state=
+}
+
+#-------------------------------------------------------------------------------
+# CHOOSE ACTION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Chooses which action will be executed and executes it with an initialized
+#   Git repository. Uses the current path prefix if detected, otherwise uses the
+#   delivered one. Also prints a report for the user after the execution.
+# PARAMETERS:
+#   $1 - action
+#   $2 - short URL
+#   $3 - fresh prefix
+execute_action() {
+    # getting source (already installed) project information
+    src_db_record="$(get_any_db_record "$2")" &&
+    src_url="$(dbi_extract_url "$src_db_record")" &&
+    src_hash="$(dbi_extract_hash "$src_db_record")" &&
+    src_prefix="$(dbi_extract_prefix "$src_db_record")" &&
+    src_prefix="${src_prefix:-"$3"}" && # in case the prefix is not present in the record
+    # getting target (to be installed) project information
+    tar_hash="$(get_repo_hash "$2")" || return
+
+    case "$1" in
+        "$ACTION_INSTALL")
+            if [ ! "$src_hash" ]; then
+                auto_install "$2" "$tar_hash" "$3"
+            elif [ "$src_hash" != "$tar_hash" ]; then
+                auto_update "$2" "$src_hash" "$src_prefix" "$src_url" "$tar_hash"
+            else
+                state="$STATE_INSTALLED" # the project is already installed
+            fi
+            ;;
+        "$ACTION_UNINSTALL")
+            if [ "$src_hash" ]; then
+                auto_uninstall "$2" "$src_hash" "$src_prefix" "$src_url"
+            else
+                state="$STATE_UNINSTALLED" # the project is already uninstalled
+            fi
+            ;;
+        "$ACTION_STATUS") auto_scan "$2" "$src_hash" "$tar_hash" ;;
+    esac && return_val=0 || return_val=1
+
+    # print report using previously set global variables
+    print_report "$errors" "$state" "$2" "$src_hash" "$tar_hash"
+    return "$return_val" # return success or fail based on previous operations
+}
+
+# DESCRIPTION:
+#   Returns the first database record, which represents an installation of the
+#   project from a given URL. It also matches different URLs. If nothing found,
+#   it returns an empty string and succeed.
+# PARAMETERS:
+#   $1 - short URL
+get_any_db_record() { (
+    cd_repo "$1" master || return
+    mirror_urls_path=gim/mirror-urls
+
+    # search the project's gim/mirror-urls file
+    if [ -r "$mirror_urls_path" ]; then
+        while read -r mirror_url; do
+            mirror_url="$(url_to_short_url "$mirror_url")" &&
+            if db_record="$(dbi_select_first "$mirror_url")"; then
+                echo "$db_record"
+                return
+            fi
+        done < "$mirror_urls_path"
+    # use the delivered repository URL to search an installation record
+    elif db_record="$(dbi_select_first "$1")"; then
+        echo "$db_record"
+    fi
+) }
+
+# DESCRIPTION:
+#   Changes current working directory to a given repository and checkouts its
+#   given commit. If the commit parameter is empty, no checkout is performed.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - target commit
+cd_repo() {
+    cd "$GIM_CACHE_REPO_DIR"/"$1"/ &&
+    if [ "$2" ]; then
+        git checkout -q "$2"
+    fi
+}
+
+# DESCRIPTION:
+#   Returns the best commit hash of a given project. It prefers latest annotated
+#   tag to latest lightweight tag and latest lightweight tag to latest commit.
+# PARAMETERS:
+#   $1 - short URL
+get_repo_hash() { (
+    cd_repo "$1" || return
+
+    if tag_name="$(git describe --abbrev=0 master 2>/dev/null)"; then # latest annotated tag
+        git rev-parse "$tag_name"'^{}' # dereference the annotated tag to an actual commit hash
+    # latest lightweight tag
+    elif tag_name="$(git describe --tags --abbrev=0 master 2>/dev/null)"; then
+        git rev-parse "$tag_name"
+    else # latest commit
+        git rev-parse master
+    fi
+) }
+
+#-------------------------------------------------------------------------------
+# EXECUTE ACTION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Performs various checks, automatically determines the best installer and if
+#   there are no errors, installs a given project of a given commit to a given
+#   path prefix and updates gim database. In case of any errors, it stops at the
+#   first one.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+#   $3 - prefix
+auto_install() {
+    state="$STATE_INSTALL"
+
+    if ! "$use_force" && ! is_supported_commit "$1" "$2"; then # perform checks
+        add_error "$ERROR_UNSUPPORTED_TAR"
+    elif ! installer_path="$(get_installer_path "$1" "$2" "$ACTION_INSTALL")"; then
+        add_error "$ERROR_NO_TAR_INSTALL"
+    elif ! "$use_force" && ! has_installer_path "$1" "$2" "$ACTION_UNINSTALL"; then
+        add_error "$ERROR_NO_TAR_UNINSTALL"
+    elif ! abs_prefix="$(init_prefix "$3")"; then
+        add_error "$ERROR_BAD_PREFIX"
+    # install and insert a new installation record to gim database
+    elif repo_install "$1" "$2" "$abs_prefix" "$installer_path" &&
+         dbi_insert "$1" "$2" "$abs_prefix"; then
+        return
+    else
+        add_error "$ERROR_INSTALL_FAIL"
+    fi
+
+    return 1 # some errors occurred, return fail
+}
+
+
+# DESCRIPTION:
+#   Performs various checks, automatically determines the best installer for
+#   both uninstallation and installation and if there are no errors, updates a
+#   given project from one commit to another in a given path prefix and updates
+#   gim database. In case of any errors, it stops at the first one.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - source hash
+#   $3 - prefix
+#   $4 - short URL to delete
+#   $5 - target hash
+auto_update() {
+    # check if the installed version is newer than the target one
+    if is_ancestor_commit "$1" "$5" "$2"; then
+        state="$STATE_DOWNGRADE" # downgrade
+    else
+        state="$STATE_UPDATE" # update
+    fi
+
+    if ! "$use_force" && ! is_supported_commit "$1" "$5"; then # perform checks
+        add_error "$ERROR_UNSUPPORTED_TAR"
+    elif ! install_installer_path="$(get_installer_path "$1" "$5" "$ACTION_INSTALL")"; then
+        add_error "$ERROR_NO_TAR_INSTALL"
+    elif ! "$use_force" && ! has_installer_path "$1" "$5" "$ACTION_UNINSTALL"; then
+        add_error "$ERROR_NO_TAR_UNINSTALL"
+    elif ! "$use_force" && ! is_supported_commit "$1" "$2"; then
+        add_error "$ERROR_UNSUPPORTED_SRC"
+    elif ! uninstall_installer_path="$(get_installer_path "$1" "$2" "$ACTION_UNINSTALL")"; then
+        add_error "$ERROR_NO_SRC_UNINSTALL"
+    elif ! abs_prefix="$(init_prefix "$3")"; then
+        add_error "$ERROR_BAD_PREFIX"
+    # uninstall and delete an appropriate installation record from gim database
+    elif repo_uninstall "$1" "$2" "$abs_prefix" "$uninstall_installer_path" && dbi_delete "$4"; then
+        # install and insert a new installation record to gim database
+        if repo_install "$1" "$5" "$abs_prefix" "$install_installer_path" &&
+           dbi_insert "$1" "$5" "$abs_prefix"; then
+            return
+        fi
+        add_error "$ERROR_INSTALL_FAIL"
+    else
+        add_error "$ERROR_UNINSTALL_FAIL"
+    fi
+
+    return 1 # some errors occurred, return fail
+}
+
+# DESCRIPTION:
+#   Performs various checks, automatically determines the best installer and if
+#   there are no errors, uninstalls a given project of a given commit from a
+#   given path prefix and updates gim database deleting a given URL. In case of
+#   any errors, it stops at the first one.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+#   $3 - prefix
+#   $4 - short URL to delete
+auto_uninstall() {
+    state="$STATE_UNINSTALL"
+
+    if ! "$use_force" && ! is_supported_commit "$1" "$2"; then # perform checks
+        add_error "$ERROR_UNSUPPORTED_SRC"
+    elif ! installer_path="$(get_installer_path "$1" "$2" "$ACTION_UNINSTALL")"; then
+        add_error "$ERROR_NO_SRC_UNINSTALL"
+    elif ! abs_prefix="$(init_prefix "$3")"; then
+        add_error "$ERROR_BAD_PREFIX"
+    # uninstall and delete an appropriate installation record from gim database
+    elif repo_uninstall "$1" "$2" "$abs_prefix" "$installer_path" && dbi_delete "$4"; then
+        return
+    else
+        add_error "$ERROR_UNINSTALL_FAIL"
+    fi
+
+    return 1 # some errors occurred, return fail
+}
+
+# DESCRIPTION:
+#   Scans the given repository considering given source and target commits,
+#   records all detected errors and changes the state. It always succeeds.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - source hash
+#   $3 - target hash
+auto_scan() {
+    # target commit errors (if target commit is not already installed)
+    if [ "$2" != "$3" ]; then
+        if ! "$use_force" && ! is_supported_commit "$1" "$3"; then
+            add_error "$ERROR_UNSUPPORTED_TAR"
+        fi
+        if ! has_installer_path "$1" "$3" "$ACTION_INSTALL"; then
+            add_error "$ERROR_NO_TAR_INSTALL"
+        fi
+        if ! "$use_force" && ! has_installer_path "$1" "$3" "$ACTION_UNINSTALL"; then
+            add_error "$ERROR_NO_TAR_UNINSTALL"
+        fi
+    fi
+
+    # source commit errors (if installed)
+    if [ ! "$2" ]; then
+        state="$STATE_NOTHING"
+    else
+        if ! "$use_force" && ! is_supported_commit "$1" "$2"; then
+            add_error "$ERROR_UNSUPPORTED_SRC"
+        fi
+        if ! has_installer_path "$1" "$2" "$ACTION_UNINSTALL"; then
+            add_error "$ERROR_NO_SRC_UNINSTALL"
+        fi
+
+        if [ "$2" = "$3" ]; then # if target commit installed
+            state="$STATE_LATEST"
+        # check if the installed version is newer than the target one
+        elif is_ancestor_commit "$1" "$3" "$2"; then
+            state="$STATE_DEV"
+        else
+            state="$STATE_OLD"
+        fi
+    fi
+}
+
+# DESCRIPTION:
+#   Adds a given error to the global variable representing current errors.
+# PARAMETERS:
+#   $1 - error
+add_error() {
+    errors="$errors""$1 "
+}
+
+# DESCRIPTION:
+#   Decides whether a given commit is supported within the project of given
+#   repository URL.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+is_supported_commit() { (
+    cd_repo "$1" master || return
+    unsupported_versions_path=gim/unsupported-versions
+
+    if [ -r "$unsupported_versions_path" ]; then
+        while read -r unsupported_version; do
+            if [ "$2" = "$(git rev-parse "$unsupported_version"'^{}' 2>/dev/null)" ]; then
+                return 1
+            fi
+        done < "$unsupported_versions_path"
+    fi
+) }
+
+#-------------------------------------------------------------------------------
+# INSTALLER
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Returns the path of the suggested installer according to given parameters of
+#   the project URL, its commit and required action to be supported by the
+#   installer. This function works only for actions representing an installation
+#   or an uninstallation.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+#   $3 - required action
+# shellcheck disable=SC1090,SC2123
+get_installer_path() { (
+    cd_repo "$1" "$2" || return
+
+    for installer_path in "$INSTALLERS_DIR"/*; do
+        if [ -r "$installer_path" ]; then
+        ( # create subshell for each installer to prevent it from modifying environment
+            . "$installer_path" &&
+            case "$3" in
+                "$ACTION_INSTALL")
+                    can_install &&
+                    PATH= && # clear PATH to ignore executables from PATH directories in a subshell
+                    command -v install > /dev/null && # check if function 'install' exists
+                    echo "$installer_path"
+                    ;;
+                "$ACTION_UNINSTALL")
+                    can_uninstall &&
+                    PATH= && # clear PATH to ignore executables from PATH directories in a subshell
+                    command -v uninstall > /dev/null && # check if function 'uninstall' exists
+                    echo "$installer_path"
+                    ;;
+                *) false ;; # only installation and uninstallation are expected
+            esac
+        ) && return # if subshell was successful, return with success
+        fi
+    done
+
+    return 1 # return fail if no suitable installer found
+) }
+
+# DESCRIPTION:
+#   Decides whether a given project of a given commit has a suitable installer
+#   for a given required action.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+#   $3 - required action
+has_installer_path() {
+    get_installer_path "$1" "$2" "$3" > /dev/null
+}
+
+# DESCRIPTION:
+#   Initializes a given prefix (creates the directory), and if there are no
+#   errors, prints the prefix in the absolute path form.
+# PARAMETERS:
+#   $1 - prefix
+init_prefix() { (
+    mkdir -p "$1"/ && # create the prefix directory if not existing
+    cd "$1"/ && pwd # get prefix absolute path
+) }
+
+# DESCRIPTION:
+#   Checks whether the first given commit is an ancestor of the second commit in
+#   a given Git repository.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - first commit
+#   $3 - second commit
+is_ancestor_commit() { (
+    cd_repo "$1" &&
+    git merge-base --is-ancestor "$2" "$3"
+) }
+
+#-------------------------------------------------------------------------------
+# INSTALLATION AND UNINSTALLATION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Installs a project based on a given repository URL, commit, installation
+#   prefix and delivered installer path.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+#   $3 - prefix
+#   $4 - installer path
+# shellcheck disable=SC1090
+repo_install() { (
+    cd_repo "$1" "$2" &&
+    . "$4" &&
+    install "$3"
+) }
+
+# DESCRIPTION:
+#   Uninstalls a project based on a given repository URL, commit, installation
+#   prefix, delivered installer path.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+#   $3 - prefix
+#   $4 - installer path
+# shellcheck disable=SC1090
+repo_uninstall() { (
+    cd_repo "$1" "$2" &&
+    . "$4" &&
+    uninstall "$3"
+) }
+
+#-------------------------------------------------------------------------------
+# STATE REPORT
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Prints a report of a given Git project and all associated parameters.
+# PARAMETERS:
+#   $1 - project errors
+#   $2 - project state
+#   $3 - short URL
+#   $4 - source hash
+#   $5 - target hash
+# shellcheck disable=SC2086
+print_report() {
+    # prepare given arguments
+    common_prefix="$(labelize $1)[$2] $3" # $1 must be split here, so no quotes
+    src_version="$(beautify_hash "$3" "$4")"
+    tar_version="$(beautify_hash "$3" "$5")"
+
+    case "$2" in
+        "$STATE_INSTALL") echo "$common_prefix $tar_version" ;;
+        "$STATE_UPDATE") echo "$common_prefix $tar_version <- $src_version" ;;
+        "$STATE_DOWNGRADE") echo "$common_prefix $tar_version <- $src_version" ;;
+        "$STATE_INSTALLED") echo "$common_prefix $src_version" ;;
+        "$STATE_UNINSTALL") echo "$common_prefix $src_version" ;;
+        "$STATE_UNINSTALLED") echo "$common_prefix" ;;
+        "$STATE_NOTHING") echo "$common_prefix -> $tar_version" ;;
+        "$STATE_OLD") echo "$common_prefix $src_version -> $tar_version" ;;
+        "$STATE_LATEST") echo "$common_prefix $src_version" ;;
+        "$STATE_DEV") echo "$common_prefix $src_version -> $tar_version" ;;
+    esac
+}
+
+# DESCRIPTION:
+#   Create labels from given string list. Uses IFS value to separate label
+#   texts. If at least one label is created, a trailing space will be appended.
+# PARAMETERS:
+#   $@ - string list
+labelize() {
+    labels=
+    for label_text in "$@"; do
+        labels="$labels"'<'"$label_text"'> '
+    done
+    echo "$labels"
+}
+
+# DESCRIPTION:
+#   Beautifies the given hash prepared for a use in a report. If there is a tag
+#   associated with a given hash, uses this tag. Otherwise, it makes the given
+#   hash shorter. It always succeeds.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+beautify_hash() { (
+    # check if given hash is associated with any tag
+    if cd_repo "$1" 2>/dev/null &&
+       tag_name="$(git describe --tags --exact-match "$2" 2>/dev/null)"; then
+        echo "$tag_name"
+    else # if no tag found, return short hash
+        echo "$2" | cut -c 1-7
+    fi
+) }
+
+#-------------------------------------------------------------------------------
+# ENTRY POINT CALLING
+#-------------------------------------------------------------------------------
+
+main "$@" || exit

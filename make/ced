@@ -1,0 +1,123 @@
+#!/bin/sh
+
+#-------------------------------------------------------------------------------
+# Copyright 2019 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a gim configuration editor module used when installing
+#   or uninstalling gim. It enables to modify system configuration correctly.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# NAMESPACE: ced_*
+#-------------------------------------------------------------------------------
+# shellcheck disable=SC2016
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# API - PROFILE
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Creates a shell profile with a given name containing a code, which appends a
+#   given path to an environment variable PATH. Then, it should keep the effect
+#   of a permanent change.
+# PARAMETERS:
+#   $1 - path to add
+#   $2 - profile name
+ced_add_path_profile() {
+    if echo "$PATH" | grep -q -F "$1"; then
+        return # early return if a given path is already in PATH
+    fi
+
+    ced_PROFILE_PATH="$(ced_get_profile_path)" &&
+    # expecting that profile and profile.d/ are connected for the root user
+    if ! ced_is_root && { [ ! -e "$ced_PROFILE_PATH" ] ||
+       ! grep -q -F "$ced_PROFILE_PATH".d "$ced_PROFILE_PATH"; }; then
+        # connect profile and profile.d/ if they are not
+        echo 'for profile_file in '"$ced_PROFILE_PATH"'.d/*.sh; do
+    if [ -r "$profile_file" ]; then
+        . "$profile_file"
+    fi
+done' >> "$ced_PROFILE_PATH"
+    fi &&
+    mkdir -p "$ced_PROFILE_PATH".d/ && # create a directory for modular profiles
+    echo 'export PATH="$PATH:'"$1"'"' > "$ced_PROFILE_PATH".d/"$2".sh # create a new profile
+}
+
+# DESCRIPTION:
+#   Removes a shell profile with a given name.
+# PARAMETERS:
+#   $1 - profile name
+ced_remove_profile() {
+    ced_PROFILE_PATH="$(ced_get_profile_path)" &&
+    rm -f "${ced_PROFILE_PATH:?}".d/"$1".sh # remove a given profile
+}
+
+#-------------------------------------------------------------------------------
+# API - BASH COMPLETION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Creates a new Bash tab completion module by copying a given one to an
+#   appropriate location with the same name as the original completion file
+#   name. Then, it should keep the effect of a permanent change.
+# PARAMETERS:
+#   $1 - completion file path
+ced_add_bash_completion() {
+    ced_BASH_COMPLETION_PATH="$(ced_get_bash_completion_path)" &&
+    # expecting that bash_completion and bash_completion.d/ are connected for the root user
+    if ! ced_is_root && { [ ! -e "$ced_BASH_COMPLETION_PATH" ] ||
+       ! grep -q -F "$ced_BASH_COMPLETION_PATH".d "$ced_BASH_COMPLETION_PATH"; }; then
+        # connect bash_completion and bash_completion.d/ if they are not
+        echo 'for completion_file in '"$ced_BASH_COMPLETION_PATH"'.d/*; do
+    if [ -r "$completion_file" ]; then
+        . "$completion_file"
+    fi
+done' >> "$ced_BASH_COMPLETION_PATH"
+    fi &&
+    mkdir -p "$ced_BASH_COMPLETION_PATH".d/ && # create a directory for modular bash completion
+    cp "$1" "$ced_BASH_COMPLETION_PATH".d/ # create a new bash completion module
+}
+
+# DESCRIPTION:
+#   Removes a Bash tab completion module with a given file name.
+# PARAMETERS:
+#   $1 - completion file name
+ced_remove_bash_completion() {
+    ced_BASH_COMPLETION_PATH="$(ced_get_bash_completion_path)" &&
+    rm -f "${ced_BASH_COMPLETION_PATH:?}".d/"$1" # remove a given bash completion module
+}
+
+#-------------------------------------------------------------------------------
+# FUNCTIONS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Returns a shell profile file path.
+ced_get_profile_path() {
+    if ced_is_root; then
+        echo /etc/profile
+    else
+        echo "$HOME"/.profile
+    fi
+}
+
+# DESCRIPTION:
+#   Checks whether running with root permissions.
+ced_is_root() {
+    test "$(id -u)" -eq 0
+}
+
+# DESCRIPTION:
+#   Returns a path of a file, which Bash uses for its complete modules.
+ced_get_bash_completion_path() {
+    if ced_is_root; then
+        echo /etc/bash_completion
+    else
+        echo "$HOME"/.bash_completion
+    fi
+}

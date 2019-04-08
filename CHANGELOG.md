@@ -9,11 +9,21 @@ The changes not yet present in any release are listed in this section.
 ### Added
 
 * Early checks of files and directories read from RC files are performed.
+* Essential support for macOS has been added.
+* Support for 'cami' and 'makei' installers has been added.
+
+### Changed
+
+* Installers are no longer part of the gim itself, they are modular and loadable during gim's execution now.
+* Gim stores prefix for each installed project, so that uninstallation is performed correctly.
+* Gim stores commit hash to database rather that an annotated tag name.
 
 ### Removed
 
 * Gim no longer delivers suggested build directory to Git projects. They can be built in the repository directory itself.
 * Command `version` has been removed. The current gim's version is included in output of the `about` command.
+* Option `-fail-on-prompt` has been removed. Use an appropriate Git environment variable to get the same effect.
+* Option `-force` has been renamed to `-f` to be more POSIX-friendly.
 
 ## 6.0.1 (2019-02-25)
 
@@ -118,7 +128,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Changed
 
-* Add support for TAB completion for bash shell of all possible arguments.
+* Add support for tab completion for Bash shell of all possible arguments.
 * The project's Git URL doesn't have to start with `https://`. It will be added automatically.
 
 ### Removed
@@ -165,7 +175,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
-* Support for TAB completion for bash shell.
+* Support for tab completion for Bash shell.
 
 ### Removed
 
@@ -181,7 +191,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Fixed
 
-* Gim don't accept Git URLs whose only a subpart meet a valid Git URL format.
+* Gim doesn't accept Git URLs whose only a subpart meet a valid Git URL format.
 
 ### Security
 

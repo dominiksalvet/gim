@@ -5,136 +5,77 @@
 # SPDX-License-Identifier: MIT
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a gim installation script.
 # PARAMETERS:
-#   $1 - source directory path
+#   $1 - gim directory path
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# shellcheck disable=SC1090,SC2034
 #-------------------------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------
-# GLOBAL DIRECTIVES
-#-------------------------------------------------------------------------------
-# shellcheck disable=1090
+# INITIALIZATION
 #-------------------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-# SOFTWARE DEPENDENCIES
-#-------------------------------------------------------------------------------
+# gim library path is relative to the gim path and it must exist
+GIM_LIB_DIR="$(cd -- "$1"/lib/gim/ && pwd)" &&
 
-# a list of required software
-SW_REQUIRED='command id mkdir cp dirname git touch grep head touch'
+# load file path abstraction module
+. "$GIM_LIB_DIR"/path &&
 
-# check if any piece of software is missing
-for sw in $SW_REQUIRED; do
+# check software dependencies
+while read -r sw; do
     if ! command -v -- "$sw" > /dev/null; then
         echo "$0: missing $sw software" >&2
-        exit 2
+        return 1
     fi
-done
+done < "$(path_deps)" &&
 
-#-------------------------------------------------------------------------------
-# CHECK ARGUMENTS
-#-------------------------------------------------------------------------------
+# load the default RC file
+. "$(path_default_rc)" &&
 
-# check if the source directory argument is correct
-if [ ! "$1" ] || [ ! -d "$1"/ ]; then
-    echo "$0: first argument must be the path of an existing directory" >&2
-    exit 1
-fi
+# overwrite default prefix if any delivered
+GIM_PREFIX="${PREFIX:-"$GIM_PREFIX"}" &&
 
-# verify that essential environment variables were provided
-: "${GLOBAL_CFG_DIR:?}" "${LOCAL_CFG_DIR:?}"
-
-#-------------------------------------------------------------------------------
-# LOAD VARIABLES
-#-------------------------------------------------------------------------------
-
-# load configuration from RC files
-if [ "$(id -u)" -eq 0 ]; then
-    . "$1"/rc/global && # use delivered global RC file
-    if [ -r "$GLOBAL_CFG_DIR"/gimrc ]; then
-        . "$GLOBAL_CFG_DIR"/gimrc # custom user-defined RC file
-    fi &&
-    INSTALL_TYPE=global
-else
-    . "$1"/rc/local && # use delivered local RC file
-    if [ -r "$LOCAL_CFG_DIR"/gimrc ]; then
-        . "$LOCAL_CFG_DIR"/gimrc # custom user-defined RC file
-    fi &&
-    INSTALL_TYPE=local
-fi || exit
-
-#-------------------------------------------------------------------------------
-# VERIFY VARIABLES
-#-------------------------------------------------------------------------------
-
-# verify variables that should have been loaded from an RC file
-: "${GIM_DB_DIR:?}" "${GIM_BIN_DIR:?}"
-
-# the file representing a database of locally installed projects
-GIM_STATUS_PATH="$GIM_DB_DIR"/status
-
-# verify access permissions
-if [ -e "$GIM_STATUS_PATH" ] && [ ! -w "$GIM_STATUS_PATH" ]; then
-    echo "$0: can't write to $GIM_STATUS_PATH" >&2
-    exit 2
-fi
-if [ -e "$GIM_BIN_DIR"/ ] && [ ! -w "$GIM_BIN_DIR"/ ]; then
-    echo "$0: can't write to $GIM_BIN_DIR" >&2
-    exit 2
-fi
-
-#-------------------------------------------------------------------------------
-# DEFINITIONS
-#-------------------------------------------------------------------------------
-
-# shellcheck disable=2016
-COMPLETION_SOURCING='for completion_file in "$HOME"/.bash_completion.d/*; do
-    [ -r "$completion_file" ] && . "$completion_file"
-done'
+# load the configuration editor
+. "$1"/make/ced &&
 
 #-------------------------------------------------------------------------------
 # INSTALLATION
 #-------------------------------------------------------------------------------
 
-# set up bash TAB completion
-if [ "$INSTALL_TYPE" = global ]; then
-    mkdir -p /etc/bash_completion.d/ &&
-    cp "$1"/bash/gim-completion /etc/bash_completion.d/
-else
-    touch "$HOME"/.bash_completion &&
-    if ! grep -q -F "$(echo "$COMPLETION_SOURCING" | head -n 1)" "$HOME"/.bash_completion; then
-        echo "$COMPLETION_SOURCING" >> "$HOME"/.bash_completion
-    fi &&
-    mkdir -p "$HOME"/.bash_completion.d/ &&
-    cp "$1"/bash/gim-completion "$HOME"/.bash_completion.d/
-fi || echo "$0: can't set up TAB completion" >&2
+# copy gim binary
+mkdir -p "$GIM_PREFIX"/bin/ &&
+cp "$1"/bin/gim "$GIM_PREFIX"/bin/ &&
+# copy gim library
+mkdir -p "$GIM_PREFIX"/lib/ &&
+cp -R "$1"/lib/gim/ "$GIM_PREFIX"/lib/ &&
 
-# copy default gimrc files
-if [ "$INSTALL_TYPE" = global ]; then
-    mkdir -p "$GLOBAL_CFG_DIR"/ &&
-    cp "$1"/rc/global "$GLOBAL_CFG_DIR"/gimrc-global &&
-    cp "$1"/rc/local "$GLOBAL_CFG_DIR"/gimrc-local
-else
-    mkdir -p "$LOCAL_CFG_DIR"/ &&
-    cp "$1"/rc/local "$LOCAL_CFG_DIR"/gimrc-local
-fi &&
+{ # add gim binary directory to PATH
+ced_add_path_profile "$GIM_PREFIX"/bin gim-bin-path ||
+echo "$0: can't add gim binary directory to PATH" >&2 # however, still continues
+} &&
+{ # install Bash tab completion
+ced_add_bash_completion "$1"/bash/gim-prompt ||
+echo "$0: can't set up Bash tab completion" >&2 # however, still continues
+} &&
 
-# copy program files
-mkdir -p "$GIM_BIN_DIR"/ &&
-cp "$1"/gim "$GIM_BIN_DIR"/ &&
-
-# if INSTALLER is not gim, it is required to modify gim status file manually
+# if used installer is not gim, insert to gim database must be done here
 if [ "$INSTALLER" != gim ]; then
-    # check if gim status file exists
-    if [ ! -e "$GIM_STATUS_PATH" ]; then
-        mkdir -p "$(dirname "$GIM_STATUS_PATH")" &&
-        touch "$GIM_STATUS_PATH"
-    fi &&
-    # get short hash of the current git commit
-    COMMIT_SHORT_HASH="$(git rev-parse --short HEAD)" &&
-    # use tag name pointing to the commit as gim version if any
-    commit_gim_version="$(git tag -l --points-at "$COMMIT_SHORT_HASH")" &&
-    # if no tags found, use short commit hash as gim version
-    commit_gim_version="${commit_gim_version:-"$COMMIT_SHORT_HASH"}" &&
-    echo "gitlab.com/dominiksalvet/gim $commit_gim_version" >> "$GIM_STATUS_PATH"
-fi || exit
+    # get hash of the current git commit
+    commit_hash="$(git rev-parse HEAD)" &&
+
+    # overwrite default database directory path if any delivered
+    GIM_DB_DIR="${DB_DIR:-"$GIM_DB_DIR"}" &&
+    GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
+
+    # load gim database interface module
+    . "$(path_dbi)" &&
+
+    # insert gim to database
+    dbi_init &&
+    dbi_insert 'gitlab.com/dominiksalvet/gim' "$commit_hash" "$GIM_PREFIX"
+fi
