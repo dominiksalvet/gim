@@ -219,7 +219,7 @@ load_lib() {
     GIMRC_PATH="$(path_gimrc)" &&
     INSTALLERS_DIR="$(path_installers_dir)" &&
 
-    # load default RC
+    # load default RC configuration
     . "$DEFAULT_RC_PATH"
 }
 
