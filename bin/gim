@@ -337,7 +337,7 @@ cache_autoclean() { (
 rm_rf_with_checks() {
     for dir in "$@"; do
         # never remove the root directory
-        ( cd -- "${dir:?}"/ 2>/dev/null && [ "$(pwd)" != / ] ) &&
+        ( cd -- "${dir:?}"/ 2>/dev/null && test "$(pwd)" != / ) &&
         rm -r -f -- "${dir:?}"/
     done
 }
