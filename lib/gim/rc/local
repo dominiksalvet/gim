@@ -1,0 +1,29 @@
+#!/bin/sh
+
+#-------------------------------------------------------------------------------
+# Copyright 2019 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a local RC configuration file for gim. Gim should read
+#   it when running without root permissions.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# shellcheck disable=SC2034
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# DEFINITIONS
+#-------------------------------------------------------------------------------
+
+# gim cache directory (where gim stores cached Git repositories)
+GIM_CACHE_DIR="$HOME"/.cache/gim
+
+# gim database directory (where the list of installed projects is)
+GIM_DB_DIR="$HOME"/.local/share/gim
+
+# prefix for installers used by gim (where new projects are installed)
+GIM_PREFIX="$HOME"/.local

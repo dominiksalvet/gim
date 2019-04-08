@@ -1,0 +1,107 @@
+#!/bin/sh
+
+#-------------------------------------------------------------------------------
+# Copyright 2019 Dominik Salvet
+# SPDX-License-Identifier: MIT
+# https://gitlab.com/dominiksalvet/gim
+#-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a gim database interface module. It enables to modify
+#   modify gim's database of installed projects correctly.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# PRECONDITIONS: GIM_STATUS_PATH
+#-------------------------------------------------------------------------------
+# NAMESPACE: dbi_*
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# API - DATABASE ACCESS
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Initializes gim database. It fails if it cannot create a file or in case of
+#   insufficient file permissions.
+dbi_init() {
+    # create gim status file if it does not exist
+    if [ ! -e "$GIM_STATUS_PATH" ]; then
+        mkdir -p "$(dirname "$GIM_STATUS_PATH")"/ &&
+        touch "$GIM_STATUS_PATH"
+    fi &&
+
+    # check access to gim status file
+    if [ ! -r "$GIM_STATUS_PATH" ] || [ ! -w "$GIM_STATUS_PATH" ]; then
+        echo "$0: can't access '$GIM_STATUS_PATH' file" >&2
+        return 2
+    fi
+}
+
+# DESCRIPTION:
+#   Inserts a given installation record into the gim database.
+# PARAMETERS:
+#   $1 - short URL
+#   $2 - hash
+#   $3 - prefix
+dbi_insert() {
+    echo "$1 $2 $3" >> "$GIM_STATUS_PATH"
+}
+
+# DESCRIPTION:
+#   Deletes all installation records with given URL from the gim database.
+# PARAMETERS:
+#   $1 - short URL
+dbi_delete() {
+    dbi_deleted="$(grep -F -v "$1" "$GIM_STATUS_PATH")" &&
+    echo "$dbi_deleted" > "$GIM_STATUS_PATH"
+}
+
+# DESCRIPTION:
+#   Decides whether a given URL is in the gim database.
+# PARAMETERS:
+#   $1 - short URL
+dbi_has() {
+    dbi_select_first "$1" > /dev/null
+}
+
+# DESCRIPTION:
+#   Selects the first record matching the given URL from the gim database. It
+#   fails if there is no matching record.
+# PARAMETERS:
+#   $1 - short URL
+dbi_select_first() {
+    dbi_selected="$(grep -F "$1" "$GIM_STATUS_PATH")" &&
+    echo "$dbi_selected" | head -n 1
+}
+
+#-------------------------------------------------------------------------------
+# API - RECORD EXTRACTION
+#-------------------------------------------------------------------------------
+
+# DESCRIPTION:
+#   Extracts short URL from a given database record. Succeeds even when
+#   delivered an invalid database record.
+# PARAMETERS:
+#   $1 - database record
+dbi_extract_url() {
+    echo "$1" | cut -f 1 -d ' ' -s
+}
+
+# DESCRIPTION:
+#   Extracts hash from a given database record. Succeeds even when delivered an
+#   invalid database record.
+# PARAMETERS:
+#   $1 - database record
+dbi_extract_hash() {
+    echo "$1" | cut -f 2 -d ' ' -s
+}
+
+# DESCRIPTION:
+#   Extracts prefix from a given database record. Succeeds even when delivered
+#   an invalid database record.
+# PARAMETERS:
+#   $1 - database record
+dbi_extract_prefix() {
+    echo "$1" | cut -f 3- -d ' ' -s
+}

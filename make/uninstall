@@ -5,118 +5,60 @@
 # SPDX-License-Identifier: MIT
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a gim uninstallation script.
 # PARAMETERS:
-#   $1 - source directory path
+#   $1 - gim directory path
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# shellcheck disable=SC1090,SC2034
 #-------------------------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------
-# GLOBAL DIRECTIVES
-#-------------------------------------------------------------------------------
-# shellcheck disable=1090
+# INITIALIZATION
 #-------------------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-# SOFTWARE DEPENDENCIES
-#-------------------------------------------------------------------------------
+# gim library path is relative to the gim path and it must exist
+GIM_LIB_DIR="$(cd -- "$1"/lib/gim/ && pwd)" &&
 
-# a list of required software
-SW_REQUIRED='command id git rm grep mv'
+# load file path abstraction module
+. "$GIM_LIB_DIR"/path &&
 
-# check if any piece of software is missing
-for sw in $SW_REQUIRED; do
-    if ! command -v -- "$sw" > /dev/null; then
-        echo "$0: missing $sw software" >&2
-        exit 2
-    fi
-done
+# load the default RC file
+. "$(path_default_rc)" &&
 
-#-------------------------------------------------------------------------------
-# CHECK ARGUMENTS
-#-------------------------------------------------------------------------------
+# overwrite default prefix if any delivered
+GIM_PREFIX="${PREFIX:-"$GIM_PREFIX"}" &&
 
-# check if the source directory argument is correct
-if [ ! "$1" ] || [ ! -d "$1"/ ]; then
-    echo "$0: first argument must be the path of an existing directory" >&2
-    exit 1
-fi
-
-# verify that essential environment variables were provided
-: "${GLOBAL_CFG_DIR:?}" "${LOCAL_CFG_DIR:?}"
-
-#-------------------------------------------------------------------------------
-# LOAD VARIABLES
-#-------------------------------------------------------------------------------
-
-# load configuration from RC files
-if [ "$(id -u)" -eq 0 ]; then
-    . "$1"/rc/global && # use delivered global RC file
-    if [ -r "$GLOBAL_CFG_DIR"/gimrc ]; then
-        . "$GLOBAL_CFG_DIR"/gimrc # custom user-defined RC file
-    fi &&
-    INSTALL_TYPE=global
-else
-    . "$1"/rc/local && # use delivered local RC file
-    if [ -r "$LOCAL_CFG_DIR"/gimrc ]; then
-        . "$LOCAL_CFG_DIR"/gimrc # custom user-defined RC file
-    fi &&
-    INSTALL_TYPE=local
-fi || exit
-
-#-------------------------------------------------------------------------------
-# VERIFY VARIABLES
-#-------------------------------------------------------------------------------
-
-# verify variables that should have been loaded from an RC file
-: "${GIM_DB_DIR:?}" "${GIM_BIN_DIR:?}"
-
-# the file representing a database of locally installed projects
-GIM_STATUS_PATH="$GIM_DB_DIR"/status
-
-# verify access permissions
-if [ -e "$GIM_STATUS_PATH" ] && [ ! -w "$GIM_STATUS_PATH" ]; then
-    echo "$0: can't write to $GIM_STATUS_PATH" >&2
-    exit 2
-fi
-if [ -e "$GIM_BIN_DIR"/ ] && [ ! -w "$GIM_BIN_DIR"/ ]; then
-    echo "$0: can't write to $GIM_BIN_DIR" >&2
-    exit 2
-fi
+# load the configuration editor
+. "$1"/make/ced &&
 
 #-------------------------------------------------------------------------------
 # UNINSTALLATION
 #-------------------------------------------------------------------------------
 
-# remove program files
-rm -f "$GIM_BIN_DIR"/gim &&
+# remove gim binary
+rm -f "${GIM_PREFIX:?}"/bin/gim &&
+# remove gim library
+rm -r -f "${GIM_PREFIX:?}"/lib/gim/ &&
 
-# remove default gimrc files
-if [ "$INSTALL_TYPE" = global ]; then
-    rm -f "$GLOBAL_CFG_DIR"/gimrc-local &&
-    rm -f "$GLOBAL_CFG_DIR"/gimrc-global
-else
-    rm -f "$LOCAL_CFG_DIR"/gimrc-local
-fi &&
+# remove gim binary directory from PATH
+ced_remove_profile gim-bin-path &&
+# remove Bash tab completion
+ced_remove_bash_completion gim-prompt &&
 
-# remove TAB completion
-if [ "$INSTALL_TYPE" = global ]; then
-    rm -f /etc/bash_completion.d/gim-completion
-else
-    rm -f "$HOME"/.bash_completion.d/gim-completion
-fi &&
-
-# if INSTALLER is not gim, it is required to modify gim status file manually
+# if used installer is not gim, delete from gim database must be done here
 if [ "$INSTALLER" != gim ]; then
-    if [ -e "$GIM_STATUS_PATH" ]; then
-        # get short hash of the current git commit
-        COMMIT_SHORT_HASH="$(git rev-parse --short HEAD)" &&
-        # use tag name pointing to the commit as gim version if any
-        commit_gim_version="$(git tag -l --points-at "$COMMIT_SHORT_HASH")" &&
-        # if no tags found, use short commit hash as gim version
-        commit_gim_version="${commit_gim_version:-"$COMMIT_SHORT_HASH"}" &&
-        grep -F -x -v "gitlab.com/dominiksalvet/gim $commit_gim_version" "$GIM_STATUS_PATH" > "$GIM_STATUS_PATH".tmp &&
-        mv "$GIM_STATUS_PATH".tmp "$GIM_STATUS_PATH"
-    else
-        echo > "$GIM_STATUS_PATH"
-    fi
-fi || exit
+    # overwrite default database directory path if any delivered
+    GIM_DB_DIR="${DB_DIR:-"$GIM_DB_DIR"}" &&
+    GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
+    
+    # load gim database interface module
+    . "$(path_dbi)" &&
+
+    # delete gim from database
+    dbi_init &&
+    dbi_delete 'gitlab.com/dominiksalvet/gim'
+fi

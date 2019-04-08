@@ -7,7 +7,7 @@
 [![semver 2.0.0](https://img.shields.io/badge/semver-2.0.0-blue.svg)](https://semver.org/)
 [![gim compliant](https://img.shields.io/badge/gim-compliant-571997.svg)](https://gitlab.com/dominiksalvet/gim)
 
-> A simple smart installation manager for your Git projects.
+> A simple installation manager for your Git projects.
 
 What about to **install and update** your favorite Git projects like this?
 

@@ -5,12 +5,8 @@
 # SPDX-License-Identifier: MIT
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
-
-#-------------------------------------------------------------------------------
-# DESCRIPTION
-#-------------------------------------------------------------------------------
-# This file is expected to be sourced. It implements a TAB completion for Bash
-# terminal environments.
+# DESCRIPTION:
+#   This file implements a prompting type tab completion for Bash shells.
 #-------------------------------------------------------------------------------
 
 
@@ -25,24 +21,24 @@ SW_REQUIRED='command compgen complete'
 for sw in $SW_REQUIRED; do
     if ! command -v -- "$sw" > /dev/null; then
         echo "$0: missing $sw software" >&2
-        exit 2
+        exit 1
     fi
 done
 
 #-------------------------------------------------------------------------------
-# APPLY TAB COMPLETION
+# APPLY COMPLETION
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Prepare a hint consisting of words that can be used from the current part of
-#   word.
+#   Prepare a textual hint consisting of words that can be used from the current
+#   part of the word.
 _gim() {
     # a hint will be shown only when a part of first argument is written
     if [ "$COMP_CWORD" -eq 1 ]; then
         # generate hint from available gim's action
-        COMPREPLY=($(compgen -W "install uninstall status -fail-on-prompt -force autoclean clean help about" -- "${COMP_WORDS[COMP_CWORD]}"))
+        COMPREPLY=($(compgen -W "install uninstall status -f autoclean clean help about" -- "${COMP_WORDS[COMP_CWORD]}"))
     fi
 }
 
-# assign a function to be called when TAB complete is required when gim is used
+# assign a function to be called when tab complete is required when gim is used
 complete -F _gim gim

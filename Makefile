@@ -3,64 +3,47 @@
 # SPDX-License-Identifier: MIT
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
+# DESCRIPTION:
+#   This file represents a makefile for gim. It support both the installation
+#   and the uninstallation of gim. It also respects some macro assignments.
+#-------------------------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------
 # DEFINITIONS
 #-------------------------------------------------------------------------------
 
-# environment configuration
-SHELL := /bin/sh
-ECHO := echo
-SED := sed
-COLUMN := column
-TRUE := true
+.POSIX: # this file should be processed as a POSIX makefile
+.SILENT: # do not print the lines that are being executed
 
-# make directory definitions
-MAKE_DIR := make
-SRC_DIR := src
+# environment definitions
+ECHO = echo
 
-# gim directory definitions, exported for called scripts
-export GLOBAL_CFG_DIR := /etc/gim
-export LOCAL_CFG_DIR := $(HOME)/.config/gim
-
-#-------------------------------------------------------------------------------
-# HELP GENERATOR
-#-------------------------------------------------------------------------------
-
-# sed script - get automatically target descriptions from a makefile
-define GET_TARGET_DESCRIPTIONS
-/^[^:=#[:blank:]]+[[:blank:]]*:[^:=#]*#/!d
-s/[:=#[:blank:]][^#]*//
-s/[[:blank:]#]*#[[:blank:]#]*/#/g
-s/^/  /
-endef
-export GET_TARGET_DESCRIPTIONS
-
-# shows generated help of a given makefile from it's comments
-define show_generated_help
-	@$(ECHO) 'USAGE:'
-	@$(ECHO) '  make [TARGET...]'
-	@$(ECHO)
-	@$(ECHO) 'TARGET:'
-	@$(SED) -E -e "$$GET_TARGET_DESCRIPTIONS" $(1) | $(COLUMN) -t -s '#'
-endef
+# directory definitions
+GIM_DIR = .
 
 #-------------------------------------------------------------------------------
 # TARGETS
 #-------------------------------------------------------------------------------
 
-.PHONY: all install uninstall help
+all: # there is no building required
 
-# there is no building required
-all: # default, does nothing
-	@$(TRUE)
+install:
+	./'$(GIM_DIR)'/make/install '$(GIM_DIR)'
 
-install: # install the entire project automatically
-	@./$(MAKE_DIR)/install '$(SRC_DIR)'
+uninstall:
+	./'$(GIM_DIR)'/make/uninstall '$(GIM_DIR)'
 
-uninstall: # uninstall the project
-	@./$(MAKE_DIR)/uninstall '$(SRC_DIR)'
-
-help: # show this help
-	$(call show_generated_help,Makefile)
+help:
+	$(ECHO) 'USAGE:'
+	$(ECHO) '  make [TARGET...] [MACRO=VALUE...]'
+	$(ECHO)
+	$(ECHO) 'TARGET:'
+	$(ECHO) '  all        do nothing (default)'
+	$(ECHO) '  install    install gim'
+	$(ECHO) '  uninstall  uninstall gim'
+	$(ECHO) '  help       show this help'
+	$(ECHO)
+	$(ECHO) 'MACRO:'
+	$(ECHO) '  PREFIX  installation path prefix'
+	$(ECHO) '  DB_DIR  database directory path'
