@@ -453,7 +453,7 @@ cleanup_runtime() {
 # PARAMETERS:
 #   $1 - action
 #   $2 - short URL
-#   $3 - fresh prefix
+#   $3 - suggested prefix
 execute_action() {
     # getting source (already installed) project information
     src_db_record="$(get_any_db_record "$2")" &&
