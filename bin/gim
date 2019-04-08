@@ -160,7 +160,7 @@ $HINT_MESSAGE" >&2
                     ;;
                 clean)
                     init_runtime &&
-                    rm_rf_with_checks "${GIM_CACHE_REPO_DIR:?}"/*
+                    safe_rm_rf_dir "${GIM_CACHE_REPO_DIR:?}"
                     return
                     ;;
                 help) echo "$HELP_MESSAGE"; return ;;
@@ -320,7 +320,7 @@ cache_autoclean() { (
             # if the repository is not in the database, it can be removed
             if ! dbi_has "${url:?}"; then
                 # remove the project's cached Git repository
-                rm_rf_with_checks "${url:?}"
+                safe_rm_rf_dir "${url:?}"
             fi
         fi
     done
@@ -330,16 +330,17 @@ cache_autoclean() { (
 ) }
 
 # DESCRIPTION:
-#   Removes given directories with their content performing a check for the root
-#   directory that is be prevented to be removed.
+#   Removes a given existing directory with its content performing a check for
+#   the root directory that is prevented to be removed and fails in that case.
+#   This function works only with the first parameter, others are ignored!
 # PARAMETERS:
-#   $@ - directories paths
-rm_rf_with_checks() {
-    for dir in "$@"; do
-        # never remove the root directory
-        ( cd -- "${dir:?}"/ 2>/dev/null && test "$(pwd)" != / ) &&
-        rm -r -f -- "${dir:?}"/
-    done
+#   $1 - directory path
+safe_rm_rf_dir() {
+    if [ -d "${1:?}"/ ]; then # check if the directory exists
+        # remove only if the given directory path is not the root directory path
+        ( cd -- "${1:?}"/ 2>/dev/null && test "$PWD" != / && test "$(pwd -P)" != / ) &&
+        rm -r -f -- "${1:?}"/
+    fi
 }
 
 #-------------------------------------------------------------------------------
