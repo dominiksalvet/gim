@@ -326,7 +326,7 @@ cache_autoclean() { (
     done
 
     # remove maintainer and hostname directories if they are empty
-    rmdir -p ./*/*/ 2>/dev/null; true # succeed even if there are not any
+    rmdir -p -- */*/ 2>/dev/null; true # succeed even if there are not any
 ) }
 
 # DESCRIPTION:
@@ -337,8 +337,12 @@ cache_autoclean() { (
 #   $1 - directory path
 safe_rm_rf_dir() {
     if [ -d "${1:?}"/ ]; then # check if the directory exists
-        # remove only if the given directory path is not the root directory path
-        ( cd -- "${1:?}"/ 2>/dev/null && test "$PWD" != / && test "$(pwd -P)" != / ) &&
+        ( # remove only if the given directory path is not the root directory path
+            cd -- "${1:?}"/ 2>/dev/null &&
+            test "$PWD" != / &&
+            resolved_pwd="$(pwd -P)" &&
+            test "$resolved_pwd" != /
+        ) &&
         rm -r -f -- "${1:?}"/
     fi
 }
