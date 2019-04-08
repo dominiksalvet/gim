@@ -129,7 +129,7 @@ def_global_vars() {
 process_args() {
     action=
     accept_action_options=true
-    
+
     for arg in "$@"; do # process each argument individually
         if [ "$action" ]; then
             if "$accept_action_options"; then
