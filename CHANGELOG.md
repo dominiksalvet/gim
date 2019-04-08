@@ -106,7 +106,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Fixed
 
-* Remove untracked files and directories before working with a cached git repository.
+* Remove untracked files and directories before working with a cached Git repository.
 
 ## 3.3.0 (2018-09-26)
 
