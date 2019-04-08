@@ -20,20 +20,20 @@
 # INITIALIZATION
 #-------------------------------------------------------------------------------
 
-# gim library path is relative to the gim path and it must exist
+# gim library path is relative to the gim directory path and it must exist
 GIM_LIB_DIR="$(cd -- "$1"/lib/gim/ && pwd)" &&
-
 # load file path abstraction module
 . "$GIM_LIB_DIR"/path &&
 
-# load the default RC file
-. "$(path_default_rc)" &&
+# source required files
+. "$(path_dbi)" && # gim database interface module
+. "$1"/make/ced && # gim configuration editor module
+. "$(path_default_rc)" && # gim default RC configuration
 
-# overwrite default prefix if any delivered
-GIM_PREFIX="${PREFIX:-"$GIM_PREFIX"}" &&
-
-# load the configuration editor
-. "$1"/make/ced &&
+# either use a delivered value or use a default value from RC configuration
+GIM_PREFIX="${PREFIX:-"$GIM_PREFIX"}" && # gim installation path prefix
+GIM_DB_DIR="${DB_DIR:-"$GIM_DB_DIR"}" && # gim database directory path
+GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
 
 #-------------------------------------------------------------------------------
 # UNINSTALLATION
@@ -49,16 +49,8 @@ ced_remove_profile gim-bin-path &&
 # remove Bash tab completion
 ced_remove_bash_completion gim-prompt &&
 
-# if used installer is not gim, delete from gim database must be done here
+# if gim installer is not used, deletion from gim database must be done here
 if [ "$INSTALLER" != gim ]; then
-    # overwrite default database directory path if any delivered
-    GIM_DB_DIR="${DB_DIR:-"$GIM_DB_DIR"}" &&
-    GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
-    
-    # load gim database interface module
-    . "$(path_dbi)" &&
-
-    # delete gim from database
-    dbi_init &&
+    dbi_init && # initialize gim database, then delete installation records
     dbi_delete 'gitlab.com/dominiksalvet/gim'
 fi

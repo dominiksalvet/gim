@@ -20,9 +20,8 @@
 # INITIALIZATION
 #-------------------------------------------------------------------------------
 
-# gim library path is relative to the gim path and it must exist
+# gim library path is relative to the gim directory path and it must exist
 GIM_LIB_DIR="$(cd -- "$1"/lib/gim/ && pwd)" &&
-
 # load file path abstraction module
 . "$GIM_LIB_DIR"/path &&
 
@@ -34,14 +33,15 @@ while read -r sw; do
     fi
 done < "$(path_deps)" &&
 
-# load the default RC file
-. "$(path_default_rc)" &&
+# source required files
+. "$(path_dbi)" && # gim database interface module
+. "$1"/make/ced && # gim configuration editor module
+. "$(path_default_rc)" && # gim default RC configuration
 
-# overwrite default prefix if any delivered
-GIM_PREFIX="${PREFIX:-"$GIM_PREFIX"}" &&
-
-# load the configuration editor
-. "$1"/make/ced &&
+# either use a delivered value or use a default value from RC configuration
+GIM_PREFIX="${PREFIX:-"$GIM_PREFIX"}" && # gim installation path prefix
+GIM_DB_DIR="${DB_DIR:-"$GIM_DB_DIR"}" && # gim database directory path
+GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
 
 #-------------------------------------------------------------------------------
 # INSTALLATION
@@ -63,19 +63,9 @@ ced_add_bash_completion "$1"/bash/gim-prompt ||
 echo "$0: can't set up Bash tab completion" >&2 # however, still continues
 } &&
 
-# if used installer is not gim, insert to gim database must be done here
+# if gim installer is not used, insertion to gim database must be done here
 if [ "$INSTALLER" != gim ]; then
-    # get hash of the current git commit
-    commit_hash="$(git rev-parse HEAD)" &&
-
-    # overwrite default database directory path if any delivered
-    GIM_DB_DIR="${DB_DIR:-"$GIM_DB_DIR"}" &&
-    GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
-
-    # load gim database interface module
-    . "$(path_dbi)" &&
-
-    # insert gim to database
-    dbi_init &&
+    commit_hash="$(git rev-parse HEAD)" && # get hash of the current Git commit
+    dbi_init && # initialize gim database, then insert an installation record
     dbi_insert 'gitlab.com/dominiksalvet/gim' "$commit_hash" "$GIM_PREFIX"
 fi
