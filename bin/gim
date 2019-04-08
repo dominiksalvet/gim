@@ -330,9 +330,9 @@ cache_autoclean() { (
 ) }
 
 # DESCRIPTION:
-#   Removes a given existing directory with its content performing a check for
-#   the root directory that is prevented to be removed and fails in that case.
-#   This function uses only the first parameter, others are ignored!
+#   Removes a given directory with its content performing a check for the root
+#   directory that is prevented to be removed and fails in that case. This
+#   function uses only the first parameter, others are ignored!
 # PARAMETERS:
 #   $1 - directory path
 safe_rm_rf_dir() {
