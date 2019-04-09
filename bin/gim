@@ -791,8 +791,8 @@ has_installer_path() {
 # PARAMETERS:
 #   $1 - prefix
 init_prefix() { (
-    mkdir -p "$1"/ && # create the prefix directory if not existing
-    cd "$1"/ && pwd # get prefix absolute path
+    mkdir -p -- "$1"/ && # create the prefix directory if not existing
+    cd -- "$1"/ && pwd # get prefix absolute path
 ) }
 
 # DESCRIPTION:
