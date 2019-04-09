@@ -29,10 +29,10 @@ GIM_DIR = .
 all: # there is no building required
 
 install:
-	./'$(GIM_DIR)'/make/install '$(GIM_DIR)'
+	'$(GIM_DIR)'/make/install '$(GIM_DIR)'
 
 uninstall:
-	./'$(GIM_DIR)'/make/uninstall '$(GIM_DIR)'
+	'$(GIM_DIR)'/make/uninstall '$(GIM_DIR)'
 
 help:
 	$(ECHO) 'USAGE:'
@@ -45,5 +45,6 @@ help:
 	$(ECHO) '  help       show this help'
 	$(ECHO)
 	$(ECHO) 'MACRO:'
-	$(ECHO) '  PREFIX  installation path prefix'
-	$(ECHO) '  DB_DIR  database directory path'
+	$(ECHO) '  PREFIX     installation prefix'
+	$(ECHO) '  INSTALLER  installer name (caller)'
+	$(ECHO) '  DB_DIR     installer database directory'
