@@ -32,6 +32,9 @@ ced_add_path_profile() {
     if echo "$PATH" | grep -q -F "$1"; then
         return # early return if a given path is already in PATH
     fi
+    if echo "$1" | grep -q -F ':'; then
+        return 1 # new PATH item must not contain ':'
+    fi
 
     ced_PROFILE_PATH="$(ced_get_profile_path)" &&
     # expecting that profile and profile.d/ are connected for the root user
