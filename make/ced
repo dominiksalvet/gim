@@ -29,11 +29,11 @@
 #   $1 - path to add
 #   $2 - profile name
 ced_add_path_profile() {
-    if echo "$PATH" | grep -q -F "$1"; then
+    if echo "$PATH" | grep -q -F -- "$1"; then
         return # early return if a given path is already in PATH
     fi
-    if echo "$1" | grep -q -F ':'; then
-        return 1 # new PATH item must not contain ':'
+    if [ "$(echo "$1" | cut -c 1)" != / ] || echo "$1" | grep -q -F ':'; then
+        return 1 # new PATH item must be an absolute path and must not contain ':' character
     fi
 
     ced_PROFILE_PATH="$(ced_get_profile_path)" &&
@@ -83,7 +83,7 @@ ced_add_bash_completion() {
 done' >> "$ced_BASH_COMPLETION_PATH"
     fi &&
     mkdir -p "$ced_BASH_COMPLETION_PATH".d/ && # create a directory for modular Bash completion
-    cp "$1" "$ced_BASH_COMPLETION_PATH".d/ # create a new Bash completion module
+    cp -- "$1" "$ced_BASH_COMPLETION_PATH".d/ # create a new Bash completion module
 }
 
 # DESCRIPTION:
