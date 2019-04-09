@@ -28,7 +28,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Security
 
-* External commands are called using absolute paths to their binaries, ignoring `PATH` environment variable value.
+* As soon as binary paths are created for external commands, `PATH` environment variable will be ignored.
 
 ## 6.0.1 (2019-02-25)
 
