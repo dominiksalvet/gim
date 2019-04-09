@@ -502,17 +502,17 @@ execute_action() {
 #   $1 - short URL
 get_any_db_record() { (
     cd_repo "$1" master || return
-    mirror_urls_path=gim/mirror-urls
+    mirrors_path=gim/mirrors
 
-    # search the project's gim/mirror-urls file
-    if [ -r "$mirror_urls_path" ]; then
+    # search the project's gim/mirrors file
+    if [ -r "$mirrors_path" ]; then
         while read -r mirror_url; do
             mirror_url="$(url_to_short_url "$mirror_url")" &&
             if db_record="$(dbi_select_first "$mirror_url")"; then
                 echo "$db_record"
                 return
             fi
-        done < "$mirror_urls_path"
+        done < "$mirrors_path"
     # use the delivered repository URL to search an installation record
     elif db_record="$(dbi_select_first "$1")"; then
         echo "$db_record"
@@ -720,14 +720,14 @@ add_error() {
 #   $2 - hash
 is_supported_commit() { (
     cd_repo "$1" master || return
-    unsupported_versions_path=gim/unsupported-versions
+    unsupported_path=gim/unsupported
 
-    if [ -r "$unsupported_versions_path" ]; then
-        while read -r unsupported_version; do
-            if [ "$2" = "$(git rev-parse "$unsupported_version"'^{}' 2>/dev/null)" ]; then
+    if [ -r "$unsupported_path" ]; then
+        while read -r unsupported_tag_name; do
+            if [ "$2" = "$(git rev-parse "$unsupported_tag_name"'^{}' 2>/dev/null)" ]; then
                 return 1
             fi
-        done < "$unsupported_versions_path"
+        done < "$unsupported_path"
     fi
 ) }
 

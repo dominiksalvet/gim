@@ -18,6 +18,7 @@ The changes not yet present in any release are listed in this section.
 * Gim stores commit hash to database rather that an annotated tag name.
 * Installation and uninstallation of gim itself respects values of `PREFIX` and `DB_DIR` variables.
 * Installation of gim itself may safely modify `PATH` variable if gim binary path is not present.
+* Gim project control files have been renamed; *gim/unsupported-versions* -> *gim/unsupported*, *gim/mirror-urls* -> *gim/mirrors*.
 
 ### Removed
 

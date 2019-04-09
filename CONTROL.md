@@ -6,11 +6,11 @@ This file describes advanced ways to control gim-related issues in your Git proj
 
 To control gim's execution from a Git repository, create *gim* directory in the repository containing files from the following list according to specific needs or requirements. These control files are used from **the most recent commit** of the repository's master branch.
 
-* *mirror-urls*
+* *mirrors*
   * A list of **all URLs** that the repository is available on. Supported URL format is the same as for gim itself.
   * Has one item per line, its content ends with a newline character.
   * Useful when renaming a repository to stay available on both the old and the new URL as the same project for gim; first create/update this file and then rename the repository itself.
-* *unsupported-versions*
+* *unsupported*
   * A list of repository's tag names whose commits are marked as not supported under gim and gim implicitly refuses to work with them.
   * Has one item per line, its content ends with a newline character.
   * Useful in case of a bad release or when a version is explicitly unsupported; just add the version of the release to this file.
