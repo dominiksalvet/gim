@@ -27,8 +27,8 @@
 dbi_init() {
     # create gim status file if it does not exist
     if [ ! -e "$GIM_STATUS_PATH" ]; then
-        mkdir -p "$(dirname "$GIM_STATUS_PATH")"/ &&
-        touch "$GIM_STATUS_PATH"
+        mkdir -p -- "$(dirname -- "$GIM_STATUS_PATH")"/ &&
+        touch -- "$GIM_STATUS_PATH"
     fi &&
 
     # check access to gim status file
@@ -53,7 +53,7 @@ dbi_insert() {
 # PARAMETERS:
 #   $1 - short URL
 dbi_delete() {
-    dbi_deleted="$(grep -F -v "$1" "$GIM_STATUS_PATH")" &&
+    dbi_deleted="$(grep -F -v "$1" -- "$GIM_STATUS_PATH")" &&
     echo "$dbi_deleted" > "$GIM_STATUS_PATH"
 }
 
@@ -71,7 +71,7 @@ dbi_has() {
 # PARAMETERS:
 #   $1 - short URL
 dbi_select_first() {
-    dbi_selected="$(grep -F "$1" "$GIM_STATUS_PATH")" &&
+    dbi_selected="$(grep -F "$1" -- "$GIM_STATUS_PATH")" &&
     echo "$dbi_selected" | head -n 1
 }
 
