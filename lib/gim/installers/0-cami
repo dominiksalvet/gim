@@ -31,7 +31,7 @@ can_install() {
 #   Installs the project of the current directory to a given prefix path. If
 #   installation is not successful, it must fail.
 # PARAMETERS:
-#   $1 - path prefix
+#   $1 - absolute path prefix
 install() {
     ./configure --prefix="$1" &&
     make &&
@@ -54,7 +54,7 @@ can_uninstall() {
 #   Uninstalls the project of the current directory from a given prefix path. If
 #   uninstallation is not successful, it must fail.
 # PARAMETERS:
-#   $1 - path prefix
+#   $1 - absolute path prefix
 uninstall() {
     ./configure --prefix="$1" &&
     make uninstall
