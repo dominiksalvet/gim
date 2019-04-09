@@ -12,7 +12,7 @@
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-# shellcheck disable=SC1090,SC2034
+# shellcheck disable=SC1090,SC1091,SC2034
 #-------------------------------------------------------------------------------
 
 
@@ -35,12 +35,16 @@ done < "$(path_deps)" &&
 
 # source required files
 . "$(path_dbi)" && # gim database interface module
-. "$1"/make/ced && # gim configuration editor module
+. -- "$1"/make/ced && # gim configuration editor module
 . "$(path_default_rc)" && # gim default RC configuration
 
 # either use a delivered value or use a default value from RC configuration
 GIM_PREFIX="${PREFIX:-"$GIM_PREFIX"}" && # gim installation path prefix
 GIM_DB_DIR="${DB_DIR:-"$GIM_DB_DIR"}" && # gim database directory path
+
+# prepare the used variable values
+# create prefix directory and transform its path to a normalized absolute path
+GIM_PREFIX="$(mkdir -p -- "$GIM_PREFIX"/ && cd -- "$GIM_PREFIX"/ && pwd)" &&
 GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
 
 #-------------------------------------------------------------------------------
@@ -49,10 +53,10 @@ GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
 
 # copy gim binary
 mkdir -p "$GIM_PREFIX"/bin/ &&
-cp "$1"/bin/gim "$GIM_PREFIX"/bin/ &&
+cp -- "$1"/bin/gim "$GIM_PREFIX"/bin/ &&
 # copy gim library
 mkdir -p "$GIM_PREFIX"/lib/ &&
-cp -R "$1"/lib/gim/ "$GIM_PREFIX"/lib/ &&
+cp -R -- "$1"/lib/gim/ "$GIM_PREFIX"/lib/ &&
 
 { # add gim binary directory to PATH
 ced_add_path_profile "$GIM_PREFIX"/bin gim-bin-path ||
