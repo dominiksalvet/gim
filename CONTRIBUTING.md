@@ -6,22 +6,20 @@ The development of this project is published on [this website](https://gitlab.co
 
 If you have any suggestions on development of the project, follow these steps:
 
-1. Take a look at [issues](https://gitlab.com/dominiksalvet/gim/issues) of the project and **make sure that the same suggestion wasn't already reported**.
+1. Take a look at [issues](https://gitlab.com/dominiksalvet/gim/issues) of the project and make sure that the same suggestion has not been already reported.
 2. If not, open a [new issue](https://gitlab.com/dominiksalvet/gim/issues/new). In the issue, **try to provide as much relevant information as possible**.
 
 ## Merge requests
 
-**Except the merge requests with bug fixes**, every merge request must precede creating an issue as described in the [previous section](#suggestions) and also must be approved. Then, continue as described below:
+**Excluding merge requests with bug fixes**, every merge request must precede creating an issue as described in the [previous section](#suggestions) and must be approved. Then continue as described below:
 
 1. Fork this project.
-2. Create a new branch with descriptive name according to your changes.
-3. Note your changes to the [Unreleased](CHANGELOG.md#unreleased) section in the [*CHANGELOG.md*](CHANGELOG.md) file.
-4. Commit and push your changes to the branch.
-5. Submit a [new merge request](https://gitlab.com/dominiksalvet/gim/merge_requests/new) with **clear description of the problem and it's solution**. Also include the relevant issue number if applicable.
-
----
-
-If you edit any source code, retain its original formatting.
+2. Create a new branch with a meaningful name.
+3. Make your changes in the branch.
+4. Add notable changes to the [*CHANGELOG.md*](CHANGELOG.md) file.
+5. Make sure **all changes are consistent** with used formatting and conventions.
+6. Push all your changes to the branch.
+7. Submit a [new merge request](https://gitlab.com/dominiksalvet/gim/merge_requests/new) with **a clear description of the problem and its solution** with relevant issue numbers if any exist.
 
 ## License
 
