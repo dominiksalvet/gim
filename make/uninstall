@@ -27,7 +27,7 @@ GIM_LIB_DIR="$(cd -- "$1"/lib/gim/ && pwd)" &&
 
 # source required files
 . "$(path_dbi)" && # gim database interface module
-. -- "$1"/make/ced && # gim configuration editor module
+. "$1"/make/ced && # gim configuration editor module
 . "$(path_default_rc)" && # gim default RC configuration
 
 # either use a delivered value or use a default value from RC configuration
@@ -42,9 +42,9 @@ GIM_STATUS_PATH="$GIM_DB_DIR"/status && # derive gim status path
 #-------------------------------------------------------------------------------
 
 # remove gim binary
-rm -f "${GIM_PREFIX:?}"/bin/gim &&
+rm -f -- "${GIM_PREFIX:?}"/bin/gim &&
 # remove gim library
-rm -r -f "${GIM_PREFIX:?}"/lib/gim/ &&
+rm -r -f -- "${GIM_PREFIX:?}"/lib/gim/ &&
 
 # remove gim binary directory from PATH
 ced_remove_profile gim-bin-path &&

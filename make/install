@@ -35,7 +35,7 @@ done < "$(path_deps)" &&
 
 # source required files
 . "$(path_dbi)" && # gim database interface module
-. -- "$1"/make/ced && # gim configuration editor module
+. "$1"/make/ced && # gim configuration editor module
 . "$(path_default_rc)" && # gim default RC configuration
 
 # either use a delivered value or use a default value from RC configuration
