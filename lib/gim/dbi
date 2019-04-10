@@ -54,14 +54,18 @@ dbi_insert() {
 #   $1 - short URL
 dbi_delete() {
     dbi_deleted="$(grep -F -v "$1" -- "$GIM_STATUS_PATH")"
+    dbi_grep_status="$?" # store exit status of the grep
 
-    dbi_grep_status="$?" # store exit status of called grep
-    # do not return fail when grep failed because there were no lines selected
-    if [ "$dbi_grep_status" -ne 0 ] && [ "$dbi_grep_status" -ne 1 ]; then
+    # if there is no error, write back an updated status file contents
+    if [ "$dbi_grep_status" -eq 0 ]; then
+        echo "$dbi_deleted" > "$GIM_STATUS_PATH"
+    # if there were no lines selected, clear the status file contents
+    elif [ "$dbi_grep_status" -eq 1 ]; then
+        true > "$GIM_STATUS_PATH"
+    # in case of any other error, propagate it further
+    else
         return "$dbi_grep_status"
     fi
-
-    echo "$dbi_deleted" > "$GIM_STATUS_PATH"
 }
 
 # DESCRIPTION:
