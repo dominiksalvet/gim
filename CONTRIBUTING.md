@@ -25,7 +25,7 @@ If you have any suggestions on development of the project, follow these steps:
 
 ## Merge requests
 
-**Excluding merge requests with bug fixes**, every merge request must precede creating an issue as described in the [previous section](#suggestions) and must be approved. Then continue as described below:
+**Excluding merge requests with bug fixes**, every merge request must be preceded by creating an issue as described in the [previous section](#suggestions) and must be approved. Then continue as described below:
 
 1. Fork this project.
 2. Create a new branch with a meaningful name.
