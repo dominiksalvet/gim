@@ -817,7 +817,7 @@ is_ancestor_commit() { (
 # PARAMETERS:
 #   $1 - short URL
 #   $2 - hash
-#   $3 - prefix
+#   $3 - absolute path prefix
 #   $4 - installer path
 # shellcheck disable=SC1090
 repo_install() { (
@@ -832,7 +832,7 @@ repo_install() { (
 # PARAMETERS:
 #   $1 - short URL
 #   $2 - hash
-#   $3 - prefix
+#   $3 - absolute path prefix
 #   $4 - installer path
 # shellcheck disable=SC1090
 repo_uninstall() { (
