@@ -11,7 +11,7 @@ An installer is a shell script module that implements a specific method to insta
 3. Function `can_uninstall` decides whether a project in the current directory can be uninstalled.
 4. Function `install` installs a project in the current directory to an absolute path prefix given as the first parameter.
 5. Function `uninstall` uninstalls a project in the current directory from an absolute path prefix given as the first parameter.
-6. Names of all other functions and all variables must begin with an `i_` prefix.
+6. Names of all other functions and all variables begin with an `i_` prefix.
 
 If you want to create a new installer, follow steps described in the [Suggestions](#suggestions) section and get in touch with a developer. Then follow steps described in the [Merge requests](#merge-requests) section. You may also take a look at already implemented installers in the [*lib/gim/installers*](lib/gim/installers) directory.
 
