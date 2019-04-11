@@ -1,10 +1,10 @@
 # Contributing
 
-The development of this project is published on [this website](https://gitlab.com/dominiksalvet/gim) and **everyone is welcome to contribute**. Here is described how.
+The development of gim is published on [this website](https://gitlab.com/dominiksalvet/gim) and **everyone is welcome to contribute**. Here is described how.
 
 ## Create a new installer
 
-An installer is a shell script module that implements a specific method to install and uninstall projects. It meets the following rules:
+An installer is a shell script module that implements a specific method to install and uninstall projects. Gim uses those installers to implement installation and uninstallation of Git projects. Every installer meets the following rules:
 
 1. It defines `can_install`, `install`, `can_uninstall` and `uninstall` functions.
 2. Function `can_install` decides whether a project in the current directory can be installed.
@@ -13,11 +13,11 @@ An installer is a shell script module that implements a specific method to insta
 5. Function `uninstall` uninstalls a project in the current directory from an absolute path prefix given as the first parameter.
 6. Names of all other functions and all variables begin with an `i_` prefix.
 
-If you want to create a new installer, follow steps described in the [Suggestions](#suggestions) section and get in touch with a gim developer. Then follow steps described in the [Merge requests](#merge-requests) section and do not forget to update the [*INSTALLERS.md*](INSTALLERS.md) file. You may also take a look at source code of already implemented installers in the [*lib/gim/installers*](lib/gim/installers) directory.
+If you want to create a new installer for gim, follow steps described in the [Suggestions](#suggestions) section to get in touch with a gim developer. Then follow steps described in the [Merge requests](#merge-requests) section and do not forget to update the [*INSTALLERS.md*](INSTALLERS.md) file. You may also want to take a look at source code of already implemented installers in the [*lib/gim/installers*](lib/gim/installers) directory.
 
 ## Suggestions
 
-If you have any suggestions on development of the project, follow these steps:
+If you have any suggestions on development of gim, follow these steps:
 
 1. Make sure the same suggestion has not been already reported in [issues](https://gitlab.com/dominiksalvet/gim/issues).
 2. Open a [new issue](https://gitlab.com/dominiksalvet/gim/issues/new).
@@ -27,7 +27,7 @@ If you have any suggestions on development of the project, follow these steps:
 
 **Except for merge requests with bug fixes**, every merge request must be preceded by creating an issue as described in the [previous section](#suggestions) and must be approved by a gim developer. Then continue as described below:
 
-1. Fork this project.
+1. Fork gim.
 2. Create a new branch with a meaningful name.
 3. Make your changes in the branch.
 4. Add notable changes to the [*CHANGELOG.md*](CHANGELOG.md) file.
@@ -39,4 +39,4 @@ If you have any suggestions on development of the project, follow these steps:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same license as the affected files. In case of creating a new file, choose the most appropriate license with respect to the project [licensing policy](README.md#license) and the type of created file.
+By contributing, you agree that your contributions will be licensed under the same license as the affected files. In case of creating a new file, choose the most appropriate license with respect to gim [licensing policy](README.md#license) and the type of the created file.
