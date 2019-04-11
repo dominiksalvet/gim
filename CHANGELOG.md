@@ -11,7 +11,7 @@ The changes not yet present in any release are listed in this section.
 ### Added
 
 * Essential support for macOS has been added.
-* New installers 'cami' and 'makei' are supported.
+* New installers `cami` and `makei` are supported.
 
 ### Changed
 
@@ -251,5 +251,5 @@ The changes not yet present in any release are listed in this section.
 ### Changed
 
 * Check if a given Git URL's project has at least one commit tagged.
-* Unnecessary actions are not performed anymore. E.g., using 'update' when the project is fully updated will not invoke the uninstall-and-install routine.
+* Unnecessary actions are not performed anymore. E.g., using `update` when the project is fully updated will not invoke the uninstall-and-install routine.
 * After an action of Git URL's project, gim verifies that the installation is in the appropriate state.
