@@ -6,8 +6,9 @@
 # https://gitlab.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
 # DESCRIPTION:
-#   This file represents a gim installer module. Gim calls every API function
-#   with the current working directory in a prepared Git repository directory.
+#   This file represents a gim installer module - MAKE Installer. Gim calls
+#   every API function with the current working directory in a prepared Git
+#   repository directory.
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
