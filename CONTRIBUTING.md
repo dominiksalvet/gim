@@ -13,7 +13,7 @@ An installer is a shell script module that implements a specific method to insta
 5. Function `uninstall` uninstalls a project in the current directory from an absolute path prefix given as the first parameter.
 6. Names of all other functions and all variables begin with an `i_` prefix.
 
-If you want to create a new installer for gim, follow steps described in the [Suggestions](#suggestions) section to get in touch with a gim developer. Then follow steps described in the [Merge requests](#merge-requests) section and do not forget to update the [*INSTALLERS.md*](INSTALLERS.md) file. You may also want to take a look at source code of already implemented installers in the [*lib/gim/installers*](lib/gim/installers) directory.
+If you want to create a new installer, follow steps described in the [Suggestions](#suggestions) section to get in touch with a gim developer. Then follow steps described in the [Merge requests](#merge-requests) section and do not forget to update the [*INSTALLERS.md*](INSTALLERS.md) file. Then gim starts to use your installer. You may also want to take a look at source code of already implemented installers in the [*lib/gim/installers*](lib/gim/installers) directory.
 
 ## Suggestions
 
