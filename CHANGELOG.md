@@ -100,7 +100,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
-* Versions of a project that aren't supported by gim can be listed in the *gim/unsupported* file.
+* Versions of a project that are not supported by gim can be listed in the *gim/unsupported* file.
 
 ### Changed
 
@@ -137,7 +137,7 @@ The changes not yet present in any release are listed in this section.
 ### Changed
 
 * Add support for tab completion for Bash shell of all possible arguments.
-* The project's Git URL doesn't have to start with `https://`. It will be added automatically.
+* The project's Git URL does not have to start with `https://`. It will be added automatically.
 
 ### Removed
 
@@ -165,18 +165,18 @@ The changes not yet present in any release are listed in this section.
 
 ### Fixed
 
-* Create the */etc/bash_completion.d/* directory if it doesn't exist.
+* Create the */etc/bash_completion.d/* directory if it does not exist.
 
 ## 3.0.0 (2018-09-09)
 
 ### Added
 
-* Intelligent removing cache using the `-autoclean` options. This will remove only cached Git repositories for projects that aren't installed on the system.
+* Intelligent removing cache using the `-autoclean` options. This will remove only cached Git repositories for projects that are not installed on the system.
 
 ### Changed
 
 * The `-clear-cache` options has been changed to `-clean`.
-* The project's Git URL doesn't have to end with `.git`.
+* The project's Git URL does not have to end with `.git`.
 * Checking for root permissions and downloading a given Git repository are not performed until necessary.
 
 ## 2.0.0 (2018-09-08)
@@ -199,7 +199,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Fixed
 
-* Gim doesn't accept Git URLs whose only a subpart meet a valid Git URL format.
+* Gim does not accept Git URLs whose only a subpart meet a valid Git URL format.
 
 ### Security
 
