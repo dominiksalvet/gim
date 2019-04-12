@@ -8,7 +8,7 @@
 # DESCRIPTION:
 #   This file represents a main file of gim - simple Git installation manager.
 # PARAMETERS:
-#   All given parameters are processed as gim's help describes.
+#   All given arguments are processed as gim's help describes.
 #-------------------------------------------------------------------------------
 
 
@@ -20,12 +20,12 @@
 #   This function represents a gim entry point and it is expected to be executed
 #   first of all, yet its calling should be at the end of this script.
 # PARAMETERS:
-#   $@ - gim parameters
+#   $@ - gim arguments
 main() {
     init_constants &&
     init_strings &&
     def_global_vars &&
-    process_params "$@"
+    process_args "$@"
 }
 
 #-------------------------------------------------------------------------------
@@ -123,10 +123,10 @@ def_global_vars() {
 #-------------------------------------------------------------------------------
 
 # DESCRIPTION:
-#   Processes given gim parameters and performs all associated operations.
+#   Processes given gim arguments and performs all associated operations.
 # PARAMETERS:
-#   $@ - gim parameters
-process_params() {
+#   $@ - gim arguments
+process_args() {
     action=
     accept_action_options=true
 
@@ -135,7 +135,7 @@ process_params() {
             if "$accept_action_options"; then
                 case "$arg" in
                     -f) use_force=true ;;
-                    -*) echo "$0: unrecognized argument '$arg'
+                    -*) echo "$0: unrecognized action argument '$arg'
 $HINT_MESSAGE" >&2
                         return 1
                         ;;
