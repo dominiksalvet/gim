@@ -25,7 +25,7 @@ main() {
     init_constants &&
     init_strings &&
     def_global_vars &&
-    process_args "$@"
+    process_params "$@"
 }
 
 #-------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ def_global_vars() {
 #   Processes given gim parameters and performs all associated operations.
 # PARAMETERS:
 #   $@ - gim parameters
-process_args() {
+process_params() {
     action=
     accept_action_options=true
 
