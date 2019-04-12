@@ -9,8 +9,3 @@ It is a standard "configure, make, make install" approach. A prefix is delivered
 ## makei
 
 Building, installation and uninstallation is implemented as `<default>`, `install` and `uninstall` Make targets. A prefix is delivered as `PREFIX=<path>` macro assignment when calling them.
-
-## Notes
-
-* Uninstallation **must keep configuration files**.
-* Installers **must not involve any user interaction**.
