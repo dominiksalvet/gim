@@ -1,24 +1,21 @@
 # Control
 
-This file describes advanced ways to control gim-related issues in your Git projects.
+This file describes how to control gim from Git projects.
 
 ## Repository
 
-To control gim's execution from a Git repository, create *gim* directory in the repository containing files from the following list according to specific needs or requirements. These control files are used from **the most recent commit** of the repository's master branch.
+To **control gim directly from latest commit** of Git repository's master branch, create *gim* directory containing files from the following list based on your needs:
 
 * *mirrors*
-  * A list of **all URLs** that the repository is available on. Supported URL format is the same as for gim itself.
-  * Has one item per line, its content ends with a newline character.
-  * Useful when renaming a repository to stay available on both the old and the new URL as the same project for gim; first create/update this file and then rename the repository itself.
+  * A list of **all URLs** that the repository is available on.
+  * Has one item per line.
 * *unsupported*
-  * A list of repository's tag names whose commits are marked as not supported under gim and gim implicitly refuses to work with them.
-  * Has one item per line, its content ends with a newline character.
-  * Useful in case of a bad release or when a version is explicitly unsupported; just add the version of the release to this file.
+  * A list of tag names whose commits are marked as unsupported under gim.
+  * Has one item per line.
 
 ## Environment variables
 
-Furthermore, gim exports environment variables for all called installers. It means that you can work with the following variables in your installers like they were normal variables.
+To control gim from an installer, it can use the following environment variables:
 
 * `INSTALLER`
-  * Equal to `gim` and represents the used installer.
-  * Useful when a different behavior is required when running installers under gim and when running them the other way, e.g., manually.
+  * Equals to `gim` when called from gim.
