@@ -10,12 +10,5 @@ To **control gim directly from latest commit** of Git repository's master branch
   * A list of **all URLs** that the repository is available on.
   * Has one item per line.
 * *unsupported*
-  * A list of tag names whose commits are marked as unsupported under gim.
+  * A list of tag names whose commits are marked as unsupported.
   * Has one item per line.
-
-## Environment variables
-
-To control gim from an installer, it can use the following environment variables:
-
-* `INSTALLER`
-  * Equals to `gim` when called from gim.
