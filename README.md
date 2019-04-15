@@ -9,7 +9,7 @@
 
 > A simple installation manager for your Git projects.
 
-What about to **install and update** your favorite Git projects like this?
+Wouldn't it be great to **install and update** your favorite Git projects like this?
 
 ```sh
 gim install <url>
@@ -21,7 +21,7 @@ And when they are no longer needed, **uninstall** them that way?
 gim uninstall <url>
 ```
 
-If you are in, then gim comes pretty handy. As you can see, all you need is a Git URL of a compatible project and gim will do the rest. And trust me, there are a lot of compatible projects thanks to standard approaches used in gim.
+If you are in, then gim comes pretty handy. All you need is a URL of a Git project and gim will do the rest. With respect to gim's flexibility, there are a lot of compatible projects around even without being adapted to gim at all.
 
 ---
 
