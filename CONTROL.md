@@ -12,3 +12,10 @@ To **control gim directly from latest commit** of Git repository's master branch
 * *unsupported*
   * A list of tag names whose commits are marked as unsupported.
   * Has one item per line.
+
+## Environment variables
+
+Gim exports the following environment variables for all executables of Git projects it calls:
+
+* `INSTALLER`
+  * Equals to `gim`.
