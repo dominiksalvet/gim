@@ -15,11 +15,11 @@ The changes not yet present in any release are listed in this section.
 
 ### Changed
 
-* Installers are no longer part of the gim itself, they are modular and loadable during gim's execution now.
+* Installers are no longer part of the gim, they are modular and loadable during gim's execution now.
 * Gim stores prefix for each installed project, so that uninstallation is performed correctly.
 * Gim stores commit hash to database rather that an annotated tag name.
-* Installation and uninstallation of gim itself respects values of `PREFIX` and `DB_DIR` variables.
-* Installation of gim itself may safely modify `PATH` variable if gim binary path is not present.
+* Installation and uninstallation of gim respects values of `PREFIX` and `DB_DIR` variables.
+* Installation of gim may safely modify `PATH` variable if gim binary path is not present.
 * Gim project control files have been renamed; *gim/unsupported-versions* -> *gim/unsupported*, *gim/mirror-urls* -> *gim/mirrors*.
 
 ### Removed
@@ -47,7 +47,7 @@ The changes not yet present in any release are listed in this section.
 * Gim now exports environment variable `INSTALLER` equal to `gim` for all invoked installers to indicate used installation manager.
 * Added support for RC files that set up gim's directory definitions. And so they are no longer hard-coded.
 * Projects installed by gim can be installed locally. Gim has one global database and an additional one for each active user.
-* Support for local installation of gim itself has been added.
+* Support for local installation of gim has been added.
 * Installation and uninstallation scripts load current system configuration of gim from RC files during their execution.
 * Added a basic installer support.
 
@@ -104,7 +104,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Changed
 
-* Installation/uninstallation of gim itself process no longer prints make recipes before executing them.
+* Installation/uninstallation process of gim no longer prints make recipes before executing them.
 * Structure of gim cache now also consider given hostname when being built. In extreme cases, it may be required to use `-clean` flag before further gim use.
 
 ### Fixed
