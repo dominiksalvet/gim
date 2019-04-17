@@ -17,7 +17,7 @@ If you want to create a new installer, follow steps described in the [Suggestion
 
 ## Suggestions
 
-If you have any suggestions (or questions) about development of gim, follow these steps:
+If you have any suggestions (or questions) about the development of gim, follow these steps:
 
 1. Make sure the same suggestion has not been already reported in [issues](https://gitlab.com/dominiksalvet/gim/issues).
 2. Open a [new issue](https://gitlab.com/dominiksalvet/gim/issues/new).
