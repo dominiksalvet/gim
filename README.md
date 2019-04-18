@@ -1,11 +1,8 @@
 # gim
 
+[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://gitlab.com/dominiksalvet/gim)
 [![reuse compliant](https://reuse.software/badge/reuse-compliant.svg)](https://reuse.software/)
 [![standard-readme compliant](https://img.shields.io/badge/readme_style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
-[![FHS 3.0](https://img.shields.io/badge/FHS-3.0-2f7ba6.svg)](https://wiki.linuxfoundation.org/lsb/fhs)
-[![keep a changelog](https://img.shields.io/badge/keep-a_changelog-f15d34.svg)](https://keepachangelog.com/en/1.0.0/)
-[![semver 2.0.0](https://img.shields.io/badge/semver-2.0.0-blue.svg)](https://semver.org/)
-[![gim compliant](https://img.shields.io/badge/gim-compliant-571997.svg)](https://gitlab.com/dominiksalvet/gim)
 
 > A simple installation manager for your Git projects.
 
@@ -25,16 +22,15 @@ If you are in, then gim comes in pretty handy. All you need is a URL of a Git pr
 
 ---
 
-**Are you a developer** of a Git project? Do you want to **automate its distribution** with gim? There are high chances that your project is already set up. The official rules of **gim compliance** are stated in the [*RULES.md*](RULES.md) file. Once your project is gim compliant, it can be installed, updated or uninstalled using gim by end users. And don't forget about [this badge](#badge)!
-
-> Gim is the place where development is distribution.
+**Are you a developer** of a Git project? Do you like the idea stated above? Then keep reading in the [Developer](#developer) section.
 
 ## Table of Contents
 
 * [Install](#install)
 * [Usage](#usage)
   * [Examples](#examples)
-* [Badge](#badge)
+* [Developer](#developer)
+  * [Badge](#badge)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -118,22 +114,37 @@ gim install gitlab.com/dominiksalvet/gim
 
 Also, there can be leading `https://` or trailing `.git` in the URLs. All those formats work equally.
 
-## Badge
+## Developer
 
-If your project is gim compliant, **you are allowed to use the following badge** in Markdown format as a sign of the gim compliance.
+Do you want to use gim in your Git projects? Here are some reasons why you should:
 
+* No publish setup, Git repository is everything you need
+* No configuration file required
+* Easy to use for both developers and users
+* Both global and local installation support
+* POSIX-friendly
+* Incremental building support
+
+Full text of rules is stated in the [*RULES.md*](RULES.md) file, maybe your project is already set up. If gim does not have the required installer, you can contribute to gim and add support for it.
+
+### Badge
+
+Gim ready projects work best with the following badge:
+
+[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://gitlab.com/dominiksalvet/gim)
+
+Markdown:
+
+```markdown
+[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://gitlab.com/dominiksalvet/gim)
 ```
-[![gim compliant](https://img.shields.io/badge/gim-compliant-571997.svg)](https://gitlab.com/dominiksalvet/gim)
-```
-
-Graphics form:
-
-[![gim compliant](https://img.shields.io/badge/gim-compliant-571997.svg)](https://gitlab.com/dominiksalvet/gim)
 
 ## Contributing
 
-See the [*CONTRIBUTING.md*](CONTRIBUTING.md) file for details.
+Do you want to contribute? Do you have any questions? Then the [*CONTRIBUTING.md*](CONTRIBUTING.md) file is here for you.
 
 ## License
 
-Licensing policy of this project is compliant with [REUSE Practices](https://reuse.software/practices/2.0/). Therefore, the license of a file of this project is determined by an [SPDX](https://spdx.org/) License Identifier or by the [*debian/copyright*](debian/copyright) file content.
+Licensing policy of gim is compliant with [REUSE Practices](https://reuse.software/practices/2.0/).
+
+The preferred license is the **MIT License** as stated in the [*LICENSE.txt*](LICENSE.txt) file.
