@@ -116,16 +116,17 @@ Also, there can be leading `https://` or trailing `.git` in the URLs. All those 
 
 ## Developer
 
-Do you want to use gim in your Git projects? Here are some reasons why you should:
+You may use gim in your Git projects. Why?
 
-* No publish setup, Git repository is everything you need
-* No configuration file required
-* Easy to use for both developers and users
-* Both global and local installation support
-* POSIX-friendly
-* Incremental building support
+* No gim-specific files required
+* Easy-to-use for developers and users
+* Global and local installations
+* Delta updates
+* POSIX-friendly environment
 
-Full text of rules is stated in the [*RULES.md*](RULES.md) file, maybe your project is already set up. If gim does not have the required installer, you can contribute to gim and add support for it.
+How? Meet the rules stated in the [*RULES.md*](RULES.md) file and your project will become gim ready. **Then users can use gim to manage it.**
+
+Not sure? Try `gim status <url>` with the URL of your project - maybe it is already compatible.
 
 ### Badge
 
