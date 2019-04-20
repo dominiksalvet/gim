@@ -36,38 +36,22 @@ If you are in, then gim comes in pretty handy. All you need is a URL of a Git pr
 
 ## Install
 
-Installation of gim itself must be done manually; **copy-paste the following commands** into a terminal emulator and execute them.
-
-* **Global installation** can perform global installations and local installations (by any user) of Git projects.
+To **globally install gim**, copy-paste the following commands into a terminal emulator and execute them.
 
 ```sh
-mkdir -p ~/Downloads/gim/ && # create a directory for gim repository
-cd ~/Downloads/gim/ && # go to the created directory
+mkdir -p /tmp/gim/ && # create a temporary directory for gim repository
+cd /tmp/gim/ && # go to the created directory
 git clone https://gitlab.com/dominiksalvet/gim.git . && # clone gim repository
-git checkout -q "$(git describe --abbrev=0)" && # use the latest gim version
+git checkout "$(git describe --abbrev=0)" && # use the latest gim version
 sudo make install && # install gim, requires root permissions
-echo 'SUCCESS' # print a message if everything succeeded
+echo 'SUCCESS' # print a message when everything succeeded
 ```
 
-* **Local installation** generally can perform only local installations (by current user) of Git projects.
-
-```sh
-mkdir -p ~/Downloads/gim/ && # create a directory for gim repository
-cd ~/Downloads/gim/ && # go to the created directory
-git clone https://gitlab.com/dominiksalvet/gim.git . && # clone gim repository
-git checkout -q "$(git describe --abbrev=0)" && # use the latest gim version
-make install && # install gim, does not require root permissions
-echo 'SUCCESS' # print a message if everything succeeded
-```
-
-After success:
-
-* The *~/Downloads/gim* directory can be manually removed.
-* Gim will be installed on your system and you can **use gim to update itself** or even uninstall itself.
+To **install gim locally**, remove `sudo` from the commands stated above and execute them.
 
 ---
 
-Note that uninstalling gim will not remove its created configuration and **will not uninstall** any project installed by gim. However, you will probably need to install gim back to easily manage those projects.
+From now on, you can use gim to update itself or even uninstall itself. If you decide to uninstall gim, it will not uninstall any project installed by gim. However, you will probably need to install gim back to manage those projects.
 
 ## Usage
 
