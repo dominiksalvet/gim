@@ -8,13 +8,13 @@
 
 Wouldn't it be great to **install and update** your favorite Git projects like this?
 
-```sh
+```
 gim install <url>
 ```
 
 And when they are no longer needed, **uninstall** them that way?
 
-```sh
+```
 gim uninstall <url>
 ```
 
@@ -60,19 +60,19 @@ Gim generally **can perform both local and global installations**. Global instal
 
 **Install or update** a Git project:
 
-```sh
+```
 gim install <url>
 ```
 
 **Uninstall** a Git project:
 
-```sh
+```
 gim uninstall <url>
 ```
 
 Show **status** of a Git project:
 
-```sh
+```
 gim status <url>
 ```
 
@@ -84,13 +84,13 @@ Note that gim manages one database for global installations and one database for
 
 1. We want to check if gim is installed globally. We will use:
 
-```sh
+```
 sudo gim status gitlab.com/dominiksalvet/gim
 ```
 
 2. We want to update gim, which is installed locally by current user. We will use:
 
-```sh
+```
 gim install gitlab.com/dominiksalvet/gim
 ```
 
