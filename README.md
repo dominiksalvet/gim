@@ -28,7 +28,7 @@ If you are in, then gim comes in pretty handy. All you need is a URL of a Git pr
 
 * [Install](#install)
 * [Usage](#usage)
-  * [Examples](#examples)
+  * [Example](#example)
 * [Developer](#developer)
   * [Badge](#badge)
 * [Contributing](#contributing)
@@ -55,9 +55,6 @@ From now on, you can use gim to update itself or even uninstall itself. If you d
 
 ## Usage
 
-Gim generally **can perform both local and global installations**. Global installation will be performed in case gim has root permissions (e.g., it was executed using `sudo`), local installation will be performed otherwise.
-
-
 **Install or update** a Git project:
 
 ```
@@ -76,27 +73,23 @@ Show **status** of a Git project:
 gim status <url>
 ```
 
----
-
-Note that gim manages one database for global installations and one database for each active user for local installations. And so when gim is running with root permissions, it will access **a different database** than running gim without them.
-
-### Examples
-
-1. We want to check if gim is installed globally. We will use:
+### Example
 
 ```
-sudo gim status gitlab.com/dominiksalvet/gim
+$ gim status gitlab.com/dominiksalvet/gim
+[nothing] gitlab.com/dominiksalvet/gim -> 6.0.1
+
+$ sudo gim status gitlab.com/dominiksalvet/gim
+[old] gitlab.com/dominiksalvet/gim 6.0.0 -> 6.0.1
+
+$ sudo gim install gitlab.com/dominiksalvet/gim
+[update] gitlab.com/dominiksalvet/gim 6.0.1 <- 6.0.0
+
+$ sudo gim status gitlab.com/dominiksalvet/gim
+[latest] gitlab.com/dominiksalvet/gim 6.0.1
 ```
 
-2. We want to update gim, which is installed locally by current user. We will use:
-
-```
-gim install gitlab.com/dominiksalvet/gim
-```
-
----
-
-Also, there can be leading `https://` or trailing `.git` in the URLs. All those formats work equally.
+As demonstrated above, gim works with either global or local installations based on whether it is run with root permissions.
 
 ## Developer
 
