@@ -208,8 +208,8 @@ load_lib() {
     # load file path abstraction module
     . "$GIM_LIB_DIR"/path &&
 
-    # initialize aliases based on a given software dependencies file
-    init_aliases "$(path_deps)" &&
+    # check software dependencies based on a given file
+    check_deps "$(path_deps)" &&
 
     # load gim database interface module
     . "$(path_dbi)" &&
@@ -224,19 +224,12 @@ load_lib() {
 }
 
 # DESCRIPTION:
-#   Removes all aliases, checks whether all software dependencies in a given
-#   file are satisfied and creates aliases only for this software.
+#   Checks whether all software dependencies in a given file are satisfied.
 # PARAMETERS:
 #   $1 - software dependencies file
-# shellcheck disable=SC2139
-init_aliases() {
-    unalias -a && # remove all aliases
+check_deps() {
     while read -r sw; do
-        if sw_alias="$(command -v -- "$sw")"; then
-            if [ "$sw_alias" != "$sw" ]; then # do not create alias with the same string
-                alias "$sw"="$sw_alias"
-            fi
-        else
+        if ! command -v -- "$sw" > /dev/null; then
             echo "$0: missing $sw software" >&2
             return 1
         fi

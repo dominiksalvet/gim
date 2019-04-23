@@ -2,8 +2,6 @@ command
 cd
 pwd
 echo
-unalias
-alias
 read
 [
 test
