@@ -226,7 +226,7 @@ load_lib() {
 # DESCRIPTION:
 #   Checks whether all software dependencies in a given file are satisfied.
 # PARAMETERS:
-#   $1 - software dependencies file
+#   $1 - software dependencies file path
 check_deps() {
     while read -r sw; do
         if ! command -v -- "$sw" > /dev/null; then
