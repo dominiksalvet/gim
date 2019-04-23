@@ -10,7 +10,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Added
 
-* Essential support for macOS has been added.
+* Support for macOS has been added.
 * New installers `cami` and `makei` are supported.
 
 ### Changed
