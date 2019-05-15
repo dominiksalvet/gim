@@ -18,3 +18,7 @@ License: MIT
 Files: lib/gim/deps
 Copyright: Copyright 2019 Dominik Salvet
 License: MIT
+
+Files: gim/mirrors
+Copyright: Copyright 2019 Dominik Salvet
+License: MIT
