@@ -4,7 +4,7 @@
 [![reuse compliant](https://reuse.software/badge/reuse-compliant.svg)](https://reuse.software/)
 [![standard-readme compliant](https://img.shields.io/badge/readme_style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 
-> A simple installation manager for your Git projects.
+> Simple installation manager for your Git projects.
 
 Wouldn't it be great to **install and update** your favorite Git projects like this?
 

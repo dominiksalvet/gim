@@ -95,7 +95,7 @@ COMMAND:
   about      show information"
 
     ABOUT_MESSAGE="gim $VERSION
-A simple installation manager for your Git projects.
+Simple installation manager for your Git projects.
 
 Copy"'right 2018-2019 Dominik Salvet
 SPDX License Identifier: MIT
