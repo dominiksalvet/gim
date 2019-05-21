@@ -101,7 +101,7 @@ You may use gim in your Git projects. Why?
 * Delta updates
 * POSIX-friendly environment
 
-How? Meet the rules stated in the [*RULES.md*](RULES.md) file and your project will become gim ready. **Then users can use gim to manage it.**
+How? Meet the rules stated in the [*RULES.md*](doc/RULES.md) file and your project will become gim ready. **Then users can use gim to manage it.**
 
 Not sure? Try `gim status <url>` with the URL of your project - maybe it is already compatible.
 
