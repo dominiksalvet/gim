@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 # Copyright 2018-2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
-# https://gitlab.com/dominiksalvet/gim
+# https://github.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
 # DESCRIPTION:
 #   This file represents a gim uninstallation script.
@@ -54,5 +54,5 @@ ced_remove_bash_completion gim-prompt &&
 # if gim installer is not used, deletion from gim database must be done here
 if [ "$INSTALLER" != gim ]; then
     dbi_init && # initialize gim database, then delete installation records
-    dbi_delete 'gitlab.com/dominiksalvet/gim'
+    dbi_delete 'github.com/dominiksalvet/gim'
 fi

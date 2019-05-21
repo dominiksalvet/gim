@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 # Copyright 2018-2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
-# https://gitlab.com/dominiksalvet/gim
+# https://github.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
 # DESCRIPTION:
 #   This file represents a gim installation script.
@@ -71,5 +71,5 @@ echo "$0: can't set up Bash tab completion" >&2 # however, still continues
 if [ "$INSTALLER" != gim ]; then
     commit_hash="$(git rev-parse HEAD)" && # get hash of the current Git commit
     dbi_init && # initialize gim database, then insert an installation record
-    dbi_insert 'gitlab.com/dominiksalvet/gim' "$commit_hash" "$GIM_PREFIX"
+    dbi_insert 'github.com/dominiksalvet/gim' "$commit_hash" "$GIM_PREFIX"
 fi

@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 # Copyright 2018-2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
-# https://gitlab.com/dominiksalvet/gim
+# https://github.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
 # DESCRIPTION:
 #   This file represents a main file of gim - simple Git installation manager.
@@ -99,7 +99,7 @@ Simple installation manager for your Git projects.
 
 Copy"'right 2018-2019 Dominik Salvet
 SPDX License Identifier: MIT
-https://gitlab.com/dominiksalvet/gim'
+https://github.com/dominiksalvet/gim'
 
     HINT_MESSAGE="Try '$0 help' for getting help."
 }

@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright 2018-2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
-# https://gitlab.com/dominiksalvet/gim
+# https://github.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
 # DESCRIPTION:
 #   This file represents a makefile for gim. It support both the installation

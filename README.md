@@ -1,6 +1,6 @@
 # gim
 
-[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://gitlab.com/dominiksalvet/gim)
+[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://github.com/dominiksalvet/gim)
 [![reuse compliant](https://reuse.software/badge/reuse-compliant.svg)](https://reuse.software/)
 [![standard-readme compliant](https://img.shields.io/badge/readme_style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 
@@ -41,7 +41,7 @@ To **globally install gim**, copy-paste the following commands into a terminal e
 ```sh
 mkdir -p /tmp/gim/ && # create a temporary directory for gim repository
 cd /tmp/gim/ && # go to the created directory
-git clone https://gitlab.com/dominiksalvet/gim.git . && # clone gim repository
+git clone https://github.com/dominiksalvet/gim.git . && # clone gim repository
 git checkout "$(git describe --abbrev=0)" && # use the latest gim version
 sudo make install && # install gim, requires root permissions
 echo 'SUCCESS' # print a message when everything succeeded
@@ -76,17 +76,17 @@ gim status <url>
 ### Example
 
 ```
-$ gim status gitlab.com/dominiksalvet/gim
-[nothing] gitlab.com/dominiksalvet/gim -> 6.0.1
+$ gim status github.com/dominiksalvet/gim
+[nothing] github.com/dominiksalvet/gim -> 6.0.1
 
-$ sudo gim status gitlab.com/dominiksalvet/gim
-[old] gitlab.com/dominiksalvet/gim 6.0.0 -> 6.0.1
+$ sudo gim status github.com/dominiksalvet/gim
+[old] github.com/dominiksalvet/gim 6.0.0 -> 6.0.1
 
-$ sudo gim install gitlab.com/dominiksalvet/gim
-[update] gitlab.com/dominiksalvet/gim 6.0.1 <- 6.0.0
+$ sudo gim install github.com/dominiksalvet/gim
+[update] github.com/dominiksalvet/gim 6.0.1 <- 6.0.0
 
-$ sudo gim status gitlab.com/dominiksalvet/gim
-[latest] gitlab.com/dominiksalvet/gim 6.0.1
+$ sudo gim status github.com/dominiksalvet/gim
+[latest] github.com/dominiksalvet/gim 6.0.1
 ```
 
 As demonstrated above, gim works with either global or local installations based on whether it is run with root permissions.
@@ -109,12 +109,12 @@ Not sure? Try `gim status <url>` with the URL of your project - maybe it is alre
 
 Gim ready projects work best with the following badge:
 
-[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://gitlab.com/dominiksalvet/gim)
+[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://github.com/dominiksalvet/gim)
 
 Markdown:
 
 ```markdown
-[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://gitlab.com/dominiksalvet/gim)
+[![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://github.com/dominiksalvet/gim)
 ```
 
 ## Contributing

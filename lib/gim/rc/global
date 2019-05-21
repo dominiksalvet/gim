@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 # Copyright 2019 Dominik Salvet
 # SPDX-License-Identifier: MIT
-# https://gitlab.com/dominiksalvet/gim
+# https://github.com/dominiksalvet/gim
 #-------------------------------------------------------------------------------
 # DESCRIPTION:
 #   This file represents a global RC configuration file for gim. Gim should read
