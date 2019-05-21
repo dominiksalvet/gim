@@ -38,7 +38,7 @@ main() {
 #   Initializes static constants.
 init_constants() {
     # the current version of gim
-    VERSION=7.0.0
+    VERSION=7.1.0
 
     # gim actions
     ACTION_INSTALL=install
