@@ -1,6 +1,6 @@
 # Rules
 
-Gim operates only with commits from the master branch of Git projects and prefers them in the following order: latest annotated tag's commit, latest lightweight tag's commit and latest commit.
+Gim operates only with master branch of Git projects using latest tag's commit. If there is no tag, it uses latest commit.
 
 A Git project is **gim ready** if gim's preferred commit can be installed and uninstalled using an installer stated in the [*INSTALLERS.md*](doc/INSTALLERS.md) file.
 

@@ -526,18 +526,16 @@ cd_repo() {
 }
 
 # DESCRIPTION:
-#   Returns the best commit hash of a given project. It prefers latest annotated
-#   tag to latest lightweight tag and latest lightweight tag to latest commit.
+#   Returns a preferred commit hash of a given project. It chooses latest tag's
+#   commit if it exists, otherwise latest commit is chosen.
 # PARAMETERS:
 #   $1 - short URL
 get_repo_hash() { (
     cd_repo "$1" || return
 
-    if tag_name="$(git describe --abbrev=0 master 2>/dev/null)"; then # latest annotated tag
-        git rev-parse "$tag_name"'^{}' # dereference the annotated tag to an actual commit hash
-    # latest lightweight tag
-    elif tag_name="$(git describe --tags --abbrev=0 master 2>/dev/null)"; then
-        git rev-parse "$tag_name"
+    # latest tag (of any type)
+    if tag_name="$(git describe --tags --abbrev=0 master 2>/dev/null)"; then
+        git rev-parse "$tag_name"'^{}' # dereferencing annotated tags to actual commit hashes
     else # latest commit
         git rev-parse master
     fi

@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 The changes not yet present in any release are listed in this section.
 
+### Changed
+
+* Gim no longer distinguishes annotated tags and lightweight tags when choosing a preferred commit.
+
 ## 7.0.0 (2019-04-23)
 
 ### Added
