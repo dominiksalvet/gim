@@ -52,7 +52,7 @@ To **globally install gim**, copy-paste the following commands into a terminal e
 mkdir -p /tmp/gim/ && # create a temporary directory for gim repository
 cd /tmp/gim/ && # go to the created directory
 git clone https://github.com/dominiksalvet/gim.git . && # clone gim repository
-git checkout "$(git describe --abbrev=0)" && # use the latest gim version
+git checkout "$(git describe --tags --abbrev=0)" && # use latest gim version
 sudo make install && # install gim, requires root permissions
 echo 'SUCCESS' # print a message when everything succeeded
 ```
