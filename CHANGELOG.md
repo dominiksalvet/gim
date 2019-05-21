@@ -12,7 +12,7 @@ The changes not yet present in any release are listed in this section.
 
 ### Changed
 
-* Gim no longer distinguishes annotated tags and lightweight tags when choosing a preferred commit.
+* Gim no longer distinguishes between annotated tags and lightweight tags when choosing a preferred commit.
 * Move from GitLab to GitHub.
 
 ## 7.0.0 (2019-04-23)
