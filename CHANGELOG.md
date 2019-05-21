@@ -31,10 +31,6 @@ The changes not yet present in any release are listed in this section.
 * Option `-fail-on-prompt` has been removed. Use an appropriate Git environment variable to get the same effect.
 * Option `-force` has been renamed to `-f` to be more POSIX-friendly.
 
-### Security
-
-* As soon as binary paths are created for external commands, `PATH` environment variable will be ignored.
-
 ## 6.0.1 (2019-02-25)
 
 ### Fixed
