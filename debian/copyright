@@ -11,7 +11,7 @@ Files: README.md CHANGELOG.md CONTRIBUTING.md doc/RULES.md
 Copyright: Copyright 2018-2019 Dominik Salvet
 License: MIT
 
-Files: doc/CONTROL.md doc/INSTALLERS.md
+Files: SECURITY.md doc/CONTROL.md doc/INSTALLERS.md
 Copyright: Copyright 2019 Dominik Salvet
 License: MIT
 
