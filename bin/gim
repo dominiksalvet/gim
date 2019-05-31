@@ -128,11 +128,11 @@ def_global_vars() {
 #   $@ - gim arguments
 process_args() {
     action=
-    accept_action_options=true
+    accept_options=true
 
     for arg in "$@"; do # process each argument individually
         if [ "$action" ]; then
-            if "$accept_action_options"; then
+            if "$accept_options"; then
                 case "$arg" in
                     -f) use_force=true ;;
                     -*) echo "$0: unrecognized action argument '$arg'
@@ -140,12 +140,12 @@ $HINT_MESSAGE" >&2
                         return 1
                         ;;
                     *)  init_runtime || return
-                        accept_action_options=false # expecting first URL
+                        accept_options=false # expecting first URL
                         ;;
                 esac
             fi
 
-            if ! "$accept_action_options"; then
+            if ! "$accept_options"; then
                 process_action "$action" "$arg" || return
             fi
         else
@@ -173,7 +173,7 @@ $HINT_MESSAGE" >&2
         fi
     done
 
-    if [ ! "$action" ] || "$accept_action_options"; then
+    if [ ! "$action" ] || "$accept_options"; then
         echo "$0: missing required arguments
 $HINT_MESSAGE" >&2
         return 1
