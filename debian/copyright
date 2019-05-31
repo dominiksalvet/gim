@@ -3,7 +3,7 @@ Upstream-Name: gim
 Upstream-Contact: Dominik Salvet <dominik.salvet@gmail.com>
 Source: https://github.com/dominiksalvet/gim
 
-Files: logo.png
+Files: img/logo.png
 Copyright: Copyright 2018 Dominik Salvet
 License: MIT
 

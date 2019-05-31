@@ -2,7 +2,7 @@
 
 <p align="center">
     <a href="https://github.com/dominiksalvet/gim">
-        <img src="logo.png" alt="gim logo" height="256"></a>
+        <img src="img/logo.png" alt="gim logo" height="256"></a>
 </p>
 
 <p align="center">
