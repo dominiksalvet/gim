@@ -85,19 +85,9 @@ gim status <url>
 
 ### Example
 
-```
-$ gim status github.com/dominiksalvet/gim
-[nothing] github.com/dominiksalvet/gim -> 6.0.1
-
-$ sudo gim status github.com/dominiksalvet/gim
-[old] github.com/dominiksalvet/gim 6.0.0 -> 6.0.1
-
-$ sudo gim install github.com/dominiksalvet/gim
-[update] github.com/dominiksalvet/gim 6.0.1 <- 6.0.0
-
-$ sudo gim status github.com/dominiksalvet/gim
-[latest] github.com/dominiksalvet/gim 6.0.1
-```
+<p align="center">
+    <img src="img/example.png" alt="gim example">
+</p>
 
 As demonstrated above, gim works with either global or local installations based on whether it is run with root permissions.
 
