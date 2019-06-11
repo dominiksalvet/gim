@@ -14,7 +14,7 @@
         <img src="https://img.shields.io/badge/readme_style-standard-brightgreen.svg"></a>
 </p>
 
-> Simple installation manager for your Git projects.
+> Git-based installation manager. Delta updates. macOS + Linux. POSIX.
 
 Wouldn't it be great to **install and update** your favorite Git projects like this?
 
