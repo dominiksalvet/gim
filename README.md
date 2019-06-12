@@ -41,6 +41,7 @@ If you are in, then gim comes in pretty handy. All you need is a URL of a Git pr
   * [Example](#example)
 * [Developer](#developer)
   * [Badge](#badge)
+* [Thanks](#thanks)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -116,6 +117,10 @@ Markdown:
 ```markdown
 [![gim ready](https://img.shields.io/badge/gim-ready-571997.svg)](https://github.com/dominiksalvet/gim)
 ```
+
+## Thanks
+
+Big thanks to [Jan Polák](https://github.com/Darkyenus) for help with macOS support.
 
 ## Contributing
 
