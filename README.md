@@ -58,7 +58,16 @@ sudo make install && # install gim, requires root permissions
 echo 'SUCCESS' # print a message when everything succeeded
 ```
 
-To **install gim locally**, remove `sudo` from the commands stated above and execute them.
+To **install gim locally**, remove `sudo` from the commands stated above and execute them. Or simply use this code snippet:
+
+```sh
+mkdir -p /tmp/gim/ && # create a temporary directory for gim repository
+cd /tmp/gim/ && # go to the created directory
+git clone https://github.com/dominiksalvet/gim.git . && # clone gim repository
+git checkout "$(git describe --tags --abbrev=0)" && # use latest gim version
+make install && # install gim, requires root permissions
+echo 'SUCCESS' # print a message when everything succeeded
+```
 
 ---
 
