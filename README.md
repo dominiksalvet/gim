@@ -47,7 +47,7 @@ If you are in, then gim comes in pretty handy. All you need is a URL of a Git pr
 
 ## Install
 
-To **globally install gim**, copy-paste the following commands into a terminal emulator and execute them.
+**Global** (system) installation:
 
 ```sh
 mkdir -p /tmp/gim/ && # create a temporary directory for gim repository
@@ -58,20 +58,20 @@ sudo make install && # install gim, requires root permissions
 echo 'SUCCESS' # print a message when everything succeeded
 ```
 
-To **install gim locally**, remove `sudo` from the commands stated above and execute them. Or simply use this code snippet:
+**Local** (user) installation:
 
 ```sh
 mkdir -p /tmp/gim/ && # create a temporary directory for gim repository
 cd /tmp/gim/ && # go to the created directory
 git clone https://github.com/dominiksalvet/gim.git . && # clone gim repository
 git checkout "$(git describe --tags --abbrev=0)" && # use latest gim version
-make install && # install gim, requires root permissions
+make install && # install gim, does not require root permissions
 echo 'SUCCESS' # print a message when everything succeeded
 ```
 
 ---
 
-From now on, you can use gim to update itself or even uninstall itself. If you decide to uninstall gim, it will not uninstall any project installed by gim. However, you will probably need to install gim back to manage those projects.
+From now on, you can use gim to update itself or even uninstall itself. If you decide to uninstall gim, it would not uninstall any project installed by gim. However, you would probably need to install gim back to manage those projects.
 
 ## Usage
 
