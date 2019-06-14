@@ -6,12 +6,14 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/dominiksalvet/gim" alt="gim ready">
-        <img src="https://img.shields.io/badge/gim-ready-571997.svg"></a>
-    <a href="https://reuse.software/" alt="reuse compliant">
-        <img src="https://reuse.software/badge/reuse-compliant.svg"></a>
-    <a href="https://github.com/RichardLitt/standard-readme" alt="standard-readme compliant">
-        <img src="https://img.shields.io/badge/readme_style-standard-brightgreen.svg"></a>
+    <a href="https://github.com/dominiksalvet/gim">
+        <img src="https://img.shields.io/badge/gim-ready-571997.svg" alt="gim ready"></a>
+    <a href="https://reuse.software/">
+        <img src="https://reuse.software/badge/reuse-compliant.svg" alt="reuse compliant"></a>
+    <a href="https://github.com/RichardLitt/standard-readme">
+        <img src="https://img.shields.io/badge/readme_style-standard-brightgreen.svg" alt="standard-readme compliant"></a>
+    <a href="https://discord.gg/GcpGetN">
+        <img src="https://img.shields.io/discord/588895022955495424.svg?logo=discord" alt="Discord chat"></a>
 </p>
 
 > Git-based installation manager. Delta updates. macOS + Linux. POSIX.
