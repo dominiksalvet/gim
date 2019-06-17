@@ -1,5 +1,6 @@
 language: shell
-python: 3.6
+python:
+  - "3.6"
 
 addons:
   apt:
@@ -17,3 +18,6 @@ before_script:
 script:
   - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
   - reuse lint
+
+after_success:
+  - make install
