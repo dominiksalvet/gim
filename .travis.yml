@@ -8,21 +8,19 @@ os: linux
 dist: xenial
 language: shell
 
-addons:
-  apt:
-    packages:
-      - python3-pip
-
-install:
-  - pip3 install --user fsfe-reuse
-
-before_script:
-  - shellcheck --version
-  - reuse --version
-
-script:
-  - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
-  - reuse lint
-
-after_success:
-  - make install
+jobs:
+  include:
+    - stage: shellcheck
+      before_script:
+        - shellcheck --version
+      script:
+        - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
+    - stage: reuse
+      addons:
+        apt:
+          packages:
+            - python3-pip
+      before_script:
+        - reuse --version
+      script:
+        - reuse lint
