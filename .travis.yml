@@ -1,13 +1,17 @@
 language: shell
-os: linux
-dist: xenial
 
-python: 3.7
+addons:
+  apt:
+    packages:
+      - python3-pip
 
-install: pip3 install fsfe-reuse
+install:
+  - pip3 install fsfe-reuse
+
+before_script:
+  - shellcheck --version
+  - reuse --version
 
 script:
-  - shellcheck --version
   - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
-  - reuse --version
   - reuse lint
