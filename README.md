@@ -12,6 +12,8 @@
         <img src="https://reuse.software/badge/reuse-compliant.svg" alt="reuse compliant"></a>
     <a href="https://github.com/RichardLitt/standard-readme">
         <img src="https://img.shields.io/badge/readme_style-standard-brightgreen.svg" alt="standard-readme compliant"></a>
+    <a href="https://travis-ci.com/dominiksalvet/gim">
+        <img src="https://travis-ci.com/dominiksalvet/gim.svg?branch=master" alt="Build Status"></a>
     <a href="https://discord.gg/GcpGetN">
         <img src="https://img.shields.io/discord/588895022955495424.svg?logo=discord" alt="Discord chat"></a>
 </p>
