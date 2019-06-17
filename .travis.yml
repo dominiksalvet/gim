@@ -10,8 +10,12 @@ install:
 
 before_script:
   - shellcheck --version
+  - python3 --version
   - reuse --version
 
 script:
   - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
   - reuse lint
+
+deploy:
+  - make install
