@@ -8,7 +8,7 @@ os: linux
 dist: xenial
 language: shell
 
-jobs:
+matrix:
   include:
     - stage: shellcheck
       before_script:
@@ -16,8 +16,6 @@ jobs:
       script:
         - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
     - stage: reuse
-      language: python
-      python: 3.6
       addons:
         apt:
           packages:
@@ -25,8 +23,6 @@ jobs:
       install:
         - pip3 install --user fsfe-reuse
       before_script:
-        - python --version
-        - python3 --version
         - reuse --version
       script:
         - reuse lint
