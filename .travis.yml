@@ -12,21 +12,15 @@ jobs:
   include:
     - stage: checks
       name: Static analysis
-      before_script:
-        - shellcheck --version
-      script:
-        - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
+      before_script: shellcheck --version
+      script: shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
     - name: Licensing
       addons:
         apt:
-          packages:
-            - python3-pip
-      install:
-        - pip3 install --user fsfe-reuse
-      before_script:
-        - reuse --version
-      script:
-        - reuse lint
+          packages: python3-pip
+      install: pip3 install --user fsfe-reuse
+      before_script: reuse --version
+      script: reuse lint
     - name: Installation
       script:
         - make install
