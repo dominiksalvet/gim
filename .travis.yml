@@ -1,5 +1,9 @@
 language: shell
 
+install: pip3 install fsfe-reuse
+
 script:
   - shellcheck --version
   - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
+  - reuse --version
+  - reuse lint
