@@ -1,6 +1,7 @@
 os: linux
 dist: xenial
 language: shell
+python: 3.7
 
 addons:
   apt:
@@ -14,7 +15,6 @@ before_script:
   - shellcheck --version
   - python3 --version
   - python --version
-  - pyenv versions
   - reuse --version
 
 script:
