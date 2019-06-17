@@ -30,4 +30,4 @@ jobs:
     - name: Installation
       script:
         - make install
-        - gim status github.com/dominiksalvet
+        - gim status github.com/dominiksalvet/gim
