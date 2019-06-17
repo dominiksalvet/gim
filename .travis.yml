@@ -1,14 +1,12 @@
 language: shell
-python: 3.5
 
 addons:
   apt:
     packages:
-      - python3
       - python3-pip
 
 install:
-  - pip3 install --user fsfe-reuse
+  - sudo pip3 install fsfe-reuse
 
 before_script:
   - shellcheck --version
