@@ -5,7 +5,6 @@ language: shell
 addons:
   apt:
     packages:
-      - python3.6
       - python3-pip
 
 install:
@@ -15,6 +14,7 @@ before_script:
   - shellcheck --version
   - python3 --version
   - python --version
+  - pyenv versions
   - reuse --version
 
 script:
