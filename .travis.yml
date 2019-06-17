@@ -1,6 +1,7 @@
 os: linux
 dist: xenial
 language: shell
+python: 3.6
 
 addons:
   apt:
