@@ -16,7 +16,7 @@ jobs:
       script:
         - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
     - stage: reuse
-      lanuage: python
+      language: python
       python: 3.6
       addons:
         apt:
