@@ -32,6 +32,7 @@ done
 # DESCRIPTION:
 #   Prepare a textual hint consisting of words that can be used from the current
 #   part of the word.
+# shellcheck disable=SC2207
 _gim() {
     # a hint will be shown only when a part of first argument is written
     if [ "$COMP_CWORD" -eq 1 ]; then
