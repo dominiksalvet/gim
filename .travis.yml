@@ -1,4 +1,6 @@
 language: shell
+os: linux
+dist: xenial
 
 python: 3.7
 
