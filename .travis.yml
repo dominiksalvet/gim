@@ -1,6 +1,6 @@
 language: shell
 
-install: pip3 install fsfe-reuse
+install: pip install fsfe-reuse
 
 script:
   - shellcheck --version
