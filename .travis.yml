@@ -6,7 +6,7 @@ addons:
       - python3-pip
 
 install:
-  - sudo pip3 install fsfe-reuse
+  - sudo pip3 install fsfe-reuse typing
 
 before_script:
   - shellcheck --version
