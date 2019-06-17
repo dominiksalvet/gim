@@ -11,12 +11,12 @@ language: shell
 jobs:
   include:
     - stage: checks
-      name: shellcheck
+      name: Static analysis
       before_script:
         - shellcheck --version
       script:
         - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
-    - name: reuse
+    - name: Licensing
       addons:
         apt:
           packages:
@@ -27,6 +27,7 @@ jobs:
         - reuse --version
       script:
         - reuse lint
-    - name: deploy
+    - name: Installation
       script:
         - make install
+        - gim status github.com/dominiksalvet
