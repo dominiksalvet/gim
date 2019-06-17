@@ -1,4 +1,5 @@
 language: shell
 
 script:
+  - shellcheck --version
   - shellcheck bin/gim
