@@ -16,7 +16,7 @@
         <img src="https://img.shields.io/discord/588895022955495424.svg?logo=discord" alt="Discord chat"></a>
 </p>
 
-> Git-based installation manager. Delta updates. macOS + Linux + Windows (WSL). Written in POSIX Shell.
+> Git-based installation manager. Linux + macOS + Windows (WSL). Delta updates. Written in POSIX Shell.
 
 Wouldn't it be great to **install and update** your favorite Git projects like this?
 
