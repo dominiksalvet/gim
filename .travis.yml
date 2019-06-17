@@ -2,4 +2,4 @@ language: shell
 
 script:
   - shellcheck --version
-  - shellcheck bin/gim
+  - shellcheck bash/* bin/* lib/gim/installers/* lib/gim/rc/* lib/gim/dbi lib/gim/path make/*
