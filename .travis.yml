@@ -23,7 +23,13 @@ jobs:
       before_script: reuse --version
       script: reuse lint
 
-    - name: Installation
+    - name: Global installation
+      script:
+        - sudo make install
+        - gim_status="$(sudo gim status github.com/dominiksalvet/gim)"
+        - echo "$gim_status" | grep -q -v 'nothing'
+
+    - name: Local installation
       script:
         - make install
         - gim_status="$(gim status github.com/dominiksalvet/gim)"
