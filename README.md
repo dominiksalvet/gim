@@ -18,7 +18,7 @@
         <img src="https://img.shields.io/discord/588895022955495424.svg?logo=discord" alt="Discord chat"></a>
 </p>
 
-> SIMPLE Git-based installation manager. Cross-platform. Delta updates. Just Shell, nothing more.
+> Simple installation manager for your Git projects.
 
 Wouldn't it be great to **install and update** your favorite Git projects like this?
 
