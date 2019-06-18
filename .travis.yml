@@ -26,4 +26,6 @@ jobs:
     - name: Installation
       script:
         - make install
-        - gim status github.com/dominiksalvet/gim
+        - |
+          gim_status="$(gim status github.com/dominiksalvet/gim)" &&
+          echo "$gim_status" | grep -q -v 'nothing'
