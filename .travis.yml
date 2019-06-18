@@ -27,6 +27,4 @@ jobs:
       script:
         - make install
         - gim_status="$(gim status github.com/dominiksalvet/gim)"
-        - echo "$gim_status"
-        - false
         - echo "$gim_status" | grep -q -v 'nothing'
