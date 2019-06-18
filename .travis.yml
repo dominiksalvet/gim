@@ -20,6 +20,7 @@ jobs:
         apt:
           packages:
             - python3-pip
+      install: pip3 install --user fsfe-reuse
       before_script: reuse --version
       script: reuse lint
 
