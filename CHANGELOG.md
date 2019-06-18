@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 The changes not yet present in any release are listed in this section.
 
+### Added
+
+* Travis CI is used for various checks during gim development.
+
 ## 7.1.0 (2019-05-21)
 
 ### Changed
