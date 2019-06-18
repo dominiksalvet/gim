@@ -18,7 +18,7 @@
         <img src="https://img.shields.io/discord/588895022955495424.svg?logo=discord" alt="Discord chat"></a>
 </p>
 
-> Git-based installation manager. Linux + macOS + Windows (WSL). Delta updates. Written in POSIX Shell.
+> SIMPLE Git-based installation manager. Cross-platform. Delta updates. Just Shell, nothing more.
 
 Wouldn't it be great to **install and update** your favorite Git projects like this?
 
