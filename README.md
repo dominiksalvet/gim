@@ -1,4 +1,4 @@
-**The development of gim has been discontiuned in favour of [GitPack](https://github.com/dominiksalvet/gitpack).**
+**The development of gim has been discontinued in favor of [GitPack](https://github.com/dominiksalvet/gitpack).**
 
 ---
 
