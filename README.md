@@ -1,3 +1,7 @@
+**The development of gim has been discontiuned in favour of [GitPack](https://github.com/dominiksalvet/gitpack).**
+
+---
+
 # gim
 
 <p align="center">
