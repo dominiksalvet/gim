@@ -16,8 +16,6 @@
         <img src="https://reuse.software/badge/reuse-compliant.svg" alt="reuse compliant"></a>
     <a href="https://github.com/RichardLitt/standard-readme">
         <img src="https://img.shields.io/badge/readme_style-standard-brightgreen.svg" alt="standard-readme compliant"></a>
-    <a href="https://travis-ci.com/dominiksalvet/gim">
-        <img src="https://travis-ci.com/dominiksalvet/gim.svg?branch=master" alt="Build Status"></a>
 </p>
 
 > Simple installation manager for your Git projects.
